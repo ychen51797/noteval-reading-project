@@ -1,0 +1,515 @@
+--- Page 1 of 17 ---
+17Total Number of Pages
+ Table of Contents 
+1. Note Valuation Report 2
+2. Payment Date Proceeds 5
+3. Administrative Cap and Expenses 6
+4. Distribution of Interest Proceeds 7
+5. Distribution of Principal Proceeds 11
+6. Account Balances 16
+7. Fee Schedule 17
+CIFC Funding 2016-1. Ltd.
+Collateralized Debt Obligations
+March 26, 2026 Distribution                                        
+Page
+ Contacts
+ Dates
+ First Distribution Date:
+ Close Date: December 21, 2016
+April 21, 2017
+March 26, 2026
+Determination Date March 25, 2026
+March 11, 2026Record Date/Global Record
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-2026
+Collateral Manager
+CIFC Asset Management LLC
+Specialist
+Brandon Bernard
+Administrator
+Brandon Bernard
+ Factor Information:                        (800) 735-7777
+ Main Phone Number:
+https://tss.sfs.db.com/investpublic
+1
+ 
+Distribution Date:
+
+--- Page 2 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Face Value Face ValueBalanceInterestPaymentPaid PaidInterestFace ValueBalanceClass
+Original OriginalPrincipalCapitalizedTotalPrincipalInterestOptimalOriginalPrincipal
+Percent ofCurrentPercent ofPrior
+  Distribution in US$
+Ccy
+Deferred/
+Interest
+Defaulted
+Cumulative
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00A-RRR-144A
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00A-RRR-REGS
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00A-RRR-AI
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00B-RRR-144A
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00B-RRR-REGS
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00B-RRR-AI
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00C-RRR-144A
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00C-RRR-REGS
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00C-RRR-AI
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00D-1-RRR-144A
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00D-1-RRR-REGS
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00D-1-RRR-AI
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00D-2-RRR-144A
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00D-2-RRR-REGS
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00D-2-RRR-AI
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00E-RRR-144A
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00E-RRR-REGS
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00E-RRR-AI
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00F-R-144A
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00F-R-REGS
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00F-R-AI
+ 45,500,000.00  45,500,000.00  3,836,500.73  0.00  3,836,500.73  45,500,000.00 100.0000%  100.0000% 0.00 0.00$  0.00SUB-144A
+ 3,750,000.00  3,750,000.00  316,195.11  0.00  316,195.11  3,750,000.00 100.0000%  100.0000% 0.00 0.00$  0.00SUB-REGS
+ 0.00  0.00  0.00  0.00  0.00  0.00 0.0000%  0.0000% 0.00 0.00$  0.00SUB-AI
+Total  49,250,000.00  49,250,000.00  4,152,695.84  0.00  4,152,695.84  0.00  49,250,000.00 0.00  0.00
+Note Valuation Report
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-20262
+
+--- Page 3 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Note Valuation Report
+InterestInterest PaidInterestBalanceClass
+CapitalizedDefaultedInterestOptimalPrior
+ Deferred/
+  Interest Detail
+Interest
+Capitalized
+Deferred/
+Interest
+Capitalized
+Deferred/
+Interest
+Defaulted
+Prior
+Cumulative CurrentPrior
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00A-RRR-144A
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00A-RRR-REGS
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00A-RRR-AI
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00B-RRR-144A
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00B-RRR-REGS
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00B-RRR-AI
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00C-RRR-144A
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00C-RRR-REGS
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00C-RRR-AI
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00D-1-RRR-144A
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00D-1-RRR-REGS
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00D-1-RRR-AI
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00D-2-RRR-144A
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00D-2-RRR-REGS
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00D-2-RRR-AI
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00E-RRR-144A
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00E-RRR-REGS
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00E-RRR-AI
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00F-R-144A
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00F-R-REGS
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00F-R-AI
+ 45,500,000.00  3,836,500.73 0.00  0.00 0.00  0.00 0.00  0.00SUB-144A
+ 3,750,000.00  316,195.11 0.00  0.00 0.00  0.00 0.00  0.00SUB-REGS
+ 0.00  0.00 0.00  0.00 0.00  0.00 0.00  0.00SUB-AI
+Total  49,250,000.00  4,152,695.84 0.00  0.00 0.00  0.00 0.00  0.00
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-20263
+
+--- Page 4 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Note Valuation Report
+Class CUSIP Balance Interest Principal Total Balance Index Coupon
+CurrentCurrentPrincipal
+Current
+Principal
+Prior
+  Factor Information per 1000 of Original Face  Coupon Rates
+Spread
+17180TBL5  0.000000  0.000000 0.000000  0.000000  0.000000  1.000000% 0.000000%  0.000000%A-RRR-144A
+G21910AT4  0.000000  0.000000 0.000000  0.000000  0.000000  1.000000% 0.000000%  0.000000%A-RRR-REGS
+17180TBM3  0.000000  0.000000 0.000000  0.000000  0.000000  1.000000% 0.000000%  0.000000%A-RRR-AI
+17180TBN1  0.000000  0.000000 0.000000  0.000000  0.000000  1.450000% 0.000000%  0.000000%B-RRR-144A
+G21910AU1  0.000000  0.000000 0.000000  0.000000  0.000000  1.450000% 0.000000%  0.000000%B-RRR-REGS
+17180TBP6  0.000000  0.000000 0.000000  0.000000  0.000000  1.450000% 0.000000%  0.000000%B-RRR-AI
+17180TBQ4  0.000000  0.000000 0.000000  0.000000  0.000000  1.700000% 0.000000%  0.000000%C-RRR-144A
+G21910AV9  0.000000  0.000000 0.000000  0.000000  0.000000  1.700000% 0.000000%  0.000000%C-RRR-REGS
+17180TBR2  0.000000  0.000000 0.000000  0.000000  0.000000  1.700000% 0.000000%  0.000000%C-RRR-AI
+17180TBS0  0.000000  0.000000 0.000000  0.000000  0.000000  2.300000% 0.000000%  0.000000%D-1-RRR-144A
+G21910AW7  0.000000  0.000000 0.000000  0.000000  0.000000  2.300000% 0.000000%  0.000000%D-1-RRR-REGS
+17180TBT8  0.000000  0.000000 0.000000  0.000000  0.000000  2.300000% 0.000000%  0.000000%D-1-RRR-AI
+17180TBU5  0.000000  0.000000 0.000000  0.000000  0.000000  3.000000% 0.000000%  0.000000%D-2-RRR-144A
+G21910AX5  0.000000  0.000000 0.000000  0.000000  0.000000  3.000000% 0.000000%  0.000000%D-2-RRR-REGS
+17180TBV3  0.000000  0.000000 0.000000  0.000000  0.000000  3.000000% 0.000000%  0.000000%D-2-RRR-AI
+17180UAL3  0.000000  0.000000 0.000000  0.000000  0.000000  6.000000% 0.000000%  0.000000%E-RRR-144A
+G2140BAF2  0.000000  0.000000 0.000000  0.000000  0.000000  6.000000% 0.000000%  0.000000%E-RRR-REGS
+17180UAM1  0.000000  0.000000 0.000000  0.000000  0.000000  6.000000% 0.000000%  0.000000%E-RRR-AI
+17180UAG4  0.000000  0.000000 0.000000  0.000000  0.000000  10.150000% 0.000000%  0.000000%F-R-144A
+G2140BAD7  0.000000  0.000000 0.000000  0.000000  0.000000  10.150000% 0.000000%  0.000000%F-R-REGS
+DE18C2060  0.000000  0.000000 0.000000  0.000000  0.000000  10.150000% 0.000000%  0.000000%F-R-AI
+17180UAB5  1,000.000000  1,000.000000 84.318697  0.000000  84.318697  0.000000%SUB-144A
+G2140BAB1  1,000.000000  1,000.000000 84.318696  0.000000  84.318696  0.000000%SUB-REGS
+17180UAD1  0.000000  0.000000 0.000000  0.000000  0.000000  0.000000%SUB-AI
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-20264
+
+--- Page 5 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Interest Proceeds
+          (i) all payments of interest, delayed compensation and call premiums 197,044.46
+          (ii) all Management Fees 0.00
+          (iii) all principal and interest payments received by Issuer 0.00
+          (iv) waiver fees, late payment fees and other fees 0.00
+          (v) commitment fees and other similar fees 0.00
+          (vi) amounts deposited into Collection account from other accounts 0.00
+          (vii) Additional Subordinate Notes Proceeds 0.00
+          (viii) amounts deposited to Collection Account from Interest Reserve Account 0.00
+          (ix) Principal Proceeds in the Collection Account 0.00
+          (x) any Designated Excess Par 0.00
+          (xi) Contributions or Redirected Fee Interest Amounts 0.00
+          Total 197,044.46
+Principal Proceeds
+          (i) all amounts that do not constitute Interest Proceeds 3,994,397.78
+          Total 3,994,397.78
+Refinancing Proceeds
+          Refinancing Proceeds 0.00
+Payment Date Proceeds
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-20265
+
+--- Page 6 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Administrative Expenses Cap
+          (i) Applicable Asset Amount 4,503,586.79
+          (A) 0.0175% per annum of (i) 788.13
+          (B) $200,000 per annum 200,000.00
+          (C) Day Count 52
+          (D) Expenses paid in between payment dates 0.00
+          Administrative Expenses Cap (A + B) * C / 360 - D 29,002.73
+Administrative Expenses
+          (i) Trustee 244.42
+          (ii) Intermediary 0.00
+          (iii) Collateral Administrator 0.00
+          (iv) Bank 0.00
+          (v) to the Issuer 0.00
+          (vi) to the Issuer Subsidiary 0.00
+          (vii) to AML Services Provider, accountants, agents and Counsel for Co-Issuers 0.00
+          (viii) Rating Agencies 0.00
+          (ix) Collateral Manager 32,252.80
+          (x) Third Party loan pricing 0.00
+          (xi) Fees and expenses permitted under Indenture 0.00
+          (xii) Amounts due and payable to any other person 662.50
+          Total 33,159.72
+Administrative Cap and Expenses
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-20266
+
+--- Page 7 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Distribution of Interest Proceeds
+Available Optimal Paid Unpaid
+(A)(1) Payment of taxes, governmental fees, filing and registration fees and registered office fees 197,044.46 0.00 0.00 0.00
+      (2) Administrative Expenses to the Bank as
+           (i) Trustee 197,044.46 244.42 244.42 0.00
+           (ii) Intermediary 196,800.04 0.00 0.00 0.00
+           (iii) Collateral Administrator 196,800.04 0.00 0.00 0.00
+           (iv) Bank 196,800.04 0.00 0.00 0.00
+           (v) to the Issuer 196,800.04 0.00 0.00 0.00
+           (vi) to the Issuer Subsidiary 196,800.04 0.00 0.00 0.00
+           (vii) to AML Services Provider, accountants, agents and Counsel for Co-Issuers 196,800.04 0.00 0.00 0.00
+           (viii) Rating Agencies 196,800.04 0.00 0.00 0.00
+           (ix) Collateral Manager 196,800.04 32,252.80 28,758.31 3,494.49
+           (x) Third Party loan pricing 168,041.73 0.00 0.00 0.00
+           (xi) Fees and expenses permitted under Indenture 168,041.73 0.00 0.00 0.00
+           (xii) Amounts due and payable to any other person 168,041.73 662.50 0.00 662.50
+      (3) Excess of Administrative Expense Cap to Expense Reimbursement Amount 168,041.73 0.00 0.00 0.00
+(B) Senior Collateral Management Fee (current period) 168,041.73 2,793.34 2,793.34 0.00
+      Senior Collateral Management Fee (prior unpaid) 165,248.39 0.00 0.00 0.00
+(C) Class A-RRR Periodic Interest Amount 165,248.39 0.00 0.00 0.00
+(D) Class B-RRR Periodic Interest Amount 165,248.39 0.00 0.00 0.00
+(E) Class A/B Coverage Test
+      (1) Class A-RRR Principal 165,248.39 0.00 0.00 0.00
+Distribution of Interest Proceeds
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-20267
+
+--- Page 8 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Distribution of Interest Proceeds
+Available Optimal Paid Unpaid
+      (2) Class B-RRR Principal 165,248.39 0.00 0.00 0.00
+(F) Class C-RRR Cumulative Interest Amount 165,248.39 0.00 0.00 0.00
+(G) Class C Coverage Test
+      (1) Class A-RRR Principal 165,248.39 0.00 0.00 0.00
+      (2) Class B-RRR Principal 165,248.39 0.00 0.00 0.00
+      (3) Class C-RRR Principal 165,248.39 0.00 0.00 0.00
+(H) Class C-RRR Periodic Rate Shortfall Amounts 165,248.39 0.00 0.00 0.00
+(I) (1) Class D-1-RRR Cumulative Interest Amount 165,248.39 0.00 0.00 0.00
+     (2) Class D-2-RRR Cumulative Interest Amount 165,248.39 0.00 0.00 0.00
+(J) Class D Coverage Test
+      (1) Class A-RRR Principal 165,248.39 0.00 0.00 0.00
+      (2) Class B-RRR Principal 165,248.39 0.00 0.00 0.00
+      (3) Class C-RRR Principal 165,248.39 0.00 0.00 0.00
+      (4) Class D-1-RRR Principal 165,248.39 0.00 0.00 0.00
+      (5) Class D-2-RRR Principal 165,248.39 0.00 0.00 0.00
+(K) (1) Class D-1-RRR Periodic Rate shortfall Amounts 165,248.39 0.00 0.00 0.00
+      (2) Class D-2-RRR Periodic Rate shortfall Amounts 165,248.39 0.00 0.00 0.00
+(L) Class E-RRR Cumulative Interest Amount 165,248.39 0.00 0.00 0.00
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-20268
+
+--- Page 9 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Distribution of Interest Proceeds
+Available Optimal Paid Unpaid
+(M) Class E Coverage Test
+      (1) Class A-RRR Principal 165,248.39 0.00 0.00 0.00
+      (2) Class B-RRR Principal 165,248.39 0.00 0.00 0.00
+      (3) Class C-RRR Principal 165,248.39 0.00 0.00 0.00
+      (4) Class D-1-RRR Principal 165,248.39 0.00 0.00 0.00
+      (5) Class D-2-RRR Principal 165,248.39 0.00 0.00 0.00
+      (6) Class E-RRR Principal 165,248.39 0.00 0.00 0.00
+(N) Class E-RRR Periodic Rate shortfall Amounts 165,248.39 0.00 0.00 0.00
+(O) Class F-R Cumulative Interest Amount 165,248.39 0.00 0.00 0.00
+(P) Reserved
+(Q) Class F-R Periodic Rate Shortfall Amounts 165,248.39 0.00 0.00 0.00
+(R) Reserved
+(S) During Reinvestment Period, if Interest Diversion test is not satisfied, deposit to the Collection account 165,248.39 0.00 0.00 0.00
+(T) (1) Accrued and unpaid Subordinated Management Fee 165,248.39 2,793.34 2,793.34 0.00
+      (2) Deferred Subordinated Management Fee 162,455.05 0.00 0.00 0.00
+(U)(1) Administrative Expenses
+          (i) Trustee 162,455.05 0.00 0.00 0.00
+          (ii) Intermediary 162,455.05 0.00 0.00 0.00
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-20269
+
+--- Page 10 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Distribution of Interest Proceeds
+Available Optimal Paid Unpaid
+          (iii) Collateral Administrator 162,455.05 0.00 0.00 0.00
+          (iv) Bank 162,455.05 0.00 0.00 0.00
+          (v) to the Issuer 162,455.05 0.00 0.00 0.00
+          (vi) to the Issuer Subsidiary 162,455.05 0.00 0.00 0.00
+          (vii) to AML Services Provider, accountants, agents and Counsel for Co-Issuers 162,455.05 0.00 0.00 0.00
+          (viii) Rating Agencies 162,455.05 0.00 0.00 0.00
+          (ix) Collateral Manager 162,455.05 3,494.49 3,494.49 0.00
+          (x) Third Party loan pricing 158,960.56 0.00 0.00 0.00
+          (xi) Fees and expenses permitted under Indenture 158,960.56 0.00 0.00 0.00
+          (xii) Amounts due and payable to any other person 158,960.56 662.50 662.50 0.00
+     (2) Expenses related to an Optional Redemption 158,298.06 0.00 0.00 0.00
+(V) (1) At the discretion of Collateral Manager to deposit into Contribution Account 158,298.06 0.00 0.00 0.00
+      (2) Aggregate amount of Contribution Repayment Amounts to each Contributor 158,298.06 0.00 0.00 0.00
+(W) Payment to the Subordinate Notes until Incentive Management Fee Threshold has been met 158,298.06 37,481,644.03 158,298.06 37,323,345.97
+(X) (1) Payment of any Deferred Incentive Management Fees 0.00 0.00 0.00 0.00
+      (2) (i) 20% of the remaining Interest proceeds as Incentive Management Fee 0.00 0.00 0.00 0.00
+           (ii) 80% of remaining Interest proceeds to the Subordinated Notes 0.00 0.00 0.00 0.00
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-202610
+
+--- Page 11 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Distribution of Principal Proceeds
+Available Optimal Paid Unpaid
+(A) (A)(1) Payment of taxes, governmental fees and registered office fees 3,994,397.78 0.00 0.00 0.00
+            (2) Administrative Expenses to the Bank as
+                     (i) Trustee 3,994,397.78 0.00 0.00 0.00
+                     (ii) Intermediary 3,994,397.78 0.00 0.00 0.00
+                     (iii) Collateral Administrator 3,994,397.78 0.00 0.00 0.00
+                     (iv) Bank 3,994,397.78 0.00 0.00 0.00
+                     (v) to the Issuer 3,994,397.78 0.00 0.00 0.00
+                     (vi) to the Issuer Subsidiary 3,994,397.78 0.00 0.00 0.00
+                     (vii) to AML Services Provider, accountants, agents and Counsel for Co-Issuers 3,994,397.78 0.00 0.00 0.00
+                     (viii) Rating Agencies 3,994,397.78 0.00 0.00 0.00
+                     (ix) Collateral Manager 3,994,397.78 0.00 0.00 0.00
+                     (x) Third Party loan pricing 3,994,397.78 0.00 0.00 0.00
+                     (xi) Fees and expenses permitted under Indenture 3,994,397.78 0.00 0.00 0.00
+                     (xii) Amounts due and payable to any other person 3,994,397.78 0.00 0.00 0.00
+            (3) Excess of Administrative Expense Cap to Expense Reimbursement Amount 3,994,397.78 0.00 0.00 0.00
+        (B) Senior Collateral Management Fee (current period) 3,994,397.78 0.00 0.00 0.00
+              Senior Collateral Management Fee (prior unpaid) 3,994,397.78 0.00 0.00 0.00
+        (C) Class A-RRR Periodic Interest Amount 3,994,397.78 0.00 0.00 0.00
+        (D) Class B Periodic Interest Amount 3,994,397.78 0.00 0.00 0.00
+        (E) Class A/B Coverage Test
+            (1) Class A-RRR Principal 3,994,397.78 0.00 0.00 0.00
+            (2) Class B-RRR Principal 3,994,397.78 0.00 0.00 0.00
+        (F) Class C-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+        (G) Class C Coverage Test
+            (1) Class A-RRR Principal 3,994,397.78 0.00 0.00 0.00
+Distribution of Principal Proceeds
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-202611
+
+--- Page 12 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Distribution of Principal Proceeds
+Available Optimal Paid Unpaid
+            (2) Class B-RRR Principal 3,994,397.78 0.00 0.00 0.00
+            (3) Class C-RRR Principal 3,994,397.78 0.00 0.00 0.00
+        (H) Class C-RRR Periodic Rate Shortfall Amounts 3,994,397.78 0.00 0.00 0.00
+        (I) (1) Class D-1-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+            (2) Class D-2-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+        (J) Class D Coverage Test
+            (1) Class A-RRR Principal 3,994,397.78 0.00 0.00 0.00
+            (2) Class B-RRR Principal 3,994,397.78 0.00 0.00 0.00
+            (3) Class C-RRR Principal 3,994,397.78 0.00 0.00 0.00
+            (4) Class D-1-RRR Principal 3,994,397.78 0.00 0.00 0.00
+            (5) Class D-2-RRR Principal
+        (K) (1) Class D-1-RRR Periodic Rate shortfall Amounts
+              (2) Class D-2-RRR Periodic Rate shortfall Amounts
+        (L) Class E-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+        (M) Class E Coverage Test
+              (1) Class A-RRR Principal 3,994,397.78 0.00 0.00 0.00
+              (2) Class B-RRR Principal 3,994,397.78 0.00 0.00 0.00
+              (3) Class C-RRR Principal 3,994,397.78 0.00 0.00 0.00
+              (4) Class D-1-RRR Principal 3,994,397.78 0.00 0.00 0.00
+              (5) Class D-2-RRR Principal 3,994,397.78 0.00 0.00 0.00
+              (6) Class E-RRR Principal 3,994,397.78 0.00 0.00 0.00
+        (N) Class E-RRR Periodic Rate shortfall Amounts 3,994,397.78 0.00 0.00 0.00
+        (O) Class F-R Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+        (P) Reserved
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-202612
+
+--- Page 13 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Distribution of Principal Proceeds
+Available Optimal Paid Unpaid
+        (Q) Class F-R Periodic Rate Shortfall Amounts 3,994,397.78 0.00 0.00 0.00
+(B)(1) Redemption Date
+          (1) Class A-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (2) Class A-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (3) Class B-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (4) Class B-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (5) Class C-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (6) Class C-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (7) Class C-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (8) Class D-1-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (9) Class D-1-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (10) Class D-1-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (11) Class D-2-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (12) Class D-2-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (13) Class D-2-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (14) Class E-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (15) Class E-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (16) Class E-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (17) Class F-R Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (18) Class F-R Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (19) Class F-R Principal 3,994,397.78 0.00 0.00 0.00
+      (2) Special Redemption
+          (1) Class A-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (2) Class A-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (3) Class B-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (4) Class B-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (5) Class C-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (6) Class C-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (7) Class C-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (8) Class D-1-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (9) Class D-1-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (10) Class D-1-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (11) Class D-2-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-202613
+
+--- Page 14 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Distribution of Principal Proceeds
+Available Optimal Paid Unpaid
+          (12) Class D-2-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (13) Class D-2-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (14) Class E-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (15) Class E-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (16) Class E-RRR Principal 3,994,397.78 0.00 0.00 0.00
+          (17) Class F-R Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+          (18) Class F-R Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+          (19) Class F-R Principal 3,994,397.78 0.00 0.00 0.00
+(C) (1) During Reinvestment Period, to Collection Account as Principal Proceeds 3,994,397.78 0.00 0.00 0.00
+      (2) After Reinvestment Period, to Collection Account as Principal Proceeds 3,994,397.78 0.00 0.00 0.00
+(D) To make payments as per Secured Note Payment Sequence
+      (1) Class A-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+      (2) Class A-RRR Principal 3,994,397.78 0.00 0.00 0.00
+      (3) Class B-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+      (4) Class B-RRR Principal 3,994,397.78 0.00 0.00 0.00
+      (5) Class C-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+      (6) Class C-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+      (7) Class C-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+      (8) Class D-1-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+      (9) Class D-1-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+      (10) Class D-1-RRR Principal 3,994,397.78 0.00 0.00 0.00
+      (11) Class D-2-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+      (12) Class D-2-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+      (13) Class D-2-RRR Principal 3,994,397.78 0.00 0.00 0.00
+      (14) Class E-RRR Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+      (15) Class E-RRR Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+      (16) Class E-RRR Principal 3,994,397.78 0.00 0.00 0.00
+      (17) Class F-R Cumulative Interest Amount 3,994,397.78 0.00 0.00 0.00
+      (18) Class F-R Periodic Rate Shortfall Amount 3,994,397.78 0.00 0.00 0.00
+      (19) Class F-R Principal 3,994,397.78 0.00 0.00 0.00
+(E) (A) (1) Accrued and unpaid Subordinated Management Fee 3,994,397.78 0.00 0.00 0.00
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-202614
+
+--- Page 15 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Distribution of Principal Proceeds
+Available Optimal Paid Unpaid
+            (2) Deferred Subordinated Management Fee 3,994,397.78 0.00 0.00 0.00
+      (B)(1) Administrative Expenses
+               (i) Trustee 3,994,397.78 0.00 0.00 0.00
+               (ii) Intermediary 3,994,397.78 0.00 0.00 0.00
+               (iii) Collateral Administrator 3,994,397.78 0.00 0.00 0.00
+               (iv) Bank 3,994,397.78 0.00 0.00 0.00
+               (v) to the Issuer 3,994,397.78 0.00 0.00 0.00
+               (vi) to the Issuer Subsidiary 3,994,397.78 0.00 0.00 0.00
+               (vii) to Administrator, accountants, agents and Counsel for Co-Issuers 3,994,397.78 0.00 0.00 0.00
+               (viii) Rating Agencies 3,994,397.78 0.00 0.00 0.00
+               (ix) Collateral Manager 3,994,397.78 0.00 0.00 0.00
+               (x) Third Party loan pricing 3,994,397.78 0.00 0.00 0.00
+               (xi) Fees and expenses permitted under Indenture 3,994,397.78 0.00 0.00 0.00
+               (xii) Amounts due and payable to any other person 3,994,397.78 0.00 0.00 0.00
+            (2) Expenses related to an Optional Redemption 3,994,397.78 0.00 0.00 0.00
+      (C) (1) At the descretion of Collateral Manager to deposit into Contribution Account 3,994,397.78 0.00 0.00 0.00
+            (2) Aggregate amount of Contribution Repayment Amounts to each Contributor 3,994,397.78 0.00 0.00 0.00
+(F) Payment to the Subordinate Notes until Incentive Management Fee Threshold has been met 3,994,397.78 37,323,345.97 3,994,397.78 33,328,948.19
+(G) (1) Payment of any Deferred Incentive Management Fees 0.00 0.00 0.00 0.00
+      (2) (i) 20% of the remaining Interest proceeds as Incentive Management Fee 0.00 0.00 0.00 0.00
+           (ii) 80% of remaining Interest proceeds to the Subordinated Notes 0.00 0.00 0.00 0.00
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-202615
+
+--- Page 16 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Balance End of 
+the Due Period
+Deposits Withdrawals Balance after 
+Payment Date
+          Interest Collection Account 197,044.46 0.00 197,044.46 0.00
+          Principal Collection Account 3,994,397.78 0.00 3,994,397.78 0.00
+          Custodial Account 0.00 0.00 0.00 0.00
+          Payment Account 0.00 4,191,442.24 4,191,442.24 0.00
+          Funding Reserve Account 0.00 0.00 0.00 0.00
+          Interest Reserve Account 0.00 0.00 0.00 0.00
+          Closing Date Expense Account 0.00 0.00 0.00 0.00
+          Expense Reimbursement Account 0.00 0.00 0.00 0.00
+          Contribution Account 0.00 0.00 0.00 0.00
+          Ramp-up Account 0.00 0.00 0.00 0.00
+          Excluded Collateral Account 0.00 0.00 0.00 0.00
+Account Balances
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-202616
+
+--- Page 17 of 17 ---
+CIFC Funding 2016-1. Ltd.
+Expenses
+Interest Accrual Period
+          Current Payment Date 03/26/2026
+          Beg Int Accrual Period 02/04/2026
+          End Interest Accrual Period (excluding) 03/26/2026
+          Actual Days 50
+TRUSTEE FEE
+          Fee Basis Amount 10,056,015.15
+          Fee Rate 0.017500%
+          Out of pocket expenses 0.00
+          Day Count 50
+          Minimum Trustee Fee 20,000.00
+          Trustee Fee 244.42
+SENIOR COLLATERAL MANAGEMENT FEE
+          Fee Basis Amount 10,056,015.15
+          Fee Rate 0.200000%
+          Day Count 50
+          Senior Collateral Management Fee 2,793.34
+SUBORDINATED COLLATERAL MANAGEMENT FEE
+          Fee Basis Amount 10,056,015.15
+          Fee Rate 0.200000%
+          Day Count 50
+          Subordinated Collateral Management Fee 2,793.34
+Fee Schedule
+Deutsche Bank - Trust & Agency Services Produced    24-Mar-202617
