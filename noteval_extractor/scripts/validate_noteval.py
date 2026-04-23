@@ -288,7 +288,7 @@ def validate_dir(out_dir: Path) -> list[Check]:
                 )
             )
 
-    p04 = out_dir / "04_interest_principal_proceeds.md"
+    p04 = out_dir / "04_interest_principal_waterfall.md"
     if p04.is_file():
         text04 = p04.read_text(encoding="utf-8", errors="replace")
         if file_section_absent(text04):
@@ -377,7 +377,7 @@ def validate_dir(out_dir: Path) -> list[Check]:
                 "waterfall",
                 "File 04 present for waterfall/fee checks",
                 False,
-                "04_interest_principal_proceeds.md missing - add if PDF has waterfall.",
+                "04_interest_principal_waterfall.md missing - add if PDF has waterfall.",
                 "warn",
             )
         )

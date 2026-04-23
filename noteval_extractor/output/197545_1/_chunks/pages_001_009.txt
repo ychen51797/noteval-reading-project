@@ -1,0 +1,367 @@
+--- Page 1 of 9 ---
+522 Funding CLO 2021-7, LTD.
+March 27, 2026
+Schedule of Payments Pursuant to the Indenture
+Section 11.1     Disbursements of Cash from Payment Account Interest Proceeds $46,899.92
+(a) Notwithstanding
+any other provision in this Indenture, the Transaction Documents or the Debt, but subject to the othe r Running Balance
+subsections of this Section 11.1 and to Section 13.1, on each Payment Date, the Collateral Trustee shall
+disburse amounts transferred from the Collection Account to the Payment Account pursuant to Section 10.2
+in accordance with the following priorities (subject to the preceding clauses of this sentence and the
+following proviso, the "Priority of Payments"); provided that, unless an Enforcement Event has occurred
+and is continuing, (x) amounts transferred from the Interest Collection Subaccount shall be applied solely
+in accordance with Section 11.1(a)(i); (y) amounts transferred from the Principal Collection Subaccount
+shall be applied solely in accordance with Section 11.1(a)Error! Reference source not found.(ii); and (z)
+amounts transferred from the Permitted Use Account in connection with any Refinancing Redemption Date
+shall be applied solely in accordance with Section 11.1(a)(iv).
+(i) On each Payment Date, unless an Enforcement Event has occurred and is
+continuing, Interest Proceeds on deposit in the Collection Account, to the extent received on or before
+the related Determination Date and that are transferred into the Payment Account, shall be applied in
+the following order of priority:
+(A) (1) first, to the payment of taxes and governmental fees owing by the $0.00 $46,899.92
+Issuer or the Co-Issuer, and
+(2) second, to the payment of the accrued and unpaid
+Administrative Expenses, in the priority stated in the definition thereof, up to the
+Administrative Expense Cap (except as otherwise expressly provided in connection with
+any Optional Redemption, Clean-Up Optional Redemption or Tax Redemption in whole
+of the Secured Debt) and
+first, to the Collateral Trustee pursuant to Section 6.7 and the other provisions of this $10,000.00 $36,899.92
+Indenture and the Transaction Documents and to the Bank, in each of its capacities, including as
+0
+second, Collateral Administrato
+r $0.00 $36,899.92
+third, on a pro rata basis, the following amounts (excluding indemnities) to the following
+parties:
+(i) the Independent accountants, agents (other than the Collateral Manager) and counsel of the Issue
+r $0.00
+(ii) S&P $0.00
+(iii) Collateral Manager $0.00
+(iv) Administrator $0.00
+(v) any other Person $0.00
+total $0.00 $36,899.92
+fourth, on a pro rata basis, indemnities payable to any Person pursuant to any Transaction Document; $0.00 $36,899.92
+Page 1
+
+--- Page 2 of 9 ---
+522 Funding CLO 2021-7, LTD.
+March 27, 2026
+Schedule of Payments Pursuant to the Indenture
+(3) third, to the extent that the Administrative Expense Cap has $0.00 $36,899.92
+not been exceeded on the applicable Payment Date, if the balance of all Eligible
+Investments and Cash in the Expense Reserve Account on the related Determination Date
+is less than U.S.$50,000, for deposit to the Expense Reserve Account of an amount equal
+to such amount as shall cause the balance of all Eligible Investments and Cash in the
+Expense Reserve Account immediately after giving effect to such deposit to equal
+U.S.$50,000, up to the remainder of the Administrative Expense Cap; provided, that, the
+Petition Expense Amount may be applied pursuant to the foregoing clause (A)(2) to the
+payment of Petition Expenses at the time that such Petition Expenses are incurred without
+regard to the Administrative Expense Cap (but subject to (x) the payment of othe
+r
+Administrative Expenses (up to the Administrative Expense Cap) that are payable prior to
+the Petition Expenses in accordance with the priority set forth in the definition of
+Administrative Expenses and (y) the cumulative cap set forth in the definition of the term
+Petition Expense Amount) and, if (but only after) the Petition Expense Amount is applied
+to the payment of Petition Expenses in full, additional Petition Expenses shall be paid
+together with other Administrative Expenses in accordance with the priority set forth in the
+definition thereof and subject to the Administrative Expense Cap;
+(B) to the payment of the Senior Collateral Management Fee (including any $1,722.20 $35,177.72
+accrued and unpaid interest thereon and any previously deferred Senior Collateral
+Management Fee (other than unpaid interest with respect to any Management Fees deferred
+in accordance with the terms hereof)) due and payable to the Collateral Manager; provided
+that, no amount of previously deferred Senior Collateral Management Fee which the
+Collateral Manager has elected to receive will be paid on such Payment Date to the extent
+that such payment would cause the deferral or non-payment of interest on any Class o
+f
+Secured Debt;
+(C) to the payment of (A) first, any amounts due to a Hedge Counterparty $0.00 $35,177.72
+under a Hedge Agreement other than amounts due as a result of the termination (or partial
+termination) of such Hedge Agreement; and then (B) second, any amounts due to a Hedge
+Counterparty under a Hedge Agreement pursuant to an early termination (or partial
+termination) of such Hedge Agreement as a result of a Priority Hedge Termination Event, $0.00 $35,177.72
+allocated between Hedge Counterparties based on the amounts payable to such Hedge
+Counterparties;
+(D) to the payment, pro rata based on amounts due, of accrued and unpaid $0.00 $35,177.72
+interest (including, without limitation, past due interest, if any) on the Class A Notes, the
+Class A-L Loans and (if a Conversion Option has been exercised) the Class A-L Notes,
+until such amounts have been paid in full;
+(E) to the payment of accrued and unpaid interest on the Class B Notes
+(including, without limitation, past due interest, if any), until such amounts have been paid
+in full; $0.00 $35,177.72
+(F) if either of the Class A/B Coverage Tests (except, in the case of the Interest
+Coverage Test, if such Payment Date is the first Payment Date after the Closing Date) is
+Page 2
+
+--- Page 3 of 9 ---
+522 Funding CLO 2021-7, LTD.
+March 27, 2026
+Schedule of Payments Pursuant to the Indenture
+not satisfied on the related Determination Date, to make payments in accordance with the
+Debt Payment Sequence to the extent necessary to cause all Class A/B Coverage Tests that
+are applicable on such Payment Date to be satisfied on a pro forma basis after giving effect
+to all payments pursuant to this clause (F); $0.00 $35,177.72
+(G) to the payment of accrued and unpaid interest (excluding Secured Debt
+Deferred Interest but including interest on Secured Debt Deferred Interest) on the Class C
+Notes until such amounts have been paid in full; $0.00 $35,177.72
+(H) if either of the Class C Coverage Tests (except, in the case of the Interest
+Coverage Test, if such Payment Date is the first Payment Date after the Closing Date) is
+not satisfied on the related Determination Date, to make payments in accordance with the
+Debt Payment Sequence to the extent necessary to cause all Class C Coverage Tests that
+are applicable on such Payment Date to be satisfied on a pro forma basis after giving effect
+to all payments pursuant to this clause (H); $0.00 $35,177.72
+(I) to the payment of any Secured Debt Deferred Interest on the Class C Notes
+until such amount has been paid in full; $0.00 $35,177.72
+(J) to the payment of accrued and unpaid interest (excluding Secured Debt
+Deferred Interest but including interest on Secured Debt Deferred Interest) on the Class D
+Notes until such amounts have been paid in full; $0.00 $35,177.72
+(K) if either of the Class D Coverage Tests (except, in the case of the Interest
+Coverage Test, if such Payment Date is the first Payment Date after the Closing Date) is
+not satisfied on the related Determination Date, to make payments in accordance with the
+Debt Payment Sequence to the extent necessary to cause all Class D Coverage Tests that
+are applicable on such Payment Date to be satisfied on a pro forma basis after giving effect
+to all payments pursuant to this clause (K); $0.00 $35,177.72
+(L) to the payment of any Secured Debt Deferred Interest on the Class D Notes
+until such amount has been paid in full; $0.00 $35,177.72
+(M) to the payment of accrued and unpaid interest (excluding Secured Debt
+Deferred Interest but including interest on Secured Debt Deferred Interest) on the Class E
+Notes until such amounts have been paid in full; $0.00 $35,177.72
+(N) if the Class E Overcollateralization Test is not satisfied on the related
+Determination Date, to make payments in accordance with the Debt Payment Sequence to
+the extent necessary to cause the Class E Overcollateralization Test to be satisfied on a pro
+forma basis after giving effect to all payments pursuant to this clause (N); $0.00 $35,177.72
+(O) to the payment of any Secured Debt Deferred Interest on the Class E Notes
+until such amount has been paid in full; $0.00 $35,177.72
+(P) [Reserved];
+Page 3
+
+--- Page 4 of 9 ---
+522 Funding CLO 2021-7, LTD.
+March 27, 2026
+Schedule of Payments Pursuant to the Indenture
+(Q) if, with respect to any Payment Date following the Effective Date, S&P
+has not yet confirmed its Initial Rating of the Secured Debt pursuant to Section 7.18(d)
+(unless the S&P Effective Date Condition has been satisfied), amounts available fo
+r
+distribution pursuant to this clause (Q) shall be used, at the option of the Collateral
+Manager, (x) to make a deposit to the Collection Account as Principal Proceeds for the
+purchase of additional Collateral Obligations or (y) for application in accordance with the
+Debt Payment Sequence on such Payment Date, in either case, in an amount sufficient to
+cause S&P to provide written confirmation (which may take the form of a press release o
+r
+other written communication) of its Initial Rating of the Secured Debt; $0.00 $35,177.72
+(R) during the Reinvestment Period, if the Interest Diversion Test is not
+satisfied on the related Determination Date, an amount equal to the Required Interest
+Diversion Amount to the Collection Account as Principal Proceeds for the purchase o
+f
+additional Collateral Obligations; $0.00 $35,177.72
+(S) to the payment of the accrued and unpaid Subordinated Collateral
+Management Fee (including any accrued and unpaid interest thereon and any previously
+deferred Subordinated Collateral Management Fee (together with interest accrued thereon)
+which the Collateral Manager has elected to be paid on such Payment Date) until such
+amounts have been paid in full; $2,870.33 $32,307.39
+(T) to the payment of (x) (in the same manner and order of priority stated
+therein) any Administrative Expenses not paid pursuant to clause (A)(2) above due to the
+limitation contained therein until such amounts have been paid in full; and then (y) any
+amounts pro rata due to any Hedge Counterparty under any Hedge Agreement not
+otherwise paid pursuant to clause (C) above until such amounts have been paid in full; $0.00 $32,307.39
+(U) at the direction of the Collateral Manager with the consent of a Majority
+of the Subordinated Notes, for deposit into the Permitted Use Account, all or a portion o
+f
+the remaining Interest Proceeds available under this clause (the "Liquidity Reserve
+Amount"); $0.00 $32,307.39
+(V) to pay to each Contributor, pro rata, based on the aggregate amount o f
+Contribution Repayment Amounts owing on such Payment Date, the aggregate amount o f 0.00 $32,307.39
+such Contribution Repayment Amounts owing to each such Contributor until all such
+amounts have been paid in full;
+(W) to the Holders of the Subordinated Notes until the Incentive Collateral 32,307.39 $0.00
+Management Fee Threshold has been met; and
+(X) any remaining Interest Proceeds to be paid (x) 20% to the Collateral 0.00 $0.00
+Manager as part of the Incentive Collateral Management Fee payable on such Payment
+Date; and (y) 80% to the Holders of the Subordinated Notes. 0.00 $0.00
+Page 4
+
+--- Page 5 of 9 ---
+522 Funding CLO 2021-7, LTD.
+March 27, 2026
+Schedule of Payments Pursuant to the Indenture
+Principal Proceeds $756,001.79
+Less Holdback
+Principal Proceeds $756,001.79
+Section 11.1     Disbursements of Cash from Payment Account
+(a) Running Balance
+(ii) On each Payment Date, unless an Enforcement Event has occurred and is
+continuing, Principal Proceeds on deposit in the Collection Account that are received on or before the
+related Determination Date and that are transferred to the Payment Account (which shall not include
+(x) amounts required to meet funding requirements with respect to Delayed Drawdown Collateral
+Obligations and Revolving Collateral Obligations that are deposited in the Revolver Funding Account
+or (y) during the Reinvestment Period (and, solely with respect to Eligible Post-Reinvestment
+Proceeds, after the Reinvestment Period)), Principal Proceeds and Interest Proceeds transferred to the
+Collection Account as Principal Proceeds pursuant to clause (R) of Section 11.1(a)(i) that, in each
+case, have previously been reinvested in Collateral Obligations shall be applied in the following orde
+r
+of priority:
+(A) to pay the amounts referred to in clauses (A) through (E) of
+Section 11.1(a)(i) (and in the same manner and order of priority stated therein), but only to
+the extent that such amounts are not paid in full thereunder; $0.00 $756,001.79
+(B) to pay the amounts referred to in clause (F) of Section 11.1(a)(i) but only
+to the extent not paid in full thereunder and to the extent necessary to cause each Class A/B
+Coverage Test that is applicable on such Payment Date to be met as of the related
+Determination Date on a pro forma basis after giving effect to any payments made through
+this clause (B); $0.00 $756,001.79
+(C) to pay the amounts referred to in clause (H) of Section 11.1(a)(i) but only
+to the extent not paid in full thereunder and to the extent necessary to cause each Class C
+Coverage Test that is applicable on such Payment Date to be met as of the related
+Determination Date on a pr
+o 0
+this clause (C); $0.00 $756,001.79
+(D) to pay the amounts referred to in clause (K) of Section 11.1(a)(i) but only
+to the extent not paid in full thereunder and to the extent necessary to cause each Class D
+Coverage Test that is applicable on such Payment Date to be met as of the related
+Determination Date on a pro forma basis after giving effect to any payments made through
+Page 5
+
+--- Page 6 of 9 ---
+522 Funding CLO 2021-7, LTD.
+March 27, 2026
+Schedule of Payments Pursuant to the Indenture
+this clause (D); $0.00 $756,001.79
+(E) to pay the amounts referred to in clause (N) of Section 11.1(a)(i) but only
+to the extent not paid in full thereunder and to the extent necessary to cause the Class E
+Overcollateralization Test to be met as of the related Determination Date on a pro forma
+basis after giving effect to any payments made through this clause (E); $0.00 $756,001.79
+(F) if the Class C Notes are or would become the Controlling Class on such
+Payment Date or if all principal of and interest on all Priority Classes with respect to the
+Class C Notes will be paid in full on such Payment Date (determined after application of
+the Priority of Payments on a pro forma basis as of the related Determination Date), to pay
+the amounts referred to in clause (G) of Section 11.1(a)(i) to the extent not paid in full
+thereunder, only to the extent that such payment would not cause a Coverage Test failure
+on a pro forma basis; $0.00 $756,001.79
+(G) if the Class C Notes are or would become the Controlling Class on such
+Payment Date or if all principal of and interest on all Priority Classes with respect to the
+Class C Notes will be paid in full on such Payment Date (determined after application of
+the Priority of Payments on a pro forma basis as of the related Determination Date), to pay
+the amounts referred to in clause (I) of Section 11.1(a)(i) to the extent not paid in full
+thereunder, only to the extent that such payment would not cause a Coverage Test failure
+on a pro forma basis; $0.00 $756,001.79
+(H) if the Class D Notes are or would become the Controlling Class on such
+Payment Date or if all principal of and interest on all Priority Classes with respect to the
+Class D Notes will be paid in full on such Payment Date (determined after application of
+the Priority of Payments on a pro forma basis as of the related Determination Date), to pay
+the amounts referred to in clause (J) of Section 11.1(a)(i) to the extent not paid in full
+thereunder, only to the extent that such payment would not cause a Coverage Test failure
+on a pro forma basis; $0.00 $756,001.79
+(I) if the Class D Notes are or would become the Controlling Class on such
+Payment Date or if all principal of and interest on all Priority Classes with respect to the
+Class D Notes will be paid in full on such Payment Date (determined after application of
+the Priority of Payments on a pro forma basis as of the related Determination Date), to pay
+the amounts referred to in clause (L) of Section 11.1(a)(i) to the extent not paid in full
+thereunder, only to the extent that such payment would not cause a Coverage Test failure
+on a pro forma basis; $0.00 $756,001.79
+(J) if the Class E Notes are or would become the Controlling Class on such
+Page 6
+
+--- Page 7 of 9 ---
+522 Funding CLO 2021-7, LTD.
+March 27, 2026
+Schedule of Payments Pursuant to the Indenture
+Payment Date or if all principal of and interest on all Priority Classes with respect to the
+Class E Notes will be paid in full on such Payment Date (determined after application of
+the Priority of Payments on a pro forma basis as of the related Determination Date), to pay
+the amounts referred to in clause (M) of Section 11.1(a)(i) to the extent not paid in full
+thereunder, only to the extent that such payment would not cause a Coverage Test failure
+on a pro forma basis; $0.00 $756,001.79
+(K) if the Class E Notes are or would become the Controlling Class on such
+Payment Date or if all principal of and interest on all Priority Classes with respect to the
+Class E Notes will be paid in full on such Payment Date (determined after application of
+the Priority of Payments on a pro forma basis as of the related Determination Date), to pay
+the amounts referred to in clause (O) of Section 11.1(a)(i) to the extent not paid in full
+thereunder, only to the extent that such payment would not cause a Coverage Test failure
+on a pro forma basis; $0.00 $756,001.79
+(L) [reserved];
+(M) (1) if such Payment Date is a Redemption Date (other than with respect to
+a Special Redemption), to make payments in accordance with the Debt Payment Sequence,
+and (2) on any other Payment Date during the Reinvestment Period that is a Special
+Redemption Date in connection with a Reinvestment Special Redemption, to make
+payments in the amount, if any, of the Principal Proceeds that the Collateral Manager has
+determined cannot be practicably reinvested in additional Collateral Obligations, in
+accordance with the Debt Payment Sequence;
+Class A Notes $0.00
+Class A-L Loans $0.00
+Class B Notes $0.00
+Class C Notes $0.00
+Class D Notes $0.00
+Class E Notes $0.00 $756,001.79
+(N) (1) during the Reinvestment Period, to the Collection Account as Principal
+Proceeds to invest in Eligible Investments (pending the purchase of additional Collateral
+Obligations) and/or to the purchase of additional Collateral Obligations in accordance with
+the Investment Criteria and (2) after the Reinvestment Period, (x) in the case of Eligible
+Post-Reinvestment Proceeds, in the sole discretion of the Collateral Manager, to the
+Collection Account as Principal Proceeds to invest in Eligible Investments (pending the
+purchase of additional Collateral Obligations) and/or to the purchase of additional
+Collateral Obligations; and (y) in the case of Principal Proceeds other than Eligible Post-
+Page 7
+
+--- Page 8 of 9 ---
+522 Funding CLO 2021-7, LTD.
+March 27, 2026
+Schedule of Payments Pursuant to the Indenture
+Reinvestment Proceeds, to make payments in accordance with the Debt Payment
+Sequence; $0.00 $756,001.79
+(O) to pay the amounts referred to in clause (S) of Section 11.1(a)(i) only to
+the extent not already paid; $0.00 $756,001.79
+(P) to pay the amounts referred to in clauses (A) and (T) of Section 11.1(a)(i)
+only to the extent not already paid (in the same manner and order of priority stated therein); $0.00 $756,001.79
+(Q) to pay to each Contributor, pro rata, based on the aggregate amount of
+Contribution Repayment Amounts owing on such Payment Date, the aggregate amount of $0.00 $756,001.79
+such Contribution Repayment Amounts owing to each such Contributor until all such
+amounts have been paid in full;
+(R) to the Holders of the Subordinated Notes until the Incentive Collateral $756,001.79 $0.00
+Management Fee Threshold has been met; and
+(S) any remaining proceeds to be paid (x) 20% to the Collateral Manager as $0.00 $0.00
+part of the Incentive Collateral Management Fee payable on such Payment Date; and
+(y) 80% to the Holders of the Subordinated Notes. $0.00 $0.00
+Page 8
+
+--- Page 9 of 9 ---
+U.S. BANK CORPORATE TRUST SERVICES Aggregate
+TRUSTEE REPORT TO NOTE HOLDERS
+522 Funding CLO 2021-7, LTD.
+Payment Date: March 27, 2026 Cusips 144A Reg S Certificated
+Record Date: March 12, 2026 Class A Notes 33833VAA3 G3660UAA9 33833VAB1
+Interest Accrual Period: October 23, 2025 through March 27, 2026 Class A-L Loan s 33833VAC9 G3660UAB7 33833VAD7
+155 Days in Accrual Perio d Class B Notes 33833VAE5 G3660UAC5 33833VAF2
+90 Fixed days in Accrual Perio d Class C Notes 33833VAG0 G3660UAD3 33833VAH8
+Class D Notes 33833VAJ4 G3660UAE1 33833VAK1
+Maturity Date: April 24, 2034 Class E Notes 33834UAA4 G3661NAA4 33834UAB2
+Subordinated Notes 33834UAC0 G3661NAB2 33834UAD8
+Applicable SOFR Rate 0.000000%
+SOFR Spread 0.261610%
+TOTAL 0.261610%
+Class A Notes 1.07000000% Variabl e 1.33161%
+Class A-L Loans 1.07000000% Variabl e 1.33161%
+Class B Notes 1.45000000% Variabl e 1.71161%
+Class C Notes 1.80000000% Variabl e 2.06161%
+Class D Notes 2.90000000% Variabl e 3.16161%
+Class E Notes 6.22000000% Variabl e 6.48161%
+Subordinated Notes N/A N/A
+ORIG PRIN PRINCIPAL PRINCIPAL TOTAL ENDIN G
+BALANCE BALANCE PAYABLE DIVIDEND S INTEREST INTEREST DEFERRED PAYABLE BALANCE
+CLASS PER UNIT PER UNIT PER UNIT PER UNIT PER UNIT PER UNIT PER UNIT PER UNIT
+Class A Notes 1,000.00000                          $0.00000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000
+Class A-L Loans 1,000.00000                          $0.00000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000
+Class B Notes 1,000.00000                          $0.00000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000
+Class C Notes 1,000.00000                          $0.00000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000
+Class D Notes 1,000.00000                          $0.00000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000
+Class E Notes 1,000.00000                          $0.00000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000 $0.000000
+Subordinated Notes 1,001.00000                          $1,001.00000 $0.000000 $18.832876 $0.000000 $0.000000 $18.832876 $1,001.000000
+The following amounts represent balances and payments for the entire issue  
+TOTAL ENDIN G
+ORIGINAL PRINCIPA L PRINCIPAL  ACCRUE D DEFERRED AMOUNT PRINCIPAL
+CLASS BALANCE BALANCE PAYABLE DIVIDENDS INTEREST INTEREST PAYABL E BALANCE
+Class A Notes $85,400,000.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00
+Class A-L Loans $162,600,000.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00
+Class B Notes $56,000,000.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00
+Class C Notes $26,000,000.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00
+Class D Notes $22,000,000.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00
+Class E Notes $14,000,000.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00 $0.00
+Subordinated Notes $41,900,000.00 $41,900,000.00 $0.00 $788,309.18 $0.00 $0.00 $0.00 $41,900,000.00
+TOTALS $407,900,000.00 $41,900,000.00 $0.00 $788,309.18 $0.00 $0.00 $0.00 $41,900,000.00

@@ -94,8 +94,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="PDF workflow: Step 1 runs segment_pdf.py (page chunks + index).",
         epilog=(
-            "Example: py -3 pdf_workflow.py C:\\data\\report.pdf C:\\data\\my_run_out\n"
-            "Needs exactly two paths: the PDF file, then one output folder (created if missing)."
+            "Example: py -3 pdf_workflow.py C:\\data\\197545_1.pdf C:\\data\\runs\\197545_1\n"
+            "Needs exactly two paths: the PDF file, then one output folder (created if missing).\n"
+            "Use a different output subfolder per PDF (e.g. ...\\runs\\<stem>) so runs do not overwrite."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

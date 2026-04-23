@@ -1,0 +1,445 @@
+--- Page 1 of 11 ---
+Ariana Lenci
+Assistant Vice President
+617-603-7627 
+ariana.lenci@usbank.com
+04/15/2026
+Regatta XX Funding, LTD.
+Note Valuation Report
+Current Determination Date
+04/03/2026
+Current Payment Date
+
+
+--- Page 2 of 11 ---
+U.S. BANK N.A. Test Date 4/3/2026
+CORPORATE TRUST DIVISION As of Date: 4/15/2026
+TRUSTEE REPORT TO ALL NOTEHOLDERS Page:  [111]
+ Regatta XX Funding, LTD.
+10.06(b)(ii) and (iii)
+ 
+PAYMENT DATE: 4/15/2026 Days
+Accrual Period 1: 1/15/2026 to 4/14/2026 All Classes 90
+Maturity Date: 1/17/2034
+Outstanding 
+Balance Before 
+Outstanding 
+Balance After 
+Spread Rate 1 Rate 2
+Class X Notes Libor 0.970% 4.64219% 0.00000% 57.14% 42.86%
+Class A-R Notes Libor 1.180% 4.85219% 0.00000% 100.00% 100.00%
+Class B-R Notes Libor 1.550% 5.22219% 0.00000% 100.00% 100.00%
+Class C-R Notes Libor 1.750% 5.42219% 0.00000% 100.00% 100.00%
+Class D-1-R Notes Libor 2.600% 6.27219% 0.00000% 100.00% 100.00%
+Class D-2-R Notes Libor 3.850% 7.52219% 0.00000% 100.00% 100.00%
+Class E-R Notes Libor 4.900% 8.57219% 0.00000% 100.00% 100.00%
+Subordinated Notes Libor NA NA 0.00000% 100.00% 100.00%
+ 
+The following amounts represent balances and payments in units of 1,000:
+BEGINNING PRINCIPAL INTEREST INTEREST INTEREST DIVIDEND DEFAULT / DEFERRED
+BALANCE PAYABLE ACCRUED PAYABLE DEFERRED PAYABLE INTEREST PAYABLE BALANCE ENDING
+CLASS CUSIP PER UNIT PER UNIT PER UNIT PER UNIT PER UNIT PER UNIT PER UNIT PER UNIT FACTOR
+Class X Notes 571.428570 142.857143 6.631700 11.605475 0.000000 0.000000 0.000000 428.571427 0.750000
+Class A-R Notes 1000.000000 0.000000 12.130475 12.130475 0.000000 0.000000 0.000000 1000.000000 1.000000
+Class B-R Notes 1000.000000 0.000000 13.055475 13.055475 0.000000 0.000000 0.000000 1000.000000 1.000000
+Class C-R Notes 1000.000000 0.000000 13.555475 13.555475 0.000000 0.000000 0.000000 1000.000000 1.000000
+Class D-1-R Notes 1000.000000 0.000000 15.680475 15.680475 0.000000 0.000000 0.000000 1000.000000 1.000000
+Class D-2-R Notes 1000.000000 0.000000 18.805475 18.805475 0.000000 0.000000 0.000000 1000.000000 1.000000
+Class E-R Notes 1000.000000 0.000000 21.430475 21.430475 0.000000 0.000000 0.000000 1000.000000 1.000000
+Subordinated Notes 1000.000000 0.000000 0.000000 0.000000 0.000000 10.631676 0.000000 1000.000000 1.000000
+ BEGINNING TOTAL    ENDING
+ PRINCIPAL PRINCIPAL INTEREST INTEREST INTEREST DIVIDEND DEFAULT / DEFERRED AMOUNT   PRINCIPAL
+CLASS ISIN   BALANCE PAYABLE ACCRUED PAYABLE DEFERRED PAYABLE INTEREST PAYABLE PAYABLE    BALANCE
+Class X Notes 3,428,571.42$               $857,142.86 39,790.20$                 39,790.20$                 -$                     -$                      $0.00 896,933.06$                2,571,428.56$                   
+Class A-R Notes 320,000,000.00$           $0.00 3,881,752.00$            3,881,752.00$            -$                     -$                      $0.00 3,881,752.00$             320,000,000.00$               
+Class B-R Notes 60,000,000.00$             $0.00 783,328.50$               783,328.50$               -$                     -$                      $0.00 783,328.50$                60,000,000.00$                 
+Class C-R Notes 30,000,000.00$             $0.00 406,664.25$               406,664.25$               -$                     -$                      $0.00 406,664.25$                30,000,000.00$                 
+Class D-1-R Notes 30,000,000.00$             $0.00 470,414.25$               470,414.25$               -$                     -$                      $0.00 470,414.25$                30,000,000.00$                 
+Class D-2-R Notes 5,000,000.00$               $0.00 94,027.38$                 94,027.38$                 -$                     -$                      $1.00 94,028.38$                  5,000,000.00$                   
+Class E-R Notes 15,000,000.00$             $0.00 321,457.13$               321,457.13$               -$                     -$                      $2.00 321,459.13$                15,000,000.00$                 
+Subordinated Notes 54,000,000.00$             $0.00 -$                            -$                            -$                     574,110.51$         $0.00 574,110.51$                54,000,000.00$                 
+TOTAL 517,428,571.42$           $857,142.86 5,997,433.70$            5,997,433.70$            $574,110.51 $3.00 7,428,690.07$             516,571,428.56$               
+
+--- Page 3 of 11 ---
+U.S. Bank Corporate Trust Services
+CDO Administration Unit
+As Of Date: 4/3/2026
+Regatta XX Funding, LTD. Page: 9
+ Note Valuation Report
+Per Section 10.6 (b)(v) of the Indenture
+Senior Management Fee 186,827.41$  
+Deferred Senior Fee -$               
+Aggregate Deferred Senior Fee -$               
+Payments of the Aggregate Deferred Senior Fee -$               
+
+
+--- Page 4 of 11 ---
+Regatta XX Funding, LTD. Test Date 4/3/2026
+Waterfall Payment Per Section 11.1 As of Date: 4/15/2026
+Disbursements of Monies from Payment Account Page:  [3]
+Per Section 10.6 (b)(iv) of the Indenture Amount  Paid Running Total
+(a) Notwithstanding any other provision in this Indenture, but subject to the other subsections of this 
+Section 11.1 and the Bankruptcy Subordination Agreement, on each Payment Date, the Trustee shall
+disburse amounts transferred, if any, from the Collection Account to the Payment Account REGATTA XX FDG - INTEREST COLL 8,163,247.48
+pursuant to Section 10.2 in accordance with the priorities described below, the Priority of Interest
+Proceeds, the Priority of Principal Proceeds, the Special Priority of Proceeds and the Priority of REGATTA XX FDG - INTEREST RSV 0.00
+Partial Redemption Proceeds (together, the "Priority of Payments"). expense 0.00
+(i) On each Payment Date (other than a Post-Acceleration Payment Date, a 8,163,247.48
+Redemption Date or the Stated Maturity), Interest Proceeds with respect to the related
+Collection Period will be applied in the following order of priority (the "Priority of Interest
+Proceeds"):
+(A) (1) first, to the payment of Taxes, governmental fees and registered CAP 45,575.28$                                 
+office fees owing by the Issuer or the Co-Issuer, if any, and (2) second, to the payment of the 21,796.53 21,796.53 8,141,450.95
+accrued and unpaid Administrative Expenses (in the order set forth in the definition of such term); 2 -$                        0.00 8,141,450.95
+provided that amounts paid or deposited pursuant to clause (2) and any Administrative Expenses paid 3 -$                        0.00 8,141,450.95 Remaining cap space after 1,2,3
+from the Expense Reserve Account or from the Collection Account pursuant to this Indenture on such 4(i) 90,005.85$             23,778.75 8,117,672.20 23,778.75$     
+Payment Date and since the preceding Payment Date (or, in the case of the first Payment Date, the (ii) -$                        0.00 8,117,672.20
+First Refinancing Date), collectively, may not exceed, in the (iii) -$                        0.00 8,117,672.20
+aggregate, the Administrative Expense Cap; (iv) -$                        0.00 8,117,672.20
+(v) -$                        0.00 8,117,672.20
+(B) to pay to the Collateral Manager (1) first, the accrued and unpaid Senior Management Fee 186,827.41 186,827.41 7,930,844.79
+Senior Management Fee and (2) second, (i) any accrued and unpaid Senior Management Fee deferred on Deferred SMF -$                        0.00 7,930,844.79
+any previous Payment Date due to insufficient amounts being available to pay such Senior Management 
+Fee under the Priority of Payments (such amount, the "Non-Elected Deferred Senior Fee"; provided 
+that any Non-Elected Deferred Senior Fee will not be payable on such Payment Date (and any such 
+amount will be deferred) to the extent that paying such Non-Elected Deferred Senior Fee would 
+result in a failure to pay in full (x) the amounts payable pursuant to clause (C) below and (y) the 
+interest payable on the Class X Notes, the Class A Notes and the Class B Notes pursuant to clauses 
+(D) through (E) below) and (ii) any accrued and unpaid Senior Management Fee that has been 
+previously deferred voluntarily (less any portion thereof waived or deferred at the election of the 
+Collateral Manager in respect of such Payment Date pursuant to the terms of the Collateral 
+Management Agreement) (such amount, the "Elected Deferred Senior Fee" and together with the 
+Non-Elected Deferred Senior Fee, the "Deferred Senior Fees"); provided that any Elected Deferred 
+Senior Fee will not be payable on such Payment Date (and any such amount will be deferred) if, 
+after giving effect on a pro forma basis to such payment, there will be insufficient Interest 
+Proceeds remaining to pay in full all current interest (and all Deferred Interest, if any) due on
+each Class of Secured Notes on such Payment Date;
+(C) to the payment on a pro rata basis of the following amounts based 1 0.00 0.00 7,930,844.79
+on the respective amounts due on such Payment Date: (1) any amounts due to a Hedge Counterparty 2 0.00 0.00 7,930,844.79
+under a Hedge Agreement other than amounts due as a result of the termination (or partial 
+termination) of such Hedge Agreement; and (2) any amounts due to a Hedge Counterparty under a Hedge 
+Agreement pursuant to an early termination (or partial termination) of such Hedge Agreement as a 
+result of a Priority Hedge Termination Event;
+(D) to the payment of (1) first, on a pro rata basis, based upon amounts Class X - Int 39,790.20$             39,790.20 7,891,054.59
+due, of accrued and unpaid interest (including any defaulted interest) on the Class X Notes and the Class AR $3,881,752.00 3,881,752.00 4,009,302.59
+Class A Notes and (2) second, an amount equal to the sum of (x) the Class X Principal Amortization 
+Amount for such Payment Date plus (y) any Class X - Amort $857,142.86 857,142.86 3,152,159.73
+Unpaid Class X Principal Amortization Amount as of such Payment Date;
+(E) to the payment of accrued and unpaid interest (including any Class BR 783,328.50$           783,328.50$           $2,368,831.23
+defaulted interest) on the Class B Notes;
+(F) if either of the Class A/B Coverage Tests (except, in the case of the -$                        -$                        $2,368,831.23
+Interest Coverage Test with respect to the Class A Notes and the Class B Notes, if such Payment 
+Date is prior to the Interest Coverage Test Date) is not satisfied on the related Determination 
+Date, to make payments in accordance with the Note Payment Sequence to the extent necessary to 
+cause both Class A/B Coverage Tests to be met as of the related Determination Date on a pro forma 
+basis after giving
+effect to any payments made through this clause (F);
+(G) (G)   to the payment of (i) first, accrued and unpaid interest (other than any Deferred Interest) Class CR 406,664.25$           406,664.25 1,962,166.98
+on the Class C Notes and (ii) second, any Deferred Interest
+on the Class C Notes (and interest thereon);
+(H) if either of the Class C Coverage Tests (except, in the case of the -$                        0.00 1,962,166.98
+Interest Coverage Test with respect to the Class C Notes, if such Payment Date is prior to the 
+
+--- Page 5 of 11 ---
+Regatta XX Funding, LTD. Test Date 4/3/2026
+Waterfall Payment Per Section 11.1 As of Date: 4/15/2026
+Disbursements of Monies from Payment Account Page:  [3]
+Per Section 10.6 (b)(iv) of the Indenture Amount  Paid Running Total
+Interest Coverage Test Date) is not satisfied on the related Determination Date, to make payments 
+in accordance with the Note Payment Sequence to the extent necessary to cause both Class C Coverage 
+Tests to be met as of the related Determination Date on a pro forma basis after giving effect to 
+any payments made through this clause (H);
+(I) to the payment of (i) first, accrued and unpaid interest (other than Class D1R 470,414.25$           470,414.25 1,491,752.73
+any Deferred Interest) on the Class D-1 Notes, (ii) second, any Deferred Interest on the Class D-1 
+Notes (and interest thereon), (iii) third, accrued and unpaid interest (other than any Deferred Class D2R 94,027.38$             94,027.38 1,397,725.35
+Interest) on the Class D-2 Notes, (iv) fourth, any Deferred
+Interest on the Class D-2 Notes (and interest thereon);
+(J) if either of the Class D Coverage Tests (except, in the case of the -$                        0.00 1,397,725.35
+Interest Coverage Test with respect to the Class D-1 Notes and the Class D-2 Notes, if such Payment 
+Date is prior to the Interest Coverage Test Date) is not satisfied on the related Determination 
+Date, to make payments in accordance with the Note Payment Sequence to the extent necessary to 
+cause both Class D Coverage Tests to be met as of the related Determination Date on a pro forma 
+basis after giving effect
+to any payments made through this clause (J);
+(K) to the payment of (i) first, accrued and unpaid interest (other than any Deferred Interest) Class ER $321,457.13 321,457.13 1,076,268.23
+on the Class E Notes and (ii) second, any Deferred Interest
+on the Class E Notes (and interest thereon);
+(L) if the Class E Coverage Test is not satisfied on the related -$                        0.00 1,076,268.23
+Determination Date, to make payments in accordance with the Note Payment Sequence to the extent 
+necessary to cause the Class E Coverage Test to be met as of the related Determination Date on a 
+pro forma basis after giving effect to any
+payments made through this clause (L);
+(M) Reserved
+(N) during the Reinvestment Period only, if the Interest Diversion Test CALCULATE as needed 0.00 0.00 1,076,268.23
+is not satisfied on the related Determination Date, the lesser of (x) 50% of the Interest Proceeds 
+then available and (y) the amount required to cause such test to be satisfied on a pro forma basis 
+after giving effect to any payments made through this clause (N) shall be applied either (1) to the 
+purchase of additional Collateral Obligations or for deposit into the Collection Account as 
+Principal Proceeds for investment in Eligible Investments pending the purchase of additional  
+Collateral Obligations at a later date or (2) only after the Non-Call Period, if so designated by 
+the Collateral Manager with the consent of a Majority of the Subordinated Notes, to make payments 
+in accordance with the Note Payment Sequence on such Payment
+Date;
+(O) Reserved 0 0.00 1,076,268.23
+(P) Reserved 0 0.00 1,076,268.23
+(Q) to  the  payment  of  any  accrued  and  unpaid  Subordinated 435,930.62 435,930.62 640,337.61
+Management Fee to the Collateral Manager, except to the extent that the Collateral Manager elects 
+to treat such current Subordinated Management Fee as Deferred Subordinated Fees, plus any unpaid 
+Deferred Subordinated Fee that has been deferred with respect to prior Payment Dates which the 
+Collateral Manager elects
+to have paid on such Payment Date, together with interest accrued thereon;
+(R) to the payment of any Administrative Expenses not paid pursuant to clause (A)(2) above due to 0 0.00 0.00 640,337.61
+the limitations contained therein (in the priority stated 2 0.00 0.00 640,337.61
+in clause (A)(2) above); 3 0.00 0.00 640,337.61
+4(i) 0.00 0.00 640,337.61
+(ii) 66,227.10 66,227.10 574,110.51
+(iii) 0.00 0.00 574,110.51
+(iv) 0.00 0.00 574,110.51
+(v) 0.00 0.00 574,110.51
+0.00 0.00 574,110.51
+(S) to the payment on a pro rata basis based on any amounts due to any Hedge Counterparty under 0.00 0.00 574,110.51
+any Hedge Agreement not otherwise paid pursuant to
+clause (C)(1) above;
+(T) at the direction of the Collateral Manager (with the consent of the 0.00 0.00 574,110.51
+Majority of the Subordinated Notes), to the Collection Account of an amount equal to the 
+Supplemental Reserve Amount for such Payment Date (other than a
+Redemption Date);
+(U) to the payment to each Contributor of a Contribution, pro rata based 0.00 0.00 574,110.51
+on the aggregate amount of Contribution Repayment Amounts owing on such Payment Date, the aggregate 
+amount of such Contribution Repayment Amounts
+owing to each such Contributor until all such amounts have been paid in full;
+(V) to pay to the Holders of the Subordinated Notes an amount necessary 574,110.51 574,110.51 0.00
+to achieve the Target Return;
+(W) (W)  to the payment to the Collateral Manager to pay the Incentive Fee Amount in an amount equal to 0.00 0.00 0.00
+20.0% of all Interest Proceeds remaining after
+application pursuant to clauses (A) through (V) above on such Payment Date; and
+(X) to the payment of any remaining Interest Proceeds to the Holders of 0.00 0.00 0.00
+the Subordinated Notes.
+2,774,745.48
+(ii) On each Payment Date (other than a Post-Acceleration Payment Date, a
+Redemption Date or the Stated Maturity), Principal Proceeds (other than Principal Proceeds which 0.00
+have previously been reinvested in Collateral Obligations or which the Collateral Manager has 
+committed to invest or intends to invest in Collateral Obligations during the next Collection 
+Period) on deposit in the Collection Account that are received on or before the related 
+Determination Date and that are transferred to the Payment Account shall be applied in 2,774,745.48
+
+--- Page 6 of 11 ---
+Regatta XX Funding, LTD. Test Date 4/3/2026
+Waterfall Payment Per Section 11.1 As of Date: 4/15/2026
+Disbursements of Monies from Payment Account Page:  [3]
+Per Section 10.6 (b)(iv) of the Indenture Amount  Paid Running Total
+the following order of priority (the "Priority of Principal Proceeds"):
+(A) in accordance with clauses (A) through (E) of the Priority of Interest Proceeds, in each case 0.00 0.00 2,774,745.48
+(a) solely to the extent not paid in full thereunder, and
+(b) subject to any applicable cap set forth therein;
+(B) to pay the amounts referred to in clause (F) of the Priority of Interest 0.00 0.00 2,774,745.48
+Proceeds, but only to the extent not paid in full thereunder and to the extent necessary to cause 
+the Class A/B Coverage Tests to be met as of the related Determination Date on a pro forma basis 
+after giving effect to any payments made
+through this clause (B);
+(C) to pay the amounts referred to in clause (H) of the Priority of Interest 0.00 0.00 2,774,745.48
+Proceeds, but only to the extent not paid in full thereunder and to the extent necessary to cause 
+the Class C Coverage Tests to be met as of the related Determination Date on a pro forma basis 
+after giving effect to any payments made
+through this clause (C);
+(D) to pay the amounts referred to in clause (J) of the Priority of Interest 0.00 0.00 2,774,745.48
+Proceeds, but only to the extent not paid in full thereunder and to the extent necessary to cause 
+the Class D Coverage Tests to be met as of the related Determination Date on a pro forma basis 
+after giving effect to any payments made
+through this clause (D);
+(E) to pay the amounts referred to in clause (L) of the Priority of Interest 0.00 0.00 2,774,745.48
+Proceeds, but only to the extent not paid in full thereunder and to the extent necessary to cause 
+the Class E Coverage Test to be met as of the related Determination Date on a pro forma basis after 
+giving effect to any payments made
+through this clause (E);
+(F) (F)   to pay the amounts referred to in clause (G) of the Priority of Interest Proceeds, but only 0.00 0.00 2,774,745.48
+to the extent not paid in full thereunder and to the extent that the
+Class C Notes are or become the Controlling Class on such Payment Date;
+(G) (i) first, to pay the amounts referred to in clause (I)(i) and (I)(ii) of 0.00 0.00 2,774,745.48
+the Priority of Interest Proceeds, but only to the extent not paid in full thereunder and to the 
+extent that the Class D-1 Notes are or become the Controlling Class on such Payment Date and (ii) 
+second, to pay the amounts referred to in clause (I)(iii) and (I)(iv) of the Priority of Interest 
+Proceeds, but only to the extent not paid in full
+thereunder and to the extent that the Class D-2 Notes are or become the Controlling
+Class on such Payment Date;
+(H) (H)   to pay the amounts referred to in clause (K) of the Priority of Interest Proceeds, but only 0.00 0.00 2,774,745.48
+to the extent not paid in full thereunder and to the extent that the
+Class E Notes are or become the Controlling Class on such Payment Date;
+(I) RESERVED 0.00 0.00 2,774,745.48
+(J) RESERVED 0.00 0.00 2,774,745.48
+(K) if such Payment Date is a Special Redemption Date, the Special 0.00 0.00 2,774,745.48
+Redemption Amount in accordance with the Note Payment Sequence;
+(L) (i) during the Reinvestment Period, to the Collection Account as 2,774,745.48$        2,774,745.48 0.00
+Principal Proceeds to invest in Eligible Investments and/or to the purchase of additional 
+Collateral Obligations and (ii) after the Reinvestment Period, in the case of Principal Proceeds 
+received with respect to Unscheduled Principal Payments and sales of Credit Risk Obligations, to 
+invest in Eligible Investments and/or to the
+purchase of additional Collateral Obligations;
+(M) (M)  after the Reinvestment Period, to make payments in accordance with the Note Payment Sequence 0.00 0.00 0.00
+after taking into account payments made pursuant to
+the Priority of Interest Proceeds and clauses (A) through (K) above;
+(N) after the Reinvestment Period, to the payment of the accrued and 0.00 0.00 0.00
+unpaid Subordinated Management Fee to the Collateral Manager (including any interest accrued and 
+unpaid thereon) (less any portion thereof waived or deferred at the election of the Collateral 
+Manager pursuant to the Collateral Management Agreement) plus any unpaid Deferred Subordinated Fee 
+that has been deferred with respect to prior Payment Dates which the Collateral Manager elects to 
+have paid on such Payment Date to the extent not previously paid in full under clause (Q) of the
+Priority of Interest Proceeds;
+(O) after the Reinvestment Period, to the payment of the Administrative 0.00 0.00 0.00
+Expenses, in the order of priority set forth in clause (A)(2) of the Priority of Interest Proceeds 
+(without regard to the Administrative Expense Cap), but only to the extent not previously paid in 
+full under clauses (A)(2) and (R) thereof and under clause
+(A) above;
+(P) after the Reinvestment Period, to the payment on a pro rata basis 0.00 0.00 0.00
+based on amounts due, of any amounts due to any Hedge Counterparty under any Hedge Agreement not 
+previously paid in full under clauses (C)(1) and (S) of the
+Priority of Interest Proceeds and under clause (A) above;
+(Q) to the payment to each Contributor of a Contribution, pro rata based 0.00 0.00 0.00
+on the aggregate amount of Contribution Repayment Amounts owing on such
+Payment Date, the aggregate amount of such Contribution Repayment Amounts
+owing to each such Contributor until all such amounts have been paid in full;
+(R) after giving effect to clause (V) of the Priority of Interest Proceeds, to pay to the holders 0.00 0.00 0.00
+of the Subordinated Notes an amount necessary to achieve the
+Target Return;
+(S) to the payment to the Collateral Manager to pay the Incentive Fee Amount in an amount equal 0.00 0.00 0.00
+to 20.0% of all Principal Proceeds remaining after
+
+--- Page 7 of 11 ---
+Regatta XX Funding, LTD. Test Date 4/3/2026
+Waterfall Payment Per Section 11.1 As of Date: 4/15/2026
+Disbursements of Monies from Payment Account Page:  [3]
+Per Section 10.6 (b)(iv) of the Indenture Amount  Paid Running Total
+application pursuant to clauses (A) through (R) above on such Payment Date; and
+(T) to the payment of any remaining Principal Proceeds to the Holders 0.00 0.00 0.00
+of the Subordinated Notes.
+(iii) On each Post-Acceleration Payment Date, Redemption Date (other than a
+Partial Redemption Date or a Re-Pricing Redemption Date) or on the Stated Maturity, all Interest 
+Proceeds and all Principal Proceeds (except for any Principal Proceeds that shall be used to settle 
+binding commitments (entered into prior to the Determination Date) for the purchase of Collateral 
+Obligations) shall be applied in the following order of priority (the
+Special Priority of Proceeds):
+(A) to pay all amounts under clauses (A) through (C)(1) of the Priority of Interest Proceeds in 
+the priority set forth therein without regard to the
+Administrative Expense Cap;
+(B) to the payment of any amounts due to a Hedge Counterparty under any Hedge Agreement pursuant 
+to an early termination (or partial termination) of
+such Hedge Agreement as a result of a Priority Hedge Termination Event;
+(C ) to the payment of, (1) first, pro rata based on amounts due, of
+accrued and unpaid interest (including any defaulted interest) on the Class X Notes and the Class A 
+Notes, until such amounts have been paid in full and (2) second, to the payment, pro rata based on 
+Aggregate Outstanding Amount, of principal of the Class X Notes and the Class A Notes, until such 
+amounts have been paid in full;
+(D) to the payment of accrued and unpaid interest (including any
+defaulted interest) on the Class B Notes until such amount has been paid in full;
+(E) to the payment of principal of the Class B Notes until such amount
+has been paid in full;
+(F) to the payment of, first, accrued and unpaid interest and then any
+Deferred Interest on the Class C Notes until such amounts have been paid in full;
+(G) to the payment of principal of the Class C Notes until such amount
+has been paid in full;
+(H) to the payment of, first, accrued and unpaid interest and then any
+Deferred Interest on the Class D-1 Notes until such amounts have been paid in full;
+(I) to the payment of principal of the Class D-1 Notes until such amount
+has been paid in full;
+(J) to the payment of, first, accrued and unpaid interest and then any
+Deferred Interest on the Class D-2 Notes until such amounts have been paid in full;
+(K) to the payment of principal of the Class D-2 Notes until such amount
+has been paid in full;
+(L) to the payment of, first, accrued and unpaid interest and then any
+Deferred Interest on the Class E Notes until such amounts have been paid in full;
+(M) to the payment of principal of the Class E Notes until such amount
+has been paid in full;
+(N) to  the  payment  of  the  accrued  and  unpaid  Subordinated
+Management Fee to the Collateral Manager (less any portion thereof waived or deferred at the 
+election of the Collateral Manager pursuant to the Collateral Management Agreement) plus any unpaid 
+Deferred Subordinated Fee that has been deferred with respect to prior Payment Dates which the 
+Collateral Manager elects
+to have paid on such Payment Date, together with interest accrued thereon;
+(O) to the payment of (1) first, any Deferred Senior Fees not otherwise
+paid pursuant to clause (A) above, and (2) second, pro rata based on amounts due, any amounts due 
+to any Hedge Counterparty under any Hedge Agreement pursuant to an early termination (or partial 
+termination) of such Hedge Agreement not
+otherwise paid pursuant to clause (B) above;
+(P ) first, to each Contributor, any Contribution Repayment Amount
+payable to such Contributor for such Payment Date, pro rata based on the Contribution Repayment 
+Amounts payable to all Contributors on such Payment Date, and second, to pay to the Holders of the 
+Subordinated Notes an amount
+necessary to achieve the Target Return;
+(Q) (Q)   to the payment to the Collateral Manager to pay the Incentive Fee Amount in an amount equal 
+to 20.0% of all Principal Proceeds remaining after
+application pursuant to clauses (A) through (P) above on such Payment Date; and
+(R) to the payment of any remaining Interest Proceeds and Principal
+Proceeds to the Holders of the Subordinated Notes.
+(iv) On any Partial Redemption Date or Re-Pricing Redemption Date,
+Refinancing Proceeds, the proceeds of the issuance of Re-Pricing Replacement Notes, Partial 
+Redemption Interest Proceeds and Contributions and proceeds received from any additional issuance 
+of Subordinated Notes and/or Junior Mezzanine Notes designated for such purpose
+will be distributed in the following order of priority (the "Priority of Partial Redemption
+Proceeds"):
+(A) to pay the Redemption Price of each Class of Secured Notes being refinanced, without 
+
+--- Page 8 of 11 ---
+Regatta XX Funding, LTD. Test Date 4/3/2026
+Waterfall Payment Per Section 11.1 As of Date: 4/15/2026
+Disbursements of Monies from Payment Account Page:  [3]
+Per Section 10.6 (b)(iv) of the Indenture Amount  Paid Running Total
+duplication of any payments received by any such Class
+pursuant to the Priority of Interest Proceeds or the Special Priority of Proceeds;
+(B) any Administrative Expenses related to the Refinancing or Re-
+Pricing, as applicable; and
+(C ) any remaining amounts, to the applicable Collection Account as Interest Proceeds or, with the 
+consent of a Majority of the Subordinated Notes and
+the Collateral Manager, to any other Permitted Use.
+
+--- Page 9 of 11 ---
+U.S. Bank Corporate Trust Services
+CDO Administration Unit  
+As Of Date: 4/3/2026
+Regatta XX Funding, LTD. Page: 10
+ Note Valuation Report
+Per Section 10.6 (b)(vi) of the Indenture
+Balance of the Collection Accounts
+Interest Collection Account
+(A) On Determination Date 4/3/2026 8,163,247.48$     
+(B) Paid out in waterfall 8,163,247.48$     
+(C ) Remaining after Payment 4/15/2026 $0.00
+Principal Collection Account
+(A) On Determination Date 4/3/2026 $2,774,745.48
+(B) Paid out in waterfall $0.00
+(C ) Remaining after Payment 4/15/2026 $2,774,745.48
+
+
+--- Page 10 of 11 ---
+U.S. Bank Corporate Trust Services
+CDO Administration Unit  
+As Of Date: 4/3/2026
+Regatta XX Funding, LTD. Page: 11
+ Note Valuation Report
+Per Section 10.6 (b)(vii) of the Indenture
+Amount of Contributions accepted by the Issuer
+since the date of determination of the last Monthly Report $0.00
+
+
+--- Page 11 of 11 ---
+(i) The Notes may be beneficially owned only by Persons that
+(A)(x) are not U.S. persons (within the meaning of Regulation S under the United States
+Securities Act of 1933, as amended) and are purchasing their beneficial interest in an offshore
+transaction or (y) are either (1)(a) qualified institutional buyers ("Qualified Institutional
+Buyers") within the meaning of Rule 144A and (b) qualified purchasers (as defined in
+Section 2(a)(51) of the Investment Company Act) ("Qualified Purchasers"), or (2) in the case
+of Subordinated Notes, Accredited Investors and also (a) Qualified Purchasers or (b)
+Knowledgeable Employees or entities owned exclusively by Knowledgeable Employees and (B)
+can make the representations set forth in Section 2.6 or the appropriate Exhibit to this Indenture.
+Beneficial ownership interests in the Rule 144A Global Notes may be transferred only to a
+Person that is both a Qualified Institutional Buyer and a Qualified Purchaser and that can make
+the representations referred to in clause (B) of the preceding sentence. The Issuer has the right to
+compel any beneficial owner of an interest in Rule 144A Global Notes that does not meet the
+qualifications set forth in such clauses to sell its interest in such Notes, or may sell such interest
+on behalf of such owner, pursuant to Section 2.12.
+(ii) Each Holder or Certifying Holder of a Note receiving this report
+agrees to keep all non-public information herein confidential and not to use such information for
+any purpose other than its evaluation of its investment in the Note; provided that any such
+Holder or Certifying Holder may provide such information on a confidential basis to any
+prospective purchaser of such Holder's or beneficial owner's Notes that is permitted by the terms
+of this Indenture to acquire such Holder's or Certifying Holder's Notes and that agrees to keep
+such information confidential in accordance with the terms of this Indenture.

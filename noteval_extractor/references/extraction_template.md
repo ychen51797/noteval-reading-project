@@ -1,7 +1,7 @@
 # Extraction output template (noteval_extractor)
 
 **Canonical per-file templates** (same style as RMBS `extraction-templates.md`):  
-→ **[extraction-templates.md](extraction-templates.md)** — use that document for filenames `01_report_metadata.md` through `07_extraction_summary.md`, stable column headers, and section-by-section fenced templates.
+→ **[extraction-templates.md](extraction-templates.md)** — use that document for deliverables **`01`**, **`02`**, **`04`**, **`05`**, **`06`**, **`07`** (no `03_*.md`; distribution grids live in **`02`**), stable column headers, and section-by-section fenced templates.
 
 This file is a **minimal single-topic fallback** when you only need one small artifact; still use the three-part structure:
 

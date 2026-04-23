@@ -50,6 +50,8 @@ py -3 scripts/pdf_workflow.py "<path-to.pdf>" "<output-dir>"
 
 **Exactly two arguments:** (1) path to the **`.pdf`** file, (2) **one** output directory where `_chunks/` and the index will be written (created if needed). Do not pass a third path — that triggers `unrecognized arguments`.
 
+**Per-PDF output folder (recommended):** Use a **dedicated subfolder per report** so runs never overwrite each other. Put all runs under one parent if you like (e.g. `noteval_extractor/output/`), but make the **second argument** the **leaf** folder for this PDF only — typically named after the file stem or deal id, e.g. `...\output\197545_1\` for `197545_1.pdf`. The script creates that leaf directory; you do not need to create it first.
+
 **Artifacts produced** (by `segment_pdf.py`):
 
 - **`<output-dir>/_chunks/`** — text files such as `pages_001_030.txt` (page markers + raw `pypdf` text).
@@ -71,7 +73,7 @@ Open **`<output-dir>/_page_index.md`**.
 
 ## Step 3: Extraction templates
 
-Use **`noteval_extractor/references/extraction-templates.md`** as the **canonical layout** for each numbered markdown deliverable (`01_` … `07_`). It mirrors the RMBS doc-extractor style: fixed filenames, stable table headers, fenced templates, and checklists per file.
+Use **`noteval_extractor/references/extraction-templates.md`** as the **canonical layout** for each markdown deliverable: **`01`**, **`02`**, **`04`**, **`05`**, **`06`**, and **`07`** (there is **no** `03_*.md` — class-distribution pages belong in **`02`**). It mirrors the RMBS doc-extractor style: fixed filenames, stable table headers, fenced templates, and checklists per file. Class-level identifiers use separate **`ISIN`** and **`CUSIP`** columns in **`02`** (and deal-level split in **`01`** document routing) — do not merge into one field.
 
 Every extraction file must include, in order:
 
@@ -94,7 +96,7 @@ For **each extraction target** below, repeat:
 3. Fill **Extracted Data** tables/fields per **`extraction-templates.md`**.
 4. Tick every applicable item in **Completeness Checklist** (or mark **N/A** with one-line justification).
 5. Paste **Source Text** from the chunk files (quote blocks or fenced excerpts; label **Page N**).
-6. Write the file to **`<output-dir>/`** using the names in **`extraction-templates.md`**, e.g. `01_report_metadata.md`, `02_tranche_class_balances.md`, … `07_extraction_summary.md` (omit N/A files but record them in `07_extraction_summary.md`).
+6. Write the file to **`<output-dir>/`** using the names in **`extraction-templates.md`**, e.g. `01_report_metadata.md`, `02_tranche_class_balances.md`, `04_interest_principal_waterfall.md`, … `07_extraction_summary.md` (omit N/A optional files but record them in `07_extraction_summary.md`). **Do not** create `03_*.md` — per-class distribution grids (**Distribution in US$**, etc.) go in **`02`** per the template. When the same **economic** tranche appears under **144A / Reg S / AI** (etc.) with **different CUSIPs**, use **`02`** **primary** row + optional **`### Tranche by listing`** and set **`07`** flag **Multi-listing tranches**.
 
 ### Extraction targets (initial set)
 
@@ -103,9 +105,8 @@ Adjust names to the PDF; add files if the deal has extra sections.
 | # | Target | Typical hints in page index |
 |---|--------|------------------------------|
 | 1 | **Report metadata** → `01_report_metadata.md` | Report title, payment / determination / distribution dates, deal name |
-| 2 | **Tranche / class balances** → `02_tranche_class_balances.md` | Class, ISIN/CUSIP, beginning balance, interest/principal payment, deferred interest, dividend, ending balance |
-| 3 | **Distribution in US$** → `03_distribution_usd.md` (if present) | Class grid, prior/current principal, interest paid |
-| 4 | **Interest / principal proceeds or waterfall** → `04_interest_principal_proceeds.md` | Waterfall, disbursements, fees, Paid / Available columns (follow deal semantics) |
+| 2 | **Tranche / class balances (+ optional distribution / multi-listing)** → `02_tranche_class_balances.md` | Note Valuation, **Distribution in US$** (or similar), **primary** table + optional **`### Tranche by listing`** (144A / Reg S / …), **Deferred interest**, interest/principal — **any trustee** |
+| 4 | **Interest / principal waterfall** → `04_interest_principal_waterfall.md` | Waterfall, disbursements, fees, Paid / Available columns (follow deal semantics) |
 | 5 | **Note balance & deferred interest** → `05_note_balance_deferred_interest.md` (if present) | Note Balance, deferred interest, totals |
 | 6 | **Logical disbursements / Section 11.1** → `06_logical_disbursements.md` (if present) | Application of Interest/Principal Proceeds |
 | 7 | **Summary** → `07_extraction_summary.md` | Compiled counts, flags, cross-checks |
