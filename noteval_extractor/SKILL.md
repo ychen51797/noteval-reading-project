@@ -135,4 +135,4 @@ Copy **`noteval_extractor/`** to **`.cursor/skills/noteval_extractor/`** in the 
 
 ## Optional: Noteval Extractor subagent (Cursor)
 
-For delegation in chat, use **`noteval_extractor/agents/noteval-extractor-agent.md`** (in this repository). You can copy the same file to **`.cursor/agents/noteval-extractor-agent.md`** in the project or user agents folder so Cursor lists it as a subagent. Ask: *Use the **noteval-extractor-agent** with output directory …*
+For delegation in chat, use **`noteval_extractor/agents/noteval-extractor-agent.md`** — the same definition is committed at **`.cursor/agents/noteval-extractor-agent.md`** for Cursor Desktop when this repo is the project root. Copy either path to your user or other project **`.cursor/agents/`** if you want the subagent listed there. Ask: *Use the **noteval-extractor-agent** with output directory …*
