@@ -28,7 +28,7 @@ This skill is **agent procedure**. For **programmatic** USB / Deutsche parsing, 
 |------|--------|
 | **1** | Segment the PDF (`noteval_extractor/scripts/pdf_workflow.py`) into `_chunks/`, `_page_index.md`, `_manifest.md`. |
 | **2** | Read **`_page_index.md`** to map sections to page numbers. |
-| **3** | Load **`references/extraction-templates.md`** — strict per-file templates (01–07). |
+| **3** | Load **`references/extraction-templates.md`** — strict per-file templates (**01**, **02**, **04**, **07**; no **03**/**05**; **06** deprecated). |
 | **4** | For each extraction target: locate pages → read **`_chunks/`** → fill template → write under **`<output-dir>/`**. |
 | **5** | Run **`validate_noteval.py`** (when present); write **`validation_report.md`** to **`<output-dir>/`**. |
 
@@ -50,7 +50,15 @@ py -3 scripts/pdf_workflow.py "<path-to.pdf>" "<output-dir>"
 
 **Exactly two arguments:** (1) path to the **`.pdf`** file, (2) **one** output directory where `_chunks/` and the index will be written (created if needed). Do not pass a third path — that triggers `unrecognized arguments`.
 
-**Per-PDF output folder (recommended):** Use a **dedicated subfolder per report** so runs never overwrite each other. Put all runs under one parent if you like (e.g. `noteval_extractor/output/`), but make the **second argument** the **leaf** folder for this PDF only — typically named after the file stem or deal id, e.g. `...\output\197545_1\` for `197545_1.pdf`. The script creates that leaf directory; you do not need to create it first.
+**Per-PDF output folder (recommended):** Use a **dedicated subfolder per report** so runs never overwrite each other. Put all runs under one parent (e.g. `noteval_extractor/output/`), and name the **leaf** folder after the **PDF file stem** (filename without `.pdf`), e.g. `180118_175.pdf` → `...\output\180118_175\`, or `197545_1.pdf` → `...\output\197545_1\`. The script creates that leaf directory; you do not need to create it first.
+
+**Batch segmentation from `deal_paths.csv`:** After `get_file_path.py` writes paths, run:
+
+```powershell
+py -3 noteval_extractor/scripts/batch_segment.py --deal-paths noteval_extractor/test/deal_paths.csv --output-root noteval_extractor/output
+```
+
+Omit `--deal-paths` / `--output-root` to use defaults: `noteval_extractor/test/deal_paths.csv` if present, otherwise **`deal_paths.csv` in the parent folder of the repo** (e.g. `…/projects/deal_paths.csv`). Output root defaults to `noteval_extractor/output`. Each PDF is written to `output/<stem>/`. Rows with `status` ≠ `ok` are skipped when a `status` column exists.
 
 **Artifacts produced** (by `segment_pdf.py`):
 
@@ -73,7 +81,7 @@ Open **`<output-dir>/_page_index.md`**.
 
 ## Step 3: Extraction templates
 
-Use **`noteval_extractor/references/extraction-templates.md`** as the **canonical layout** for each markdown deliverable: **`01`**, **`02`**, **`04`**, **`05`**, **`06`**, and **`07`** (there is **no** `03_*.md` — class-distribution pages belong in **`02`**). It mirrors the RMBS doc-extractor style: fixed filenames, stable table headers, fenced templates, and checklists per file. Class-level identifiers use separate **`ISIN`** and **`CUSIP`** columns in **`02`** (and deal-level split in **`01`** document routing) — do not merge into one field.
+Use **`noteval_extractor/references/extraction-templates.md`** as the **canonical layout** for each markdown deliverable: **`01`**, **`02`**, **`04`**, and **`07`** (there is **no** `03_*.md` or **`05_*.md`** — class-distribution pages and **per-class deferred interest** belong in **`02`**; **`06`** is deprecated in favor of **`04`**). It mirrors the RMBS doc-extractor style: fixed filenames, stable table headers, fenced templates, and checklists per file. Class-level identifiers use separate **`ISIN`** and **`CUSIP`** columns in **`02`** (and deal-level split in **`01`** document routing) — do not merge into one field.
 
 Every extraction file must include, in order:
 
@@ -96,7 +104,7 @@ For **each extraction target** below, repeat:
 3. Fill **Extracted Data** tables/fields per **`extraction-templates.md`**.
 4. Tick every applicable item in **Completeness Checklist** (or mark **N/A** with one-line justification).
 5. Paste **Source Text** from the chunk files (quote blocks or fenced excerpts; label **Page N**).
-6. Write the file to **`<output-dir>/`** using the names in **`extraction-templates.md`**, e.g. `01_report_metadata.md`, `02_tranche_class_balances.md`, `04_interest_principal_waterfall.md`, … `07_extraction_summary.md` (omit N/A optional files but record them in `07_extraction_summary.md`). **Do not** create `03_*.md` — per-class distribution grids (**Distribution in US$**, etc.) go in **`02`** per the template. When the same **economic** tranche appears under **144A / Reg S / AI** (etc.) with **different CUSIPs**, use **`02`** **primary** row + optional **`### Tranche by listing`** and set **`07`** flag **Multi-listing tranches**.
+6. Write the file to **`<output-dir>/`** using the names in **`extraction-templates.md`**, e.g. `01_report_metadata.md`, `02_tranche_class_balances.md`, `04_interest_principal_waterfall.md`, `07_extraction_summary.md` (omit N/A optional legacy files but record them in `07_extraction_summary.md`). **Do not** create `03_*.md` or **`05_*.md`** — per-class distribution grids (**Distribution in US$**, etc.) and **deferred interest** go in **`02`** per the template. **`02`** primary (and **Tranche by listing** / **Distribution grid**) tables include **`Interest payable`** and **`Principal payable`** alongside **Interest payment** / **Principal payment** when the trustee reports due/payable vs paid separately (or payable-only). When the same **economic** tranche appears under **144A / Reg S / AI** (etc.) with **different CUSIPs**, use **`02`** **primary** row + optional **`### Tranche by listing`** and set **`07`** flag **Multi-listing tranches**.
 
 ### Extraction targets (initial set)
 
@@ -104,12 +112,12 @@ Adjust names to the PDF; add files if the deal has extra sections.
 
 | # | Target | Typical hints in page index |
 |---|--------|------------------------------|
-| 1 | **Report metadata** → `01_report_metadata.md` | Report title, payment / determination / distribution dates, deal name |
-| 2 | **Tranche / class balances (+ optional distribution / multi-listing)** → `02_tranche_class_balances.md` | Note Valuation, **Distribution in US$** (or similar), **primary** table + optional **`### Tranche by listing`** (144A / Reg S / …), **Deferred interest**, interest/principal — **any trustee** |
-| 4 | **Interest / principal waterfall** → `04_interest_principal_waterfall.md` | Waterfall, disbursements, fees, Paid / Available columns (follow deal semantics) |
-| 5 | **Note balance & deferred interest** → `05_note_balance_deferred_interest.md` (if present) | Note Balance, deferred interest, totals |
-| 6 | **Logical disbursements / Section 11.1** → `06_logical_disbursements.md` (if present) | Application of Interest/Principal Proceeds |
+| 1 | **Report metadata** → `01_report_metadata.md` | Report title, payment / determination / distribution dates, deal name; **`Payment date`** = **`Distribution date`** by business definition for CLO trustee reports (same calendar date in both columns); **Next Payment:** in headers fills both when that is the only anchor (`extraction-templates.md` **File 01**) |
+| 2 | **Tranche / class balances (+ optional distribution / multi-listing)** → `02_tranche_class_balances.md` | Note Valuation, **Distribution in US$** (or similar), **`### Summary`** optional **Total payment / total amount payable** when the class / voucher / distribution exhibit prints a trustee aggregate; **primary** table + optional **`### Tranche by listing`** (144A / Reg S / …), **Deferred interest**, interest/principal, supplementary lines — **any trustee**; **Interest payment** / **Principal payment** may stay blank when the PDF has **only** payable / due columns; **Ending balance** (and beginning) **as printed** — no recomputation (`extraction-templates.md` **File 02**) |
+| 4 | **Interest / principal waterfall** (grid and/or logical ladder) → `04_interest_principal_waterfall.md` | Waterfall, Section 11.1 / Application of …, Computershare ladders, fees, Paid / Available |
 | 7 | **Summary** → `07_extraction_summary.md` | Compiled counts, flags, cross-checks |
+
+**`04` — indenture / Payment Date Report three-column grids:** Some CLO **Payment Date Report** exhibits (indenture **Section 11.1**, *Disbursements from Payment Account*) print **Amount Due**, **Payment**, and **Running Balance**. Map into the stable template columns as: **Amount Due** → **`Amount payable`** (what is **due** for that priority line — obligation / accrued amount; **not** necessarily cash paid), **Payment** → **`Amount paid`** (cash **actually disbursed**), **Running Balance** → **`Amount available / running`** (remainder after the step). Prose **interest due** / **amounts due** aligns with **payable**; it may **exceed** **paid** when a line is capped, partially paid, or unpaid. For **fee-style** questions (“what left the account?”), use **Payment** / **Amount paid**; for “what was owed on the line?”, use **Amount Due** / **Amount payable**. Add a short **`### Column mapping`** in **`04`** when this layout applies (see **`references/extraction-templates.md`** blockquote under File 04).
 
 Cross-check ambiguous tables against **`read_noteval_usbank`** / **`read_noteval_deutsche`** skills when automating the same layouts later.
 
@@ -123,7 +131,7 @@ Run:
 py -3 noteval_extractor/scripts/validate_noteval.py "<output-dir>"
 ```
 
-**`noteval_extractor/scripts/validate_noteval.py`** — checks required files (`01`, `02`, `07`), at least one class row in `02`, fee-like lines in `04` waterfall when present, and warns if every **Interest payment** is zero/blank. Writes **`validation_report.md`** into **`<output-dir>/`**. Use **`--strict`** to exit with code 1 on warnings as well as errors.
+**`noteval_extractor/scripts/validate_noteval.py`** — checks required files (`01`, `02`, `07`), at least one class row in `02`, fee-like lines in `04` waterfall when present; warns if **all** tranches have **Interest payment**, **Interest payable**, and **Dividend** each zero/blank; warns if **all** tranches have **Original**, **Beginning**, and **Ending** balance each zero/blank (sub-only deals with seniors at zero **pass** when the sub row has nonzero balances). Writes **`validation_report.md`** into **`<output-dir>/`**. Use **`--strict`** to exit with code 1 on warnings as well as errors.
 
 If the script is unavailable, do a **manual validation pass** — re-open each `0*_*.md` (and `07_extraction_summary.md`), confirm every checklist item is addressed, and add **`validation_report.md`** yourself.
 
