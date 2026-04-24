@@ -12,6 +12,10 @@ Rules (initial):
      **Ending balance** each zero or blank (possible extraction gap). Deals with
      only **subordinated notes** left and seniors at zero are **normal** — such a
      deal passes as long as the sub row has a nonzero balance in any of those columns.
+  5. WARN if **Ending balance** ≠ **Beginning balance** + **Deferred interest**
+     − **Principal payment** (within tolerance) on class rows where **Principal
+     payable** is blank/zero (rows with nonzero **Principal payable** are skipped
+     — voucher-style layouts).
 
 Usage:
     python validate_noteval.py <extraction_dir>
@@ -217,6 +221,76 @@ def all_tranches_zero_original_beginning_and_ending(
         not row_has_nonzero_original_beginning_or_ending(row, orig_i, beg_i, end_i)
         for row in data_rows
     )
+
+
+# Principal roll-forward: ending ≈ beginning + deferred_interest − principal_payment
+PRINCIPAL_ROLLFORWARD_ABS_TOL = 0.02
+
+
+def principal_rollforward_row_stats(
+    header: list[str],
+    data_rows: list[list[str]],
+) -> tuple[int, int, list[str]]:
+    """How many class rows pass ending ≈ beg + deferred − principal_payment.
+
+    Skips a row when **Principal payable** parses nonzero — common voucher layouts
+    where **Ending balance** is not the same roll-forward object as beginning − payment.
+
+    Returns ``(n_checked, n_mismatch, sample_messages)``.
+    """
+    beg_i = column_index_exact(header, "Beginning balance")
+    end_i = column_index_exact(header, "Ending balance")
+    prin_i = column_index_exact(header, "Principal payment")
+    def_i = column_index_exact(header, "Deferred interest")
+    prin_pbl_i = column_index_exact(header, "Principal payable")
+
+    if beg_i is None or end_i is None or prin_i is None:
+        return 0, 0, []
+
+    n_checked = 0
+    n_mismatch = 0
+    msgs: list[str] = []
+
+    for row in data_rows:
+        cls = row[0].strip() if row else "?"
+        if prin_pbl_i is not None and prin_pbl_i < len(row):
+            pbl = parse_number(row[prin_pbl_i])
+            if pbl is not None and abs(pbl) > PRINCIPAL_ROLLFORWARD_ABS_TOL:
+                continue
+
+        if beg_i >= len(row) or end_i >= len(row):
+            continue
+        beg = parse_number(row[beg_i])
+        end = parse_number(row[end_i])
+        if beg is None or end is None:
+            continue
+
+        prin = parse_number(row[prin_i]) if prin_i < len(row) else None
+        if prin is None:
+            prin = 0.0
+
+        def_val = 0.0
+        if def_i is not None and def_i < len(row):
+            d = parse_number(row[def_i])
+            if d is not None:
+                def_val = d
+
+        expected = beg + def_val - prin
+        tol = max(
+            PRINCIPAL_ROLLFORWARD_ABS_TOL,
+            1e-9 * max(abs(beg), abs(end), abs(expected), 1.0),
+        )
+        n_checked += 1
+        if abs(end - expected) > tol:
+            n_mismatch += 1
+            if len(msgs) < 5:
+                msgs.append(
+                    f"{cls}: ending {end:,.2f} vs expected {expected:,.2f} "
+                    f"(beg {beg:,.2f} + def {def_val:,.2f} − prin {prin:,.2f}); "
+                    f"delta {end - expected:,.2f}"
+                )
+
+    return n_checked, n_mismatch, msgs
 
 
 FEE_KEYWORDS = re.compile(
@@ -440,6 +514,45 @@ def validate_dir(out_dir: Path) -> list[Check]:
                     f"{n_with_bal}/{len(data_rows)} tranche(s) have a nonzero "
                     f"original, beginning, or ending balance.",
                     "info",
+                )
+            )
+
+    if data_rows and cb:
+        n_pr, n_bad, pr_msgs = principal_rollforward_row_stats(cb[0], data_rows)
+        if n_pr == 0:
+            checks.append(
+                Check(
+                    "balances",
+                    "Principal roll-forward (ending ≈ beg + deferred − principal pmt)",
+                    True,
+                    "No class rows checked: missing Beginning/Ending/Principal payment "
+                    "columns, non-numeric beginning/ending, or all rows skipped "
+                    "(nonzero **Principal payable** — voucher-style layout).",
+                    "info",
+                )
+            )
+        elif n_bad == 0:
+            checks.append(
+                Check(
+                    "balances",
+                    "Principal roll-forward (ending ≈ beg + deferred − principal pmt)",
+                    True,
+                    f"{n_pr} class row(s) within tolerance "
+                    f"(ending ≈ beginning + deferred interest − principal payment).",
+                    "info",
+                )
+            )
+        else:
+            detail = f"{n_bad}/{n_pr} row(s) mismatch. " + (
+                " Examples: " + " | ".join(pr_msgs) if pr_msgs else ""
+            )
+            checks.append(
+                Check(
+                    "balances",
+                    "Principal roll-forward (ending ≈ beg + deferred − principal pmt)",
+                    False,
+                    detail.strip(),
+                    "warn",
                 )
             )
 
