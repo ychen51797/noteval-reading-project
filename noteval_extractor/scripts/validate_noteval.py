@@ -4,7 +4,14 @@ validate_noteval.py — Lightweight checks on noteval_extractor markdown outputs
 Rules (initial):
   1. FAIL if there is no tranche/class data (no populated class rows in 02).
   2. WARN if a waterfall/proceeds table exists but no fee-like rows are detected.
-  3. WARN if every class row has interest payment zero or blank (possible extraction gap).
+  3. WARN if **all** tranches (class rows) have **Interest payment**, **Interest
+     payable**, and **Dividend** each zero or blank — i.e. no row has a nonzero in
+     payment **or** payable **or** dividend (possible extraction gap). Subordinated
+     notes often use **Dividend**; payable-only layouts use **Interest payable**.
+  4. WARN if **all** tranches have **Original balance**, **Beginning balance**, and
+     **Ending balance** each zero or blank (possible extraction gap). Deals with
+     only **subordinated notes** left and seniors at zero are **normal** — such a
+     deal passes as long as the sub row has a nonzero balance in any of those columns.
 
 Usage:
     python validate_noteval.py <extraction_dir>
@@ -70,12 +77,14 @@ def _header_join(row: list[str]) -> str:
 
 
 def find_class_balance_table(tables: list[list[list[str]]]) -> list[list[str]] | None:
-    """Table whose header includes Class + Beginning balance + Interest payment."""
+    """Table whose header includes Class + Beginning balance + interest payment or payable."""
     for table in tables:
         if not table or len(table[0]) < 3:
             continue
         h = _header_join(table[0])
-        if "class" in h and "beginning balance" in h and "interest payment" in h:
+        if "class" not in h or "beginning balance" not in h:
+            continue
+        if "interest payment" in h or "interest payable" in h:
             return table
     return None
 
@@ -132,6 +141,84 @@ def column_index_interest_payment(header: list[str]) -> int | None:
     return None
 
 
+def column_index_exact(header: list[str], name: str) -> int | None:
+    nl = name.lower()
+    for i, h in enumerate(header):
+        if h.strip().lower() == nl:
+            return i
+    return None
+
+
+def row_has_nonzero_interest_payment_payable_or_dividend(
+    row: list[str],
+    pay_i: int | None,
+    payable_i: int | None,
+    dividend_i: int | None,
+) -> bool:
+    """True if this tranche has a nonzero **Interest payment**, **Interest payable**, or **Dividend**.
+
+    **Dividend:** **DIVIDEND PAYABLE** on **Subordinated Notes** is treated as
+    interest-like economics for this sanity check.
+    """
+    for i in (pay_i, payable_i, dividend_i):
+        if i is None or i >= len(row):
+            continue
+        v = parse_number(row[i])
+        if v is not None and abs(v) > 1e-9:
+            return True
+    return False
+
+
+def all_tranches_zero_interest_payment_payable_and_dividend(
+    data_rows: list[list[str]],
+    pay_i: int | None,
+    payable_i: int | None,
+    dividend_i: int | None,
+) -> bool:
+    """True if every class row lacks a nonzero in payment, payable, and dividend."""
+    if not data_rows:
+        return False
+    return all(
+        not row_has_nonzero_interest_payment_payable_or_dividend(
+            row, pay_i, payable_i, dividend_i
+        )
+        for row in data_rows
+    )
+
+
+def row_has_nonzero_original_beginning_or_ending(
+    row: list[str],
+    orig_i: int | None,
+    beg_i: int | None,
+    end_i: int | None,
+) -> bool:
+    """True if Original, Beginning, or Ending balance parses nonzero for this row."""
+    for i in (orig_i, beg_i, end_i):
+        if i is None or i >= len(row):
+            continue
+        v = parse_number(row[i])
+        if v is not None and abs(v) > 1e-9:
+            return True
+    return False
+
+
+def all_tranches_zero_original_beginning_and_ending(
+    data_rows: list[list[str]],
+    orig_i: int | None,
+    beg_i: int | None,
+    end_i: int | None,
+) -> bool:
+    """True if every class row has no nonzero in original, beginning, or ending balance."""
+    if not data_rows:
+        return False
+    if orig_i is None and beg_i is None and end_i is None:
+        return False
+    return all(
+        not row_has_nonzero_original_beginning_or_ending(row, orig_i, beg_i, end_i)
+        for row in data_rows
+    )
+
+
 FEE_KEYWORDS = re.compile(
     r"\b(fee|fees|servicing|master serv|trustee|"
     r"administration|administrator|custodian|"
@@ -169,16 +256,16 @@ def row_description(table: list[list[str]], row: list[str]) -> str:
 
 
 def file_section_absent(text: str) -> bool:
+    """True only for explicit prose that the waterfall/proceeds section is absent.
+
+    Do **not** scan generic key/value tables: optional **`04`** tables such as
+    **Logical / clause waterfall** use ``Section present (Y/N) | N`` when the
+    *clause ladder* is absent while a **grid** waterfall still exists — that must
+    not skip fee validation on the grid.
+    """
     tl = text.lower()
     if "section not present" in tl:
         return True
-    for table in parse_md_tables(text):
-        for row in table[1:]:
-            if len(row) < 2:
-                continue
-            k, v = row[0].strip().lower(), row[1].strip().lower()
-            if "section present" in k and v in ("n", "no"):
-                return True
     return False
 
 
@@ -235,7 +322,8 @@ def validate_dir(out_dir: Path) -> list[Check]:
                 "tranches",
                 "Class balance table found",
                 False,
-                "No table with headers Class + Beginning balance + Interest payment.",
+                "No table with headers Class + Beginning balance + "
+                "Interest payment (and/or Interest payable).",
                 "error",
             )
         )
@@ -254,36 +342,103 @@ def validate_dir(out_dir: Path) -> list[Check]:
         )
     )
 
-    int_col = column_index_interest_payment(cb[0])
-    if int_col is not None and data_rows:
-        values: list[float | None] = []
-        for row in data_rows:
-            v = parse_number(row[int_col]) if int_col < len(row) else None
-            values.append(v)
-        numeric = [v for v in values if v is not None]
-        # Warn when every class row has interest 0 or blank (no nonzero amount).
-        all_zero_or_blank = bool(values) and not any(
-            v is not None and abs(v) > 1e-9 for v in values
+    int_pay_i = column_index_interest_payment(cb[0])
+    int_pbl_i = column_index_exact(cb[0], "Interest payable")
+    div_i = column_index_exact(cb[0], "Dividend")
+    if (int_pay_i is not None or int_pbl_i is not None or div_i is not None) and data_rows:
+        all_blank = all_tranches_zero_interest_payment_payable_and_dividend(
+            data_rows, int_pay_i, int_pbl_i, div_i
         )
 
-        if all_zero_or_blank and data_rows:
+        if all_blank:
             checks.append(
                 Check(
                     "interest",
-                    "Interest payment column not all zero/blank",
+                    "All tranches zero on interest payment, payable, and dividend",
                     False,
-                    "Every class row has interest payment 0, blank, or N/A - "
-                    "confirm this matches the PDF or re-extract.",
+                    f"All {len(data_rows)} class row(s) have Interest payment, "
+                    "Interest payable, and Dividend each 0, blank, or N/A — "
+                    "confirm the PDF, or fill **Interest payable** / **Dividend** "
+                    "(sub notes) per trustee layout.",
                     "warn",
                 )
             )
         else:
+            n_pay = sum(
+                1
+                for row in data_rows
+                if int_pay_i is not None
+                and int_pay_i < len(row)
+                and parse_number(row[int_pay_i]) is not None
+            )
+            n_pbl = sum(
+                1
+                for row in data_rows
+                if int_pbl_i is not None
+                and int_pbl_i < len(row)
+                and parse_number(row[int_pbl_i]) is not None
+            )
+            n_div = sum(
+                1
+                for row in data_rows
+                if div_i is not None
+                and div_i < len(row)
+                and parse_number(row[div_i]) is not None
+            )
+            n_tranches_with_signal = sum(
+                1
+                for row in data_rows
+                if row_has_nonzero_interest_payment_payable_or_dividend(
+                    row, int_pay_i, int_pbl_i, div_i
+                )
+            )
             checks.append(
                 Check(
                     "interest",
-                    "Interest payment column not all zero/blank",
+                    "Not all tranches blank on interest payment / payable / dividend",
                     True,
-                    f"{len(numeric)} numeric interest cell(s), at least one nonzero.",
+                    f"{n_tranches_with_signal}/{len(data_rows)} tranche(s) have a "
+                    f"nonzero interest payment, payable, or dividend; numeric cells: "
+                    f"{n_pay} payment, {n_pbl} payable, {n_div} dividend.",
+                    "info",
+                )
+            )
+
+    orig_i = column_index_exact(cb[0], "Original balance")
+    beg_i = column_index_exact(cb[0], "Beginning balance")
+    end_i = column_index_exact(cb[0], "Ending balance")
+    if data_rows and (orig_i is not None or beg_i is not None or end_i is not None):
+        all_bal_zero = all_tranches_zero_original_beginning_and_ending(
+            data_rows, orig_i, beg_i, end_i
+        )
+        if all_bal_zero:
+            checks.append(
+                Check(
+                    "balances",
+                    "All tranches zero on original, beginning, and ending balance",
+                    False,
+                    f"All {len(data_rows)} class row(s) have Original balance, "
+                    "Beginning balance, and Ending balance each 0, blank, or N/A — "
+                    "likely extraction gap. (If the deal is **sub-only** with seniors "
+                    "at zero, the subordinated row should still show nonzero balances.)",
+                    "warn",
+                )
+            )
+        else:
+            n_with_bal = sum(
+                1
+                for row in data_rows
+                if row_has_nonzero_original_beginning_or_ending(
+                    row, orig_i, beg_i, end_i
+                )
+            )
+            checks.append(
+                Check(
+                    "balances",
+                    "Not all tranches blank on original / beginning / ending balance",
+                    True,
+                    f"{n_with_bal}/{len(data_rows)} tranche(s) have a nonzero "
+                    f"original, beginning, or ending balance.",
                     "info",
                 )
             )
