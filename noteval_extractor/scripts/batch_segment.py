@@ -16,14 +16,22 @@ Default CSV search: (1) ``noteval_extractor/test/deal_paths.csv`` if present;
 
 Requires rows with a non-empty ``pdf_path``. If a ``status`` column exists, only
 rows with ``status`` = ``ok`` are processed.
+
+Optional column ``waterfall_path`` (e.g. Wells Fargo Waterfall Calculations
+Report): when non-empty, that PDF is segmented into the **same** deal folder
+after the note PDF. Standard outputs stay ``_chunks/``, ``_page_index.md``,
+``_manifest.md`` (from ``pdf_path``). Waterfall outputs are moved to
+``_chunks_waterfall/``, ``_page_index_waterfall.md``, ``_manifest_waterfall.md``.
 """
 
 from __future__ import annotations
 
 import argparse
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -120,6 +128,10 @@ def load_rows(path: Path) -> pd.DataFrame:
     out = df[[pdf_col]].copy()
     out.rename(columns={pdf_col: "pdf_path"}, inplace=True)
     out["pdf_path"] = out["pdf_path"].astype(str).str.strip()
+    if "waterfall_path" in cmap:
+        out["waterfall_path"] = df[cmap["waterfall_path"]].astype(str).str.strip()
+    else:
+        out["waterfall_path"] = ""
     if "status" in cmap:
         out["_status"] = df[cmap["status"]].astype(str).str.strip()
     else:
@@ -133,6 +145,50 @@ def load_rows(path: Path) -> pd.DataFrame:
     else:
         out["_payment_date"] = ""
     return out
+
+
+def _run_pdf_workflow(
+    *,
+    script: Path,
+    pdf: Path,
+    output_dir: Path,
+    chunk_size: int,
+    segment_script: Path | None,
+) -> int:
+    cmd = [
+        sys.executable,
+        str(script),
+        str(pdf.resolve()),
+        str(output_dir),
+        "--chunk-size",
+        str(chunk_size),
+    ]
+    if segment_script:
+        cmd.extend(["--segment-script", str(segment_script.resolve())])
+    proc = subprocess.run(cmd, check=False)
+    return int(proc.returncode)
+
+
+def _replace_tree_or_file(dst: Path) -> None:
+    if dst.exists():
+        if dst.is_dir():
+            shutil.rmtree(dst)
+        else:
+            dst.unlink()
+
+
+def _install_waterfall_artifacts(tmp_dir: Path, deal_dir: Path) -> None:
+    """Move segment_pdf outputs from ``tmp_dir`` into ``deal_dir`` with *_waterfall names."""
+    moves = [
+        (tmp_dir / "_chunks", deal_dir / "_chunks_waterfall"),
+        (tmp_dir / "_page_index.md", deal_dir / "_page_index_waterfall.md"),
+        (tmp_dir / "_manifest.md", deal_dir / "_manifest_waterfall.md"),
+    ]
+    for src, dst in moves:
+        if not src.exists():
+            continue
+        _replace_tree_or_file(dst)
+        shutil.move(str(src), str(dst))
 
 
 def main() -> None:
@@ -195,7 +251,9 @@ def main() -> None:
     failures = 0
     skipped = 0
     noted_folder_fallback = False
-    for i, row in rows.iterrows():
+    seg_script = args.segment_script.resolve() if args.segment_script else None
+
+    for _, row in rows.iterrows():
         pdf = Path(row["pdf_path"])
         st = row.get("_status", "")
         if st and str(st).strip().lower() != "ok":
@@ -217,6 +275,10 @@ def main() -> None:
             stem,
         )
         output_dir = out_root / folder
+        wf_raw = str(row.get("waterfall_path", "") or "").strip()
+        wf_path = Path(wf_raw) if wf_raw else None
+        wf_segment_ok = False
+
         if folder == stem and not noted_folder_fallback:
             noted_folder_fallback = True
             print(
@@ -226,28 +288,70 @@ def main() -> None:
                 flush=True,
             )
         print(f"{pdf} -> {output_dir}", flush=True)
+        if wf_raw:
+            if wf_path is None or not wf_path.is_file():
+                print(
+                    f"ERROR: waterfall_path is not a file: {wf_raw!r} (note PDF will still segment)",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                failures += 1
+            elif wf_path.resolve() == pdf.resolve():
+                print(
+                    f"SKIP waterfall (same file as pdf_path): {wf_path}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+            else:
+                wf_segment_ok = True
+                print(f"{wf_path} -> {output_dir} (_chunks_waterfall, …)", flush=True)
 
         if args.dry_run:
             continue
 
         output_dir.mkdir(parents=True, exist_ok=True)
-        cmd = [
-            sys.executable,
-            str(script),
-            str(pdf.resolve()),
-            str(output_dir),
-            "--chunk-size",
-            str(args.chunk_size),
-        ]
-        if args.segment_script:
-            cmd.extend(["--segment-script", str(args.segment_script.resolve())])
-
-        proc = subprocess.run(cmd, check=False)
-        if proc.returncode != 0:
-            print(f"ERROR: segmentation failed (exit {proc.returncode}): {pdf}", file=sys.stderr)
+        rc = _run_pdf_workflow(
+            script=script,
+            pdf=pdf,
+            output_dir=output_dir,
+            chunk_size=args.chunk_size,
+            segment_script=seg_script,
+        )
+        if rc != 0:
+            print(f"ERROR: segmentation failed (exit {rc}): {pdf}", file=sys.stderr)
             failures += 1
             if not args.continue_on_error:
-                raise SystemExit(proc.returncode)
+                raise SystemExit(rc)
+
+        if wf_segment_ok:
+            with tempfile.TemporaryDirectory(prefix="noteval_wf_seg_") as tmp:
+                tmp_path = Path(tmp)
+                rc2 = _run_pdf_workflow(
+                    script=script,
+                    pdf=wf_path,
+                    output_dir=tmp_path,
+                    chunk_size=args.chunk_size,
+                    segment_script=seg_script,
+                )
+                if rc2 != 0:
+                    print(
+                        f"ERROR: waterfall segmentation failed (exit {rc2}): {wf_path}",
+                        file=sys.stderr,
+                    )
+                    failures += 1
+                    if not args.continue_on_error:
+                        raise SystemExit(rc2)
+                else:
+                    try:
+                        _install_waterfall_artifacts(tmp_path, output_dir)
+                    except OSError as e:
+                        print(
+                            f"ERROR: could not install waterfall artifacts: {e}",
+                            file=sys.stderr,
+                        )
+                        failures += 1
+                        if not args.continue_on_error:
+                            raise SystemExit(1) from e
 
     if args.dry_run:
         print("(dry-run; no segmentation run)", file=sys.stderr)
