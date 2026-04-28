@@ -35,7 +35,7 @@ from pathlib import Path
 REQUIRED_FILES = (
     "01_report_metadata.md",
     "02_tranche_class_balances.md",
-    "07_extraction_summary.md",
+    "04_extraction_summary.md",
 )
 
 
@@ -556,9 +556,9 @@ def validate_dir(out_dir: Path) -> list[Check]:
                 )
             )
 
-    p04 = out_dir / "04_interest_principal_waterfall.md"
-    if p04.is_file():
-        text04 = p04.read_text(encoding="utf-8", errors="replace")
+    p03 = out_dir / "03_interest_principal_waterfall.md"
+    if p03.is_file():
+        text04 = p03.read_text(encoding="utf-8", errors="replace")
         if file_section_absent(text04):
             checks.append(
                 Check(
@@ -578,7 +578,7 @@ def validate_dir(out_dir: Path) -> list[Check]:
                         "waterfall",
                         "Waterfall table found",
                         False,
-                        "04 has no recognizable waterfall/proceeds table "
+                        "03 has no recognizable waterfall/proceeds table "
                         "(expected Priority + Item/payee + Amount paid).",
                         "warn",
                     )
@@ -643,9 +643,9 @@ def validate_dir(out_dir: Path) -> list[Check]:
         checks.append(
             Check(
                 "waterfall",
-                "File 04 present for waterfall/fee checks",
+                "File 03 present for waterfall/fee checks",
                 False,
-                "04_interest_principal_waterfall.md missing - add if PDF has waterfall.",
+                "03_interest_principal_waterfall.md missing - add if PDF has waterfall.",
                 "warn",
             )
         )
@@ -694,7 +694,7 @@ def write_report(out_dir: Path, checks: list[Check]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate noteval_extractor markdown outputs.")
-    parser.add_argument("extraction_dir", type=Path, help="Directory with 01_*.md … 07_*.md")
+    parser.add_argument("extraction_dir", type=Path, help="Directory with 01_ … 04_ extraction markdown")
     parser.add_argument(
         "--strict",
         action="store_true",
