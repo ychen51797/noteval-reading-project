@@ -88,9 +88,11 @@ Use **stable table headers** below; do not rename columns (future `validate_note
 ## File 02: Tranche / class balances
 
 **Filename:** `02_tranche_class_balances.md`  
-**Source:** Note Valuation Report tables, class summary, certificate principal / notional lines, **any per-class distribution grid** the trustee prints (e.g. **“Distribution in US$”**, prior/current principal, interest paid — **any trustee**, not only Deutsche Bank), and **optional report-level payment totals** printed with or beneath those tables (e.g. voucher **Total amount payable**, distribution **grand total** — captured in **`### Summary`**, not **`01`**).
+**Source:** Note Valuation Report tables, class summary, certificate principal / notional lines, **any per-class distribution grid** the trustee prints (e.g. **“Distribution in US$”**, prior/current principal, interest paid — **any trustee**, not only Deutsche Bank), **including when principal and interest are on separate exhibits** (merge into **`02`** per the **Dual exhibits** rule below), and **optional report-level payment totals** printed with or beneath those tables (e.g. voucher **Total amount payable**, distribution **grand total** — captured in **`### Summary`**, not **`01`**).
 
 **There is no `03_` file.** Capture distribution-style grids in **`02`**: extend the primary class table, add **Supplementary lines**, and/or add a second table under **Extracted Data** (e.g. `### Distribution grid (if present)`) with stable columns and the same **Source Text** rules.
+
+**Dual exhibits — *Principal Distribution Detail* vs *Interest Distribution Detail* (or same pattern under other trustee headings):** The PDF often prints **two** per-CUSIP grids for the **same** payment date: one for **principal / balances / factors** and one for **interest accrual and interest amounts**. The **principal** grid may show **0.00** in columns that are **not** the interest story, or repeat **factor-only** fields where **interest payment** is **not** populated. **`### Class balance table (primary)`** must **merge by row key** (CUSIP and/or printed class label that appears on **both** exhibits): take **Beginning balance**, **Ending balance**, **Principal payment**, **Principal payable**, and related **principal** fields from the **principal** exhibit; take **`Interest rate`**, **`Interest payment`**, **`Interest payable`**, and **`Deferred interest`** (when printed) from the **interest** exhibit for the **matching** CUSIP/class line. **Do not** leave **`Interest payment`** / **`Interest rate`** as **0.00** copied only from the principal grid when the **Interest Distribution** (or equivalent) grid in the same PDF shows **non-zero interest** for that CUSIP. If column order differs between exhibits, map by **heading / position** and **Notes** once per row if needed. When you also fill **`### Distribution grid`**, **`Interest paid`** / **`Interest payable`** there must **match** the interest exhibit — **not** stay **0.00** while **Source Text** quotes non-zero interest lines.
 
 **Multi-listing (same economic class, several printed lines / CUSIPs — e.g. **SUB** with **three** rows, or **144A** / **Reg S** / **AI** slices):** Use **both** layers so nothing is lost and class-level numbers stay auditable.
 
@@ -123,9 +125,11 @@ Use **stable table headers** below; do not rename columns (future `validate_note
 > **Total payment / total amount payable (Summary only):** When the **same exhibit** as the class / voucher / distribution table prints a **single trustee aggregate** for the payment (e.g. *Total Payment*, *Total Amount Payable*, *Total Cash Distribution*, *Total distribution*, voucher **total line** summing **Total amount payable** across classes), capture it in **`Total payment / total amount payable (if stated)`** under **`### Summary`**. Use **N/A** when no such line exists. **Do not** copy a figure from **`03`** waterfall **unless** the PDF repeats that same total on the class / voucher page; if ambiguous, **N/A** and quote the line in **`02` Source Text**. **`Ending balance`** on class rows stays **principal only** — do not put this aggregate in the **Ending balance** column.
 
 ### Class balance table (primary)
-| Class | ISIN | CUSIP | Original balance | Beginning balance | Interest payment | Interest payable | Principal payment | Principal payable | Deferred interest | Dividend | Ending balance | Notes |
-|-------|------|-------|------------------|-------------------|------------------|------------------|-------------------|-------------------|-------------------|----------|----------------|-------|
-| | | | | | | | | | | | | |
+| Class | ISIN | CUSIP | Original balance | Beginning balance | Interest rate | Interest payment | Interest payable | Principal payment | Principal payable | Deferred interest | Dividend | Ending balance | Notes |
+|-------|------|-------|------------------|-------------------|---------------|------------------|------------------|-------------------|-------------------|-------------------|----------|----------------|-------|
+| | | | | | | | | | | | | | |
+
+> **Interest rate (accrual):** Per-class **rate used to accrue interest** for the period (or as-of the report), copied **verbatim** from the exhibit (e.g. **%**, **bps**, or **SOFR + spread** when printed as the all-in accrual). PDF headings vary — common labels include **Interest rate**, **All-in rate**, **Coupon**, **Current rate**, **Note rate** — map them all into this single column **`Interest rate`**; if the report prints **both** a base index and a spread **and** a single combined all-in figure, prefer the **printed all-in / combined** accrual rate; otherwise concatenate or use **Notes** once. Leave **blank** / **`N/A`** when the trustee does **not** print a per-class accrual rate on the captured table. **Equity / subordinate** classes often print **no** meaningful coupon and may show **0%** (or an empty rate cell) — copy **as printed**; do **not** treat **0%** vs blank as an extraction completeness issue. **Downstream QA** (outside this template) may apply business rules for those tranches.
 
 > **Interest payment vs Interest payable:** **`Interest payment`** = cash **paid** / distributed to the class for the period (labels vary: *interest paid*, *interest distribution*, *payment*, settled amount). **`Interest payable`** = amount **due** / **accrued** / contractually **payable** for the period. When the PDF prints **only** payable / due / accrued and **no** paid amount (or paid is genuinely zero while payable is positive), leave **`Interest payment`** **blank** or **`N/A`** / null — **do not** copy payable into payment. When the PDF prints **both**, fill **both**. Copying payable → payment is allowed **only** when the report clearly uses one figure for both concepts (say so once in **Notes**).
 
@@ -139,6 +143,8 @@ Use **stable table headers** below; do not rename columns (future `validate_note
 >
 > **Deferred interest:** Map the trustee’s **deferred interest** for each class from the class / NVR table — labels vary (**Interest Deferred Payable**, **Deferred Interest**, **Default / Deferred Interest Payable**, combined PIK columns, etc.). Use **one** column (**Deferred interest**) for the amount the PDF attributes to deferred interest on that tranche; if the report prints **two** deferred-style columns, choose the cell that matches the heading for *interest* deferred (or document both in **Notes** with a single primary cell). **Issuer-level or aggregate** deferred (not on a class row) — add **`### Supplementary lines`** entries or **Notes** under **`02`**; there is **no** separate **`05`** deliverable.
 >
+> **Inclusive amounts — do not double-count:** When the PDF makes clear that one printed figure **already includes** another (e.g. **Interest payment** embeds the **Deferred interest** component, or **Ending balance** includes accrued/deferred interest while **Deferred interest** is still shown as a **breakout**), copy **both** cells **verbatim** and explain once in **Notes** (e.g. “162,351.94 includes 42,596.17 deferred per trustee”). **Do not** add those columns together as if they were separate, non-overlapping pieces of the same total — they are **not** additive. The same rule applies to any other **nested** disclosure (sub-line + total line). In **`04` Cross-checks**, do not imply **Interest payment + Deferred interest** (or similar) as a gross total when one column is **inclusive** of the other.
+>
 > **Balances and amounts:** Use plain numeric cells (no embedded `(N)` in the number). Put IO / notional / structural commentary in **Notes**. **Ending balance** stays **as printed** (see blockquote above).
 
 ### Supplementary lines (if present)
@@ -147,11 +153,13 @@ Use **stable table headers** below; do not rename columns (future `validate_note
 | | | |
 
 ### Distribution grid (optional — e.g. “Distribution in US$”, prior/current principal, interest paid)
+> **Interest rate:** When this exhibit prints a per-class accrual / **all-in** rate, copy it into **`Interest rate`** using the same semantics as the primary class table (otherwise **blank** / **N/A**). **0%** / blank on subordinate rows is common — no extraction-side QA (see primary-table **Interest rate** note).
+
 > **Interest paid** / **Interest payable** and **Principal paid** / **Principal payable:** Same null rules as the primary class table — payable-only or paid-only columns are fine; leave the unused paid or payable cells blank / `N/A` rather than inferring.
 
-| Class | ISIN | CUSIP | Prior principal balance | Current principal balance | Principal paid | Principal payable | Interest paid | Interest payable | Other columns (name + value) | Notes |
-|-------|------|-------|------------------------|---------------------------|----------------|-------------------|----------------|------------------|------------------------------|-------|
-| | | | | | | | | | | |
+| Class | ISIN | CUSIP | Prior principal balance | Current principal balance | Interest rate | Principal paid | Principal payable | Interest paid | Interest payable | Other columns (name + value) | Notes |
+|-------|------|-------|------------------------|---------------------------|---------------|----------------|-------------------|----------------|------------------|------------------------------|-------|
+| | | | | | | | | | | | |
 
 ### Cross-checks (distribution grid, if used)
 | Check | Value |
@@ -165,9 +173,9 @@ Use when the **same economic class** appears on **multiple** trustee tables with
 
 > **CUSIP line id (required on every row in this subsection):** Machine-stable key for downstream ETL and deduplication. **Must be unique within this `02` file** (no duplicate ids). **CUSIP** stays the trustee’s identifier from the PDF; **`CUSIP line id`** is an extra surrogate so pipelines can reference a row even when **Economic class** repeats or extraction order drifts. Pick **one** scheme and document it once in **`04_extraction_summary.md`** or **`Notes`**: (**A**) Monotonic ids **`L001`**, **`L002`**, … in the same order as the PDF / Source Text; (**B**) Composite ASCII id, e.g. **`{YYYYMMDD}-{class_slug}-{CUSIP}-{seq}`** (`20260420-A2R-26829CBA4-01`); (**C**) a printed trustee row key if the report provides one. If two rows would collide, extend with **`-a` / `-b`** and explain in **Notes**.
 
-| CUSIP line id | Economic class | Listing / program | ISIN | CUSIP | Original balance | Beginning balance | Interest payment | Interest payable | Principal payment | Principal payable | Deferred interest | Dividend | Ending balance | Notes |
-|---------------|----------------|-------------------|------|-------|------------------|-------------------|------------------|------------------|-------------------|-------------------|-------------------|----------|----------------|-------|
-| | | | | | | | | | | | | | | |
+| CUSIP line id | Economic class | Listing / program | ISIN | CUSIP | Original balance | Beginning balance | Interest rate | Interest payment | Interest payable | Principal payment | Principal payable | Deferred interest | Dividend | Ending balance | Notes |
+|---------------|----------------|-------------------|------|-------|------------------|-------------------|---------------|------------------|------------------|-------------------|-------------------|-------------------|----------|----------------|-------|
+| | | | | | | | | | | | | | | | |
 
 ### Cross-checks (multi-listing, if used)
 | Check | Result |
@@ -181,7 +189,8 @@ Use when the **same economic class** appears on **multiple** trustee tables with
 - [ ] **Class** with **ISIN** and/or **CUSIP** in the correct columns when printed (leave unused identifier blank)
 - [ ] **Original balance** when the report prints it (or N/A with reason)
 - [ ] **Beginning balance** and **Ending balance** taken **directly** from the report (or mapped label-for-label from prior/current principal columns) — **no** recomputed ending principal
-- [ ] **Interest payment**, **Interest payable**, **Principal payment**, **Principal payable**, **Deferred interest** (per tranche, from the PDF class table — see column notes), and **dividend** captured when the report includes them (or blank / N/A with reason); **payment** cells may stay blank when the PDF is **payable-only** (do not infer paid from payable)
+- [ ] **Interest payment**, **Interest payable**, **Principal payment**, **Principal payable**, **Deferred interest** (per tranche, from the PDF class table — see column notes), and **dividend** captured when the report includes them (or blank / N/A with reason); **payment** cells may stay blank when the PDF is **payable-only** (do not infer paid from payable); if one column **includes** another (e.g. interest includes deferred), **Notes** once — **no** spurious sum of overlapping components
+- [ ] **Separate principal vs interest distribution exhibits:** When the trustee prints **two** grids (e.g. *Principal Distribution Detail* + *Interest Distribution Detail*) for the **same** period and CUSIPs, **`### Class balance table (primary)`** (and **`### Distribution grid`** when used) **must combine both** — principal/balance columns from the **principal** exhibit, **interest rate** and **interest** amounts from the **interest** exhibit; **Source Text** must quote **both** page blocks (see **Dual exhibits** rule above)
 - [ ] Totals row matches sum of detail rows (or discrepancy noted)
 - [ ] Optional **Distribution grid** filled or marked N/A when the PDF has a separate class-distribution page
 - [ ] **Multi-listing / multi-CUSIP:** if 144A / Reg S / AI (etc.) **slices** exist **or** the **same class label** has **>1** printed line / CUSIP row, **`### Tranche by listing`** has **one row per PDF line** (e.g. three SUB lines → three listing rows), **or** flag **N** with reason if strictly one line per class; **`04`** (summary) flag **Multi-listing tranches** matches
@@ -189,7 +198,7 @@ Use when the **same economic class** appears on **multiple** trustee tables with
 - [ ] **Total payment / total amount payable** in **`### Summary`** when the trustee prints a payment-period aggregate on the class / voucher / distribution exhibit (or **N/A** with reason)
 
 ## Source Text
-(Paste full class table(s) from chunks; **Page N** per block — include **each** listing block used for **`### Tranche by listing`**. Preserve **PDF row order** when assigning **`CUSIP line id`** sequence unless reordering is documented in **Notes**.)
+(Paste full class table(s) from chunks; **Page N** per block — include **each** listing block used for **`### Tranche by listing`**. When **principal** and **interest** distribution exhibits are **separate pages**, include **both** blocks (principal + interest) so the merge in **`### Class balance table (primary)`** is auditable. Preserve **PDF row order** when assigning **`CUSIP line id`** sequence unless reordering is documented in **Notes**.)
 ```
 
 #### Worked example: SUB (or any class) with three printed listing lines
@@ -204,16 +213,16 @@ Illustrative excerpt (replace all numbers and ids with the deal’s PDF):
 
 ```markdown
 ### Class balance table (primary)
-| Class | … | Ending balance | Notes |
-|-------|---|----------------|-------|
-| SUB | … | 47,950,000.00 | Printed SUB total on Principal Detail |
+| Class | … | Interest rate | … | Ending balance | Notes |
+|-------|---|---------------|---|----------------|-------|
+| SUB | … | 0.00% | … | 47,950,000.00 | Printed SUB total on Principal Detail (subordinate rate often **0%** — copy exhibit) |
 
 ### Tranche by listing (optional …)
-| CUSIP line id | Economic class | Listing / program | CUSIP | Beginning balance | … | Ending balance | Notes |
-|---------------|----------------|-------------------|-------|-------------------|---|----------------|-------|
-| L001 | SUB | 144A | 12345ABC7 | … | … | 19,900,000.00 | First SUB line on p.4 |
-| L002 | SUB | Reg S | 12345ABD5 | … | … | 17,925,000.00 | Second |
-| L003 | SUB | AI | 12345ABE3 | … | … | 10,125,000.00 | Third |
+| CUSIP line id | Economic class | Listing / program | CUSIP | Beginning balance | Interest rate | … | Ending balance | Notes |
+|---------------|----------------|-------------------|-------|-------------------|---------------|---|----------------|-------|
+| L001 | SUB | 144A | 12345ABC7 | … | 0.00% | … | 19,900,000.00 | First SUB line on p.4 |
+| L002 | SUB | Reg S | 12345ABD5 | … | 0.00% | … | 17,925,000.00 | Second |
+| L003 | SUB | AI | 12345ABE3 | … | 0.00% | … | 10,125,000.00 | Third |
 
 ### Cross-checks (multi-listing, if used)
 | Check | Result |
@@ -244,6 +253,12 @@ A single deal can blend styles (e.g. indenture body + a small summary grid). Use
 **Filename:** `03_interest_principal_waterfall.md`  
 **Scope:** All **interest / principal proceeds application** belongs here: **multi-column grid waterfalls** *and* **logical / clause ladders** (indenture **Section 11.1**, Computershare **“Application of … Proceeds”**, `(i)`–`(v)` ladders with bare decimals — see **`read_noteval_logical_disb`**). **Do not** create **`06_logical_disbursements.md`** for new extractions; that file is **deprecated** (see **File 06**). If a deal prints **both** a grid and a clause ladder, use **both** subsections in **`03`**; avoid pasting the same **Source Text** twice — cross-reference in **Notes** and keep one full verbatim block.
 
+**Wrap-up vs `02` (no duplicate class cash):** Per-class **interest payment**, **interest payable**, **principal payment**, and **principal payable** for note **classes** (A, B, SUB, etc.) are **authoritative in `02`** (primary table and/or **`### Distribution grid`**). In **`03` Extracted Data**, **do not** repeat the same class-level interest/principal lines row-by-row when they are the **same economic amounts** already captured in **`02`** for that payment date. Keep the **full** trustee priority in **`## Source Text`** (verbatim) for audit. In **`### Waterfall table`** / ladder, you may use **one** summary pointer row in **Notes** (e.g. “Class interest & principal: see **`02`**) or **omit** redundant class rows; still extract **fees**, **expenses**, **account / structural** lines, and anything **not** represented in **`02`**.
+
+**Valuation-relevant fees (downstream focus):** Not every waterfall line is a “fee” for modeling. After the full waterfall (or in parallel), **always** fill **`### Valuation-relevant fees`** with **only** these categories when the PDF includes them (synonyms map into the **Standard fee type** cell): **Trustee** (contractual **trustee fee** / corporate trustee fee when the report shows it **as its own line**), **Issuer fee**, **Administrative expense** (administration / admin expense), **Collateral admin** (collateral administrator / collateral administration), **Senior management fee**, **Subordinated management fee** (subordinated / class B manager), **Hedge fee** (hedging / hedge transaction fee). **Do not** label class **interest** / **principal** distributions as fees. Other lines (taxes, swap breakage, generic “expenses” not in the list) stay in **`### Waterfall table`** or **`### Other waterfall lines (non-fee / structural)`**, not in **`### Valuation-relevant fees`**, unless they clearly match one of the seven types above.
+
+**Trustee-paid expenses → Administrative expense (no separate rows):** Lines paid **to** or **through** the trustee that are **reimbursable expenses**, **trustee expense**, **counsel / legal / professional fees** (e.g. *The Bank of New York* — *Trustee Expense*, *counsel fee*), or similar **administrative** charges — **do not** give each one its own row in **`### Valuation-relevant fees`**. **Roll them into a single `Administrative expense` row:** set **Amount paid** (and **Amount payable** if applicable) to the **combined** total for that payment, put the trustee’s **verbatim labels** in **Description** or list the line items in **Notes**. Use **`Trustee`** as **Standard fee type** only for a **distinct contractual trustee fee** line when the PDF separates it from those reimbursements; if the report only shows bundled “trustee + counsel + expense” admin-style lines, use **`Administrative expense`** only (and **N/A** or omit **`Trustee`** for that period).
+
 **Source:** Waterfall tables, disbursement schedules, “Application of … Proceeds”, fee tables, Paid vs Available / Running — follow **this deal’s** labels.
 
 ```markdown
@@ -270,6 +285,8 @@ A single deal can blend styles (e.g. indenture body + a small summary grid). Use
 |----------|-------------------------|-------------|----------------|---------------------------|----------------------|-------|
 | | | | | | | |
 
+> **Abbreviated grid (preferred when `02` is complete):** If the PDF’s waterfall lists **each class** interest/principal step and those amounts **match** **`02`**, you may **omit** those class rows here and document once in **Notes** (see **Wrap-up vs `02`** above). Keep rows for **fees**, **valuation-relevant admin/manager/trustee/issuer/hedge** lines, **taxes**, **swap** and other **non-class** steps, and any line **not** mirrored in **`02`**.
+
 > **Fee-style rows:** Prefer **amount paid** (or the column the trustee labels as paid/settled) over “remaining” or discretionary picks. If the report has multiple $ columns, name each column exactly as printed and map consistently across rows. **Computershare:** for a **two-number block** under paid-style semantics, the **left** value is **Amount paid** (see blockquote under **Section identification**).
 
 ### Logical / clause waterfall (optional — Section 11.1, Application of …, Computershare ladders)
@@ -292,17 +309,33 @@ Use when the PDF prints **prose / clause priority** instead of (or in addition t
 
 > Roll up indented / “first / second / third” continuations under the parent clause in **Item description** or **Notes** so each major line is one logical row. **Two trailing amounts:** use the **left** as disbursed **`Amount`** when that matches the trustee layout; mirror the **right** in **Notes** or a second amount column if you split them.
 
-### Fees extracted separately (optional mirror)
-| Fee name | Rate or basis (if stated) | Paid | Notes |
-|----------|----------------------------|------|-------|
+### Valuation-relevant fees (required — seven standard types + Other column)
+Use **one row per standard type** that appears in the PDF for this payment (leave blank or **N/A** row only when that fee type is **not** charged this period — prefer omitting unused types or one **Notes** line “No hedge fee this period”). **Standard fee type** must be one of: **Trustee** | **Issuer fee** | **Administrative expense** | **Collateral admin** | **Senior management fee** | **Subordinated management fee** | **Hedge fee**. Put the trustee’s **exact wording** in **Description (as printed)**.
+
+| Standard fee type | Description (as printed) | Amount paid | Amount payable | Other | Notes |
+|-------------------|-------------------------|-------------|----------------|-------|-------|
+| | | | | | |
+
+> **Trustee vs Administrative expense:** Combine **trustee expense**, **counsel fee**, **legal / professional** fees paid via the trustee (e.g. *BNY* / *Bank of New York* trustee expense and counsel) into **`Administrative expense`** — **one combined row**, not separate valuation-fee rows per line item. Reserve **`Trustee`** for a **standalone contractual trustee fee** when the exhibit clearly breaks it out from admin/counsel reimbursements.
+
+> **Other:** Use this column for **fee / expense lines that do not map** to one of the seven standard types — compact **label + amount** as printed (one line per item, or semicolon-separated if several). Use **N/A** when nothing unmapped. For rows where **Standard fee type** is one of the seven, **Other** is usually **N/A** (or a short cross-reference only if needed).
+
+> **Do not** put class **interest** or **principal** distributions in this table — those belong in **`02`**. Optional **rate or basis** may go in **Notes**. Keep the **six** column headers above **stable** (including **Other**) for UI and validation.
+
+### Other waterfall lines (non-fee / structural — optional)
+| Item description | Amount paid | Amount payable | Notes |
+|------------------|-------------|----------------|-------|
 | | | | |
 
+> Use for **tax**, **swap**, **generic expense** buckets not mapped to the seven types, **opening/closing** lines, etc. Class interest/principal already in **`02`** should **not** be duplicated here unless needed to reconcile a total (then **Notes** tie-out to **`02`**).
+
 ## Completeness Checklist
-- [ ] **`### Waterfall table`** filled when a multi-column grid exists (or **N/A** with reason)
+- [ ] **`### Waterfall table`** filled when a multi-column grid exists (or **N/A** with reason); **no** row-by-row duplication of class interest/principal already in **`02`** unless **`02`** lacks that exhibit (then extract class flows from the waterfall into **`02`** per **File 02** rules)
+- [ ] **`### Valuation-relevant fees`** filled: one row per **present** fee type among the **seven** standard categories (or **N/A** with reason if the PDF has **no** separate fee lines at all); **trustee expense / counsel** style lines **rolled into `Administrative expense`** (not separate rows); **Other** column documents any **fee** lines that do not map to those seven (or **N/A**)
 - [ ] **`### Logical / clause waterfall`** filled when Section 11.1 / Application of … / Computershare-style ladders exist (or **N/A** with reason)
 - [ ] **Computershare-style two-number rows:** **left** = actual disbursed in **Amount paid** / ladder **Amount** (per **Section identification** note)
 - [ ] Column semantics documented in **Notes** where ambiguous (Paid vs Available)
-- [ ] All fee lines that affect note valuation captured
+- [ ] All **seven** valuation-relevant fee types **searched** in the PDF; lines that affect notes but are **not** one of the seven remain in **`### Waterfall table`** / **`### Other waterfall lines`**
 - [ ] Subtotals / totals match detail or variance explained
 - [ ] Determination / payment dates stated in this section if printed here
 
@@ -343,7 +376,8 @@ Use when the PDF prints **prose / clause priority** instead of (or in addition t
 | Max CUSIPs under one economic class (if >1) | |
 | Grid waterfall lines in 03 | |
 | Logical / clause ladder rows in 03 | |
-| Fee rows (approx) | |
+| Valuation-relevant fee rows in 03 (`### Valuation-relevant fees`) | |
+| Fee rows (approx, legacy / all waterfall) | |
 
 ### Critical flags
 | Flag | Value | Notes |
@@ -358,6 +392,7 @@ Use when the PDF prints **prose / clause priority** instead of (or in addition t
 | Check | Result |
 |-------|--------|
 | Sum of class principals vs report totals | |
+| Inclusive vs additive: any **Interest payment** / **Deferred interest** (or balance) relationship where one column **includes** the other — confirm no spurious **sum** of overlapping components | |
 | Multi-listing: sum of **Tranche by listing** vs primary **`02`** / PDF printed class total (if **Y**) | |
 | **`02`** **`CUSIP line id`** scheme (e.g. L00n / composite) and uniqueness | |
 | Waterfall paid totals vs class/distribution totals in `02` (if comparable) | |
