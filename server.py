@@ -39,7 +39,7 @@ _DRAFT_KEY_HINT = (
 )
 
 import batch_segment as _bs  # noqa: E402  # type: ignore[import-untyped]
-import draft_llm as _draft  # noqa: E402
+import noteval_llm as _draft  # noqa: E402
 import get_file_path as _gfp  # noqa: E402  # type: ignore[import-untyped]
 
 app = FastAPI()
