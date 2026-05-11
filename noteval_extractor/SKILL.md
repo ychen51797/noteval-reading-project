@@ -8,7 +8,8 @@ description: >-
   validate with validate_noteval.py (writes validation_report.md). Use
   when the user wants human-in-the-loop or agent-led extraction, markdown
   outputs, completeness checks, or a pipeline before/ alongside read_noteval
-  scripts.
+  scripts. Set env for LLM UI (NOTEVAL_DRAFT_API_KEY or OPENAI_API_KEY; see
+  Prerequisites) when using server.py / noteval_llm.
 ---
 
 # noteval_extractor
