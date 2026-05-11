@@ -14,7 +14,8 @@ be parsed, falls back to **pdf** stem (e.g. ``180118_175.pdf`` →
 Default CSV search: (1) ``noteval_extractor/test/deal_paths.csv`` if present;
 (2) ``deal_paths.csv`` in the **parent** of the repo (e.g. ``…/projects/deal_paths.csv`` when the repo is ``…/projects/noteval-reading-project``).
 
-Requires rows with a non-empty ``pdf_path``. If a ``status`` column exists, only
+Requires rows with a non-empty primary path column: ``pdf_path`` (preferred), or
+``file_path``, or ``filepath`` (case-insensitive). If a ``status`` column exists, only
 rows with ``status`` = ``ok`` are processed.
 
 Optional column ``waterfall_path`` (e.g. Wells Fargo Waterfall Calculations
@@ -81,6 +82,18 @@ def _pdf_workflow_script() -> Path:
     return Path(__file__).resolve().parent / "pdf_workflow.py"
 
 
+def path_cell_to_str(raw: object) -> str:
+    """CSV/pandas-safe path string: NaN, float NaN, and literal 'nan' become empty."""
+    if raw is None:
+        return ""
+    if isinstance(raw, float) and pd.isna(raw):
+        return ""
+    s = str(raw).strip()
+    if not s or s.lower() in ("nan", "none", "<na>"):
+        return ""
+    return s
+
+
 def normalize_deal_id(raw: object) -> str:
     """Strip whitespace; turn ``867840715.0`` (CSV float) into ``867840715``."""
     if raw is None or (isinstance(raw, float) and pd.isna(raw)):
@@ -119,17 +132,26 @@ def output_folder_name(deal_id: str, payment_date: str, pdf_stem: str) -> str:
     return pdf_stem
 
 
+def _primary_path_column(cmap: dict[str, str], headers: list[str]) -> str:
+    """First matching logical name (same role as ``get_file_path`` ``pdf_path``)."""
+    for logical in ("pdf_path", "file_path", "filepath"):
+        if logical in cmap:
+            return cmap[logical]
+    raise SystemExit(
+        "deal_paths CSV needs one of: pdf_path, file_path, filepath (any case). "
+        f"Found: {headers}"
+    )
+
+
 def load_rows(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
     cmap = _colmap(df)
-    if "pdf_path" not in cmap:
-        raise SystemExit(f"{path}: missing required column pdf_path. Found: {list(df.columns)}")
-    pdf_col = cmap["pdf_path"]
+    pdf_col = _primary_path_column(cmap, list(df.columns))
     out = df[[pdf_col]].copy()
     out.rename(columns={pdf_col: "pdf_path"}, inplace=True)
-    out["pdf_path"] = out["pdf_path"].astype(str).str.strip()
+    out["pdf_path"] = out["pdf_path"].map(path_cell_to_str)
     if "waterfall_path" in cmap:
-        out["waterfall_path"] = df[cmap["waterfall_path"]].astype(str).str.strip()
+        out["waterfall_path"] = df[cmap["waterfall_path"]].map(path_cell_to_str)
     else:
         out["waterfall_path"] = ""
     if "status" in cmap:
@@ -153,7 +175,6 @@ def _run_pdf_workflow(
     pdf: Path,
     output_dir: Path,
     chunk_size: int,
-    segment_script: Path | None,
 ) -> int:
     cmd = [
         sys.executable,
@@ -163,8 +184,6 @@ def _run_pdf_workflow(
         "--chunk-size",
         str(chunk_size),
     ]
-    if segment_script:
-        cmd.extend(["--segment-script", str(segment_script.resolve())])
     proc = subprocess.run(cmd, check=False)
     return int(proc.returncode)
 
@@ -178,7 +197,7 @@ def _replace_tree_or_file(dst: Path) -> None:
 
 
 def _install_waterfall_artifacts(tmp_dir: Path, deal_dir: Path) -> None:
-    """Move segment_pdf outputs from ``tmp_dir`` into ``deal_dir`` with *_waterfall names."""
+    """Move pdf_workflow segmentation outputs from ``tmp_dir`` into ``deal_dir`` with *_waterfall names."""
     moves = [
         (tmp_dir / "_chunks", deal_dir / "_chunks_waterfall"),
         (tmp_dir / "_page_index.md", deal_dir / "_page_index_waterfall.md"),
@@ -201,8 +220,9 @@ def main() -> None:
         type=Path,
         default=None,
         help=(
-            "CSV from get_file_path.py (needs pdf_path). If omitted: use "
-            "noteval_extractor/test/deal_paths.csv, else <parent-of-repo>/deal_paths.csv."
+            "CSV with a primary PDF column: pdf_path, file_path, or filepath. "
+            "If omitted: use noteval_extractor/test/deal_paths.csv, else "
+            "<parent-of-repo>/deal_paths.csv."
         ),
     )
     parser.add_argument(
@@ -215,13 +235,7 @@ def main() -> None:
         "--chunk-size",
         type=int,
         default=30,
-        help="Pages per chunk (passed to segment_pdf via pdf_workflow).",
-    )
-    parser.add_argument(
-        "--segment-script",
-        type=Path,
-        default=None,
-        help="Path to segment_pdf.py (same as pdf_workflow --segment-script).",
+        help="Pages per chunk (passed to pdf_workflow).",
     )
     parser.add_argument(
         "--dry-run",
@@ -251,18 +265,18 @@ def main() -> None:
     failures = 0
     skipped = 0
     noted_folder_fallback = False
-    seg_script = args.segment_script.resolve() if args.segment_script else None
 
     for _, row in rows.iterrows():
-        pdf = Path(row["pdf_path"])
+        pdf_raw = path_cell_to_str(row.get("pdf_path", ""))
         st = row.get("_status", "")
         if st and str(st).strip().lower() != "ok":
-            print(f"SKIP (status={st!r}): {pdf}", file=sys.stderr, flush=True)
+            print(f"SKIP (status={st!r}): {pdf_raw!r}", file=sys.stderr, flush=True)
             skipped += 1
             continue
-        if not row["pdf_path"]:
+        if not pdf_raw:
             skipped += 1
             continue
+        pdf = Path(pdf_raw)
         if not pdf.is_file():
             print(f"SKIP (not a file): {pdf}", file=sys.stderr, flush=True)
             failures += 1
@@ -275,7 +289,7 @@ def main() -> None:
             stem,
         )
         output_dir = out_root / folder
-        wf_raw = str(row.get("waterfall_path", "") or "").strip()
+        wf_raw = path_cell_to_str(row.get("waterfall_path", ""))
         wf_path = Path(wf_raw) if wf_raw else None
         wf_segment_ok = False
 
@@ -315,7 +329,6 @@ def main() -> None:
             pdf=pdf,
             output_dir=output_dir,
             chunk_size=args.chunk_size,
-            segment_script=seg_script,
         )
         if rc != 0:
             print(f"ERROR: segmentation failed (exit {rc}): {pdf}", file=sys.stderr)
@@ -331,7 +344,6 @@ def main() -> None:
                     pdf=wf_path,
                     output_dir=tmp_path,
                     chunk_size=args.chunk_size,
-                    segment_script=seg_script,
                 )
                 if rc2 != 0:
                     print(
