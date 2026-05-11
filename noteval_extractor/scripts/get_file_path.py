@@ -15,9 +15,10 @@ If you omit --requests and --deal-id/--payment-date, the script uses
 ``noteval_extractor/test/requests.csv`` when that file exists (same as
 ``…\\noteval_extractor\\test\\requests.csv`` under the repo).
 
-Then run ``batch_segment.py`` to segment each ``pdf_path`` into
-``noteval_extractor/output/<deal_id>_YYYYMMDD/`` when ``deal_id`` and ``payment_date``
-are present in ``deal_paths.csv``; otherwise ``output/<pdf-stem>/``.
+Then run ``batch_segment.py`` to segment ``pdf_path`` (and optional
+``waterfall_path`` for Wells Fargo) into ``noteval_extractor/output/<deal_id>_YYYYMMDD/``
+when ``deal_id`` and ``payment_date`` are present in ``deal_paths.csv``; otherwise
+``output/<pdf-stem>/``.
 
 requests.csv must include columns deal_id and payment_date (extra columns ignored).
 """
@@ -54,7 +55,6 @@ or (
 and  trustee_file_name not like '%notice%' and r.trustee = 'CDOMonitoring') 
 )
 and r.report_type not like '%notice%' and r.report_type <> 'Noteholder Updates'
-and r.trustee = 'usbank'
 and r.payment_date is not null
 and r.payment_date <= GETDATE()
 AND r.deal_id = ?
@@ -185,11 +185,8 @@ def fetch_deal_report_rows(deal_id: str, payment_date_user: str) -> pd.DataFrame
     return out
 
 
-def pick_first_pdf_path(df: pd.DataFrame) -> tuple[str | None, str]:
-    """
-    First non-empty pdf_path where report_format is PDF (if column exists).
-    Returns (path_or_none, message).
-    """
+def _filtered_pdf_rows(df: pd.DataFrame) -> tuple[pd.DataFrame | None, str | None]:
+    """Rows with non-empty resolved path and PDF format (if ``report_format`` exists)."""
     rfp = _resolve_column(df, "pdf_path")
     if not rfp:
         return None, "missing pdf_path column"
@@ -198,22 +195,67 @@ def pick_first_pdf_path(df: pd.DataFrame) -> tuple[str | None, str]:
         return None, "all paths empty"
     fmt_col = _resolve_column(df, "report_format")
     if not fmt_col:
-        chosen = nonempty
-    else:
-        is_pdf = (
-            nonempty[fmt_col]
-            .fillna("")
-            .astype(str)
-            .str.strip()
-            .str.casefold()
-            == "pdf"
-        )
-        pdf_rows = nonempty[is_pdf]
-        if pdf_rows.empty:
-            return None, "no row with report_format PDF and non-empty path"
-        chosen = pdf_rows
-    path = str(chosen.iloc[0][rfp]).strip()
-    return path, "ok"
+        return nonempty, None
+    is_pdf = (
+        nonempty[fmt_col]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+        .str.casefold()
+        == "pdf"
+    )
+    pdf_rows = nonempty[is_pdf]
+    if pdf_rows.empty:
+        return None, "no row with report_format PDF and non-empty path"
+    return pdf_rows, None
+
+
+def pick_primary_and_waterfall_paths(df: pd.DataFrame) -> tuple[str | None, str | None, str]:
+    """
+    ``pdf_path``: prefer Note Valuation-style ``report_type``; else first non-waterfall
+    PDF row; else first PDF row.
+
+    ``waterfall_path``: first PDF row whose ``report_type`` contains ``waterfall``
+    (e.g. Wells Fargo Waterfall Calculations Report). Empty when none.
+
+    Returns ``(pdf_path, waterfall_path, message)``.
+    """
+    rfp = _resolve_column(df, "pdf_path")
+    if not rfp:
+        return None, None, "missing pdf_path column"
+    pdf_rows, err = _filtered_pdf_rows(df)
+    if pdf_rows is None:
+        return None, None, err or "unknown"
+    rt_col = _resolve_column(df, "report_type")
+    lowered = (
+        pdf_rows[rt_col].fillna("").astype(str).str.strip().str.casefold()
+        if rt_col
+        else pd.Series([""] * len(pdf_rows), index=pdf_rows.index)
+    )
+
+    wf_mask = lowered.str.contains("waterfall", na=False)
+    waterfall_path: str | None = None
+    if wf_mask.any():
+        p = str(pdf_rows[wf_mask].iloc[0][rfp]).strip()
+        waterfall_path = p or None
+
+    nv_mask = lowered.str.contains("note", na=False) & lowered.str.contains(
+        "valuation", na=False
+    )
+    pdf_path: str | None = None
+    if nv_mask.any():
+        pdf_path = str(pdf_rows[nv_mask].iloc[0][rfp]).strip() or None
+
+    if not pdf_path:
+        if wf_mask.any() and (~wf_mask).any():
+            pdf_path = str(pdf_rows[~wf_mask].iloc[0][rfp]).strip() or None
+        if not pdf_path:
+            pdf_path = str(pdf_rows.iloc[0][rfp]).strip() or None
+
+    if waterfall_path and pdf_path and waterfall_path == pdf_path:
+        waterfall_path = None
+
+    return pdf_path, waterfall_path, "ok"
 
 
 def build_deal_path_row(df: pd.DataFrame, deal_id: str, payment_date_raw: str) -> dict[str, str]:
@@ -225,6 +267,7 @@ def build_deal_path_row(df: pd.DataFrame, deal_id: str, payment_date_raw: str) -
         "trustee": "",
         "report_type": "",
         "pdf_path": "",
+        "waterfall_path": "",
         "status": "",
     }
     if df.empty:
@@ -239,9 +282,10 @@ def build_deal_path_row(df: pd.DataFrame, deal_id: str, payment_date_raw: str) -
         row["trustee"] = str(df.iloc[0][tr]).strip()
     if rt and pd.notna(df.iloc[0][rt]):
         row["report_type"] = str(df.iloc[0][rt]).strip()
-    path, msg = pick_first_pdf_path(df)
+    path, wf_path, msg = pick_primary_and_waterfall_paths(df)
     if path:
         row["pdf_path"] = path
+        row["waterfall_path"] = wf_path or ""
         row["status"] = "ok"
     else:
         row["status"] = msg
@@ -338,7 +382,16 @@ def main() -> None:
 
     out_df = pd.DataFrame(rows_out)
     # Stable column order for downstream batch tools
-    cols = ["deal_id", "payment_date", "deal_name", "trustee", "report_type", "pdf_path", "status"]
+    cols = [
+        "deal_id",
+        "payment_date",
+        "deal_name",
+        "trustee",
+        "report_type",
+        "pdf_path",
+        "waterfall_path",
+        "status",
+    ]
     out_df = out_df[[c for c in cols if c in out_df.columns]]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     out_df.to_csv(args.output.resolve(), index=False)
