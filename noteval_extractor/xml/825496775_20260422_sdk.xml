@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='utf-8'?>
+<noteval_export schema_version="4" source_folder="825496775_20260422_sdk">
+  <metadata>
+    <deal_id>825496775</deal_id>
+    <deal_name>Crestline Denali CLO XV Ltd</deal_name>
+    <report_title>Note Valuation Report / April 22, 2026 Distribution</report_title>
+    <payment_date date_source="payment_date">April 22, 2026</payment_date>
+    <currency>US$</currency>
+    <trustee>Deutsche Bank - Trust &amp; Agency Services</trustee>
+  </metadata>
+  <classes>
+    <class name="A-R" moodystrancheid="867821217" map_tier="cusip" map_status="ok" map_message="matched via cusip 22616CAJ2">
+      <original_balance>254,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.0000%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down; Current Coupon 0.0000% on Distribution in US$</notes>
+      <identifiers>
+        <line cusip="22616CAJ2" moodystrancheid="867821217" map_tier="cusip" map_status="ok" />
+        <line cusip="G25434AE4" moodystrancheid="867821217" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="B-R" moodystrancheid="867821227" map_tier="cusip" map_status="ok" map_message="matched via cusip 22616CAN3">
+      <original_balance>50,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.0000%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="22616CAN3" moodystrancheid="867821227" map_tier="cusip" map_status="ok" />
+        <line cusip="G25434AG9" moodystrancheid="867821227" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="C-R" moodystrancheid="867821228" map_tier="cusip" map_status="ok" map_message="matched via cusip 22616CAL7">
+      <original_balance>24,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.0000%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Original = sum of C-R-144A (22M) + C-R-REGS (2M); paid down</notes>
+      <identifiers>
+        <line cusip="22616CAL7" moodystrancheid="867821228" map_tier="cusip" map_status="ok" />
+        <line cusip="G25434AF1" moodystrancheid="867821228" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="D" moodystrancheid="825521455" map_tier="cusip" map_status="ok" map_message="matched via cusip 22616CAG8">
+      <original_balance>22,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.0000%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="22616CAG8" moodystrancheid="825521455" map_tier="cusip" map_status="ok" />
+        <line cusip="G25434AD6" moodystrancheid="825521455" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="E-1" moodystrancheid="825521456" map_tier="cusip" map_status="ok" map_message="matched via cusip 22616BAE5">
+      <original_balance>16,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.0000%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Original = sum of E-1-144A (15,750,000) + E-1-REGS (250,000); paid down</notes>
+      <identifiers>
+        <line cusip="22616BAE5" moodystrancheid="825521456" map_tier="cusip" map_status="ok" />
+        <line cusip="G2543EAC6" moodystrancheid="825521456" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="E-2" moodystrancheid="825521457" map_tier="cusip" map_status="ok" map_message="matched via cusip 22616BAG0">
+      <original_balance>6,000,000.00</original_balance>
+      <beginning_balance>328,437.40</beginning_balance>
+      <interest_rate>5.4740%</interest_rate>
+      <interest_payment>6,270.40</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>334,707.80</ending_balance>
+      <notes>Only E-2-144A carries balances/cash; Interest rate from Distribution in US$ Current Coupon</notes>
+      <identifiers>
+        <line cusip="22616BAG0" moodystrancheid="825521457" map_tier="cusip" map_status="ok" />
+        <line cusip="G2543EAD4" moodystrancheid="825521457" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="SUB" moodystrancheid="825521458" map_tier="cusip" map_status="ok" map_message="matched via cusip 22616BAJ4">
+      <original_balance>37,440,000.00</original_balance>
+      <beginning_balance>37,440,000.00</beginning_balance>
+      <interest_rate>0.0000%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>37,440,000.00</ending_balance>
+      <notes>Primary = sum of SUB-144A + SUB-REGS + SUB-AI on Distribution in US$; Prior Cumulative on Interest Detail not mapped to Interest payment</notes>
+      <identifiers>
+        <line cusip="22616BAJ4" moodystrancheid="825521458" map_tier="cusip" map_status="ok" />
+        <line cusip="G2543EAE2" moodystrancheid="825521458" map_tier="cusip" map_status="ok" />
+        <line cusip="22616BAK1" moodystrancheid="825521458" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+  </classes>
+  <valuation_fees empty="true" />
+</noteval_export>

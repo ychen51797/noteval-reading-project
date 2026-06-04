@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='utf-8'?>
+<noteval_export schema_version="4" source_folder="825674259_20260424_sdk">
+  <metadata>
+    <deal_id>825674259</deal_id>
+    <deal_name>CIFC FUNDING 2017-IV, LTD.</deal_name>
+    <report_title>Payment Date Report</report_title>
+    <payment_date date_source="payment_date">2026-04-24</payment_date>
+    <currency>USD</currency>
+    <trustee>BNY (Corporate Trust Services - BNY)</trustee>
+  </metadata>
+  <classes>
+    <class name="Class X Senior Secured Floating Rate Notes" moodystrancheid="825674260" map_tier="name" map_status="ok" trustee_tranche_name="X">
+      <original_balance>6,405,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>4.67963%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+    </class>
+    <class name="Class A-1-R Senior Secured Floating Rate Notes" moodystrancheid="867754036" map_tier="name" map_status="ok" trustee_tranche_name="A1R">
+      <original_balance>520,000,000.00</original_balance>
+      <beginning_balance>5,863,685.25</beginning_balance>
+      <interest_rate>4.87963%</interest_rate>
+      <interest_payment>69,941.95</interest_payment>
+      <interest_payable>69,941.95</interest_payable>
+      <principal_payment>5,863,685.25</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Full paydown; ending 0% of original</notes>
+    </class>
+    <class name="Class A-2-R Senior Secured Floating Rate Notes" moodystrancheid="867754037" map_tier="name" map_status="ok" trustee_tranche_name="A2R">
+      <original_balance>88,000,000.00</original_balance>
+      <beginning_balance>88,000,000.00</beginning_balance>
+      <interest_rate>5.47963%</interest_rate>
+      <interest_payment>1,178,729.30</interest_payment>
+      <interest_payable>1,178,729.30</interest_payable>
+      <principal_payment>27,848,703.12</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>60,151,296.88</ending_balance>
+    </class>
+    <class name="Class B-R Mezzanine Secured Deferrable Floating Rate Notes" moodystrancheid="867754038" map_tier="name" map_status="ok" trustee_tranche_name="BR">
+      <original_balance>44,570,000.00</original_balance>
+      <beginning_balance>44,570,000.00</beginning_balance>
+      <interest_rate>5.92963%</interest_rate>
+      <interest_payment>646,026.60</interest_payment>
+      <interest_payable>646,026.60</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>44,570,000.00</ending_balance>
+    </class>
+    <class name="Class C-R Mezzanine Secured Deferrable Floating Rate Notes" moodystrancheid="867754039" map_tier="name" map_status="ok" trustee_tranche_name="CR">
+      <original_balance>49,140,000.00</original_balance>
+      <beginning_balance>49,140,000.00</beginning_balance>
+      <interest_rate>7.07963%</interest_rate>
+      <interest_payment>850,405.16</interest_payment>
+      <interest_payable>850,405.16</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>49,140,000.00</ending_balance>
+    </class>
+    <class name="Class D Junior Secured Deferrable Floating Rate Notes" moodystrancheid="825742367" map_tier="name" map_status="ok" trustee_tranche_name="D">
+      <original_balance>34,290,000.00</original_balance>
+      <beginning_balance>34,290,000.00</beginning_balance>
+      <interest_rate>10.02963%</interest_rate>
+      <interest_payment>840,683.59</interest_payment>
+      <interest_payable>840,683.59</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>34,290,000.00</ending_balance>
+    </class>
+    <class name="Class Y Notes" moodystrancheid="0" map_tier="name" map_status="ok" trustee_tranche_name="Y">
+      <original_balance>1.00</original_balance>
+      <beginning_balance>1.00</beginning_balance>
+      <interest_rate>0.00000%</interest_rate>
+      <interest_payment>26,584.54</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>1.00</ending_balance>
+      <notes>All In Rate 0%; Interest Paid from Section 1</notes>
+    </class>
+    <class name="Subordinated Notes" moodystrancheid="825742365" map_tier="name" map_status="ok" trustee_tranche_name="B">
+      <original_balance>72,000,000.00</original_balance>
+      <beginning_balance>72,000,000.00</beginning_balance>
+      <interest_rate>0.00000%</interest_rate>
+      <interest_payment>141,080.04</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>72,000,000.00</ending_balance>
+      <notes>All In Rate 0%; Interest Paid per Section 1 (matches waterfall (T) Amount Paid)</notes>
+    </class>
+  </classes>
+  <valuation_fees empty="true" />
+</noteval_export>

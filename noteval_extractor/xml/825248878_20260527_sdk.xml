@@ -1,0 +1,286 @@
+<?xml version='1.0' encoding='utf-8'?>
+<noteval_export schema_version="4" source_folder="825248878_20260527_sdk">
+  <metadata>
+    <deal_id>825248878</deal_id>
+    <deal_name>Atlas Senior Loan Fund VII Ltd</deal_name>
+    <report_title>Note Valuation Report</report_title>
+    <payment_date date_source="payment_date">2026-05-27</payment_date>
+    <currency>USD</currency>
+    <trustee>Computershare Trust Company, N.A.</trustee>
+  </metadata>
+  <classes>
+    <class name="A" moodystrancheid="830751871" map_tier="cusip" map_status="ok">
+      <original_balance>18,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down; IDD/PDD Sub Totals</notes>
+      <identifiers>
+        <line cusip="04941TBC3" moodystrancheid="830751871" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="A1-R" moodystrancheid="825248879" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAC4">
+      <original_balance>248,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941TAC4" moodystrancheid="825248879" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AB6" moodystrancheid="825248879" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="A1-R2" moodystrancheid="830751868" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAS9">
+      <original_balance>244,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941TAS9" moodystrancheid="830751868" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AJ9" moodystrancheid="830751868" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="A2-R" moodystrancheid="867867371" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TBG4">
+      <original_balance>242,462,800.00</original_balance>
+      <beginning_balance>8,292,879.38</beginning_balance>
+      <interest_rate>5.03435</interest_rate>
+      <interest_payment>103,213.44</interest_payment>
+      <principal_payment>8,292,879.38</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Full principal paydown; coupon from IDD Sub Totals</notes>
+      <identifiers>
+        <line cusip="04941TBG4" moodystrancheid="867867371" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AR1" moodystrancheid="867867371" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="B-R2" moodystrancheid="830751869" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAU4">
+      <original_balance>20,000,000.00</original_balance>
+      <beginning_balance>20,000,000.00</beginning_balance>
+      <interest_rate>5.48435</interest_rate>
+      <interest_payment>271,170.64</interest_payment>
+      <principal_payment>13,992,166.01</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>6,007,833.99</ending_balance>
+      <notes>Partial principal distribution per PDD</notes>
+      <identifiers>
+        <line cusip="04941TAU4" moodystrancheid="830751869" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AK6" moodystrancheid="830751869" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="B1" moodystrancheid="867867372" map_tier="cusip" map_status="ok">
+      <original_balance>33,000,000.00</original_balance>
+      <beginning_balance>33,000,000.00</beginning_balance>
+      <interest_rate>5.63435</interest_rate>
+      <interest_payment>459,669.05</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>33,000,000.00</ending_balance>
+      <identifiers>
+        <line cusip="04941TBL3" moodystrancheid="867867372" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="B1-R" moodystrancheid="825310106" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAE0">
+      <original_balance>40,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941TAE0" moodystrancheid="825310106" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AC4" moodystrancheid="825310106" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="B2" moodystrancheid="830751870" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAW0">
+      <original_balance>15,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941TAW0" moodystrancheid="830751870" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AL4" moodystrancheid="830751870" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="B2-R" moodystrancheid="825310107" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAL4">
+      <original_balance>10,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941TAL4" moodystrancheid="825310107" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AF7" moodystrancheid="825310107" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="C-R" moodystrancheid="830751871" map_tier="cusip" map_status="ok">
+      <original_balance>18,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="G06220AP5" moodystrancheid="830751871" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="C1" moodystrancheid="830751872" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAY6">
+      <original_balance>31,000,000.00</original_balance>
+      <beginning_balance>31,000,000.00</beginning_balance>
+      <interest_rate>6.43435</interest_rate>
+      <interest_payment>493,121.43</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>31,000,000.00</ending_balance>
+      <identifiers>
+        <line cusip="04941TAY6" moodystrancheid="830751872" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AM2" moodystrancheid="830751872" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="C2" moodystrancheid="825310108" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAG5">
+      <original_balance>24,500,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941TAG5" moodystrancheid="825310108" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AD2" moodystrancheid="825310108" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="D" moodystrancheid="825355711" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAN0">
+      <original_balance>4,500,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941TAN0" moodystrancheid="825355711" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AG5" moodystrancheid="825355711" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="D-R" moodystrancheid="825310109" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TAJ9">
+      <original_balance>20,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941TAJ9" moodystrancheid="825310109" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AE0" moodystrancheid="825310109" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="E" moodystrancheid="830751873" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941TBA7">
+      <original_balance>20,000,000.00</original_balance>
+      <beginning_balance>20,000,000.00</beginning_balance>
+      <interest_rate>7.36435</interest_rate>
+      <interest_payment>364,126.19</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>20,000,000.00</ending_balance>
+      <identifiers>
+        <line cusip="04941TBA7" moodystrancheid="830751873" map_tier="cusip" map_status="ok" />
+        <line cusip="G06220AN0" moodystrancheid="830751873" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="E-R" moodystrancheid="825310110" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941UAA5">
+      <original_balance>19,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941UAA5" moodystrancheid="825310110" map_tier="cusip" map_status="ok" />
+        <line cusip="G06215AA8" moodystrancheid="825310110" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="F-R" moodystrancheid="830751874" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941UAE7">
+      <original_balance>17,000,000.00</original_balance>
+      <beginning_balance>17,000,000.00</beginning_balance>
+      <interest_rate>10.33435</interest_rate>
+      <interest_payment>434,329.77</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>17,000,000.00</ending_balance>
+      <identifiers>
+        <line cusip="04941UAE7" moodystrancheid="830751874" map_tier="cusip" map_status="ok" />
+        <line cusip="G06215AC4" moodystrancheid="830751874" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="SUB" moodystrancheid="830751875" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941UAG2">
+      <original_balance>7,000,000.00</original_balance>
+      <beginning_balance>7,992,136.97</beginning_balance>
+      <interest_rate>11.98435</interest_rate>
+      <interest_payment>53,262.31</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>183,528.54</deferred_interest>
+      <ending_balance>8,175,665.51</ending_balance>
+      <notes>Interest Distribution from IDD Sub Totals; Deferred Interest from PDD; ending balance increased (PIK/deferred)</notes>
+      <identifiers>
+        <line cusip="04941UAG2" moodystrancheid="830751875" map_tier="cusip" map_status="ok" />
+        <line cusip="G06215AD2" moodystrancheid="830751875" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="X" moodystrancheid="825310111" map_tier="cusip" map_status="ok" map_message="matched via cusip 04941UAC1">
+      <original_balance>42,500,000.00</original_balance>
+      <beginning_balance>42,500,000.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>42,500,000.00</ending_balance>
+      <notes>Zero coupon per IDD</notes>
+      <identifiers>
+        <line cusip="04941UAC1" moodystrancheid="825310111" map_tier="cusip" map_status="ok" />
+        <line cusip="04941UAD9" moodystrancheid="825310111" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="X-R" moodystrancheid="825310105" map_tier="cusip" map_status="ok">
+      <original_balance>2,500,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>0.00000</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+      <identifiers>
+        <line cusip="04941TAA8" moodystrancheid="825310105" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+  </classes>
+  <valuation_fees empty="true" />
+</noteval_export>

@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding='utf-8'?>
+<noteval_export schema_version="4" source_folder="824237876_20260427_sdk">
+  <metadata>
+    <deal_id>824237876</deal_id>
+    <deal_name>Elevation CLO 2013-1 LTD</deal_name>
+    <report_title>Note Valuation Report</report_title>
+    <payment_date date_source="payment_date">2026-04-27</payment_date>
+    <currency>USD</currency>
+    <trustee>Computershare Trust Company, N.A.</trustee>
+  </metadata>
+  <classes>
+    <class name="A1-R3" moodystrancheid="869804428" map_tier="cusip" map_status="ok">
+      <original_balance>248,000,000.00</original_balance>
+      <beginning_balance>248,000,000.00</beginning_balance>
+      <interest_rate>5.06802%</interest_rate>
+      <interest_payment>3,177,085.43</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>248,000,000.00</ending_balance>
+      <notes>Coupon from IDD; balances/principal from PDD Sub Totals</notes>
+      <identifiers>
+        <line cusip="28623FAJ3" moodystrancheid="869804428" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="A2-R3" moodystrancheid="869804429" map_tier="cusip" map_status="ok">
+      <original_balance>12,000,000.00</original_balance>
+      <beginning_balance>12,000,000.00</beginning_balance>
+      <interest_rate>5.31802%</interest_rate>
+      <interest_payment>161,313.27</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>12,000,000.00</ending_balance>
+      <identifiers>
+        <line cusip="28623FAL8" moodystrancheid="869804429" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="B-R3" moodystrancheid="869804430" map_tier="cusip" map_status="ok" map_message="matched via cusip 28623FAN4">
+      <original_balance>40,000,000.00</original_balance>
+      <beginning_balance>40,000,000.00</beginning_balance>
+      <interest_rate>5.56802%</interest_rate>
+      <interest_payment>562,988.69</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>40,000,000.00</ending_balance>
+      <notes>Class coupon on two CUSIP lines; see listing</notes>
+      <identifiers>
+        <line cusip="28623FAN4" moodystrancheid="869804430" map_tier="cusip" map_status="ok" />
+        <line cusip="G31109AG9" moodystrancheid="869804430" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="C1-R3" moodystrancheid="869804431" map_tier="cusip" map_status="ok">
+      <original_balance>22,000,000.00</original_balance>
+      <beginning_balance>22,000,000.00</beginning_balance>
+      <interest_rate>5.91802%</interest_rate>
+      <interest_payment>329,107.67</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>22,000,000.00</ending_balance>
+      <identifiers>
+        <line cusip="28623FAQ7" moodystrancheid="869804431" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="C2-R3" moodystrancheid="869804432" map_tier="cusip" map_status="ok">
+      <original_balance>6,000,000.00</original_balance>
+      <beginning_balance>6,000,000.00</beginning_balance>
+      <interest_rate>6.00000%</interest_rate>
+      <interest_payment>90,000.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>6,000,000.00</ending_balance>
+      <identifiers>
+        <line cusip="28623FAS3" moodystrancheid="869804432" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="D1-R3" moodystrancheid="869804433" map_tier="cusip" map_status="ok" map_message="matched via cusip 28623FAU8">
+      <original_balance>18,000,000.00</original_balance>
+      <beginning_balance>18,000,000.00</beginning_balance>
+      <interest_rate>7.01802%</interest_rate>
+      <interest_payment>319,319.91</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>18,000,000.00</ending_balance>
+      <notes>Two CUSIPs; see listing</notes>
+      <identifiers>
+        <line cusip="28623FAU8" moodystrancheid="869804433" map_tier="cusip" map_status="ok" />
+        <line cusip="G31109AK0" moodystrancheid="869804433" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="D2-R3" moodystrancheid="869804434" map_tier="cusip" map_status="ok">
+      <original_balance>8,000,000.00</original_balance>
+      <beginning_balance>8,000,000.00</beginning_balance>
+      <interest_rate>8.56802%</interest_rate>
+      <interest_payment>173,264.40</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>8,000,000.00</ending_balance>
+      <identifiers>
+        <line cusip="28623FAW4" moodystrancheid="869804434" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="E-R3" moodystrancheid="869804435" map_tier="cusip" map_status="ok">
+      <original_balance>14,000,000.00</original_balance>
+      <beginning_balance>14,000,000.00</beginning_balance>
+      <interest_rate>11.41802%</interest_rate>
+      <interest_payment>404,071.04</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>14,000,000.00</ending_balance>
+      <identifiers>
+        <line cusip="28623GAE2" moodystrancheid="869804435" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="SUB" moodystrancheid="824237996" map_tier="cusip" map_status="ok" map_message="matched via cusip 04281TAC2">
+      <original_balance>141,513,000.00</original_balance>
+      <beginning_balance>141,513,000.00</beginning_balance>
+      <interest_rate>0.00000%</interest_rate>
+      <interest_payment>880,825.62</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>141,513,000.00</ending_balance>
+      <notes>Coupon 0%; Interest Distribution from IDD Sub Totals (880,825.62); two CUSIP lines — see listing</notes>
+      <identifiers>
+        <line cusip="04281TAC2" moodystrancheid="824237996" map_tier="cusip" map_status="ok" />
+        <line cusip="04281TAF5" moodystrancheid="824237996" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="X-R3" moodystrancheid="869804380" map_tier="cusip" map_status="ok">
+      <original_balance>4,000,000.00</original_balance>
+      <beginning_balance>4,000,000.00</beginning_balance>
+      <interest_rate>4.81802%</interest_rate>
+      <interest_payment>48,715.54</interest_payment>
+      <principal_payment>307,692.31</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>3,692,307.69</ending_balance>
+      <notes>Partial principal paydown per PDD</notes>
+      <identifiers>
+        <line cusip="28623FAG9" moodystrancheid="869804380" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+  </classes>
+  <valuation_fees empty="true" />
+</noteval_export>

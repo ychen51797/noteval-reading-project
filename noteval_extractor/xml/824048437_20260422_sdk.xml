@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='utf-8'?>
+<noteval_export schema_version="4" source_folder="824048437_20260422_sdk">
+  <metadata>
+    <deal_id>824048437</deal_id>
+    <deal_name>Monroe Capital CLO 2014-1, Ltd.</deal_name>
+    <report_title>Note Valuation Report</report_title>
+    <payment_date date_source="payment_date">April 22, 2026</payment_date>
+    <currency>USD</currency>
+    <trustee>Deutsche Bank - Trust &amp; Agency Services</trustee>
+  </metadata>
+  <classes>
+    <class name="A-R" moodystrancheid="830111014" map_tier="cusip" map_status="ok" map_message="matched via cusip 610333AS5">
+      <original_balance>177,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>3.930810%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down; primary Original = sum of A-R-144A + A-R-REGS on Distribution in US$</notes>
+      <identifiers>
+        <line cusip="610333AS5" moodystrancheid="830111014" map_tier="cusip" map_status="ok" />
+        <line cusip="G6270NAJ1" moodystrancheid="830111014" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="B-R" moodystrancheid="830111019" map_tier="cusip" map_status="ok" map_message="matched via cusip 610333AU0">
+      <original_balance>49,250,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>3.930810%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down; primary Original = sum of B-R-144A + B-R-REGS</notes>
+      <identifiers>
+        <line cusip="610333AU0" moodystrancheid="830111019" map_tier="cusip" map_status="ok" />
+        <line cusip="G6270NAK8" moodystrancheid="830111019" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="C-R" moodystrancheid="830111020" map_tier="cusip" map_status="ok" map_message="matched via cusip 610333AW6">
+      <original_balance>34,500,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>3.930810%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down; C-R-REGS line 0.00</notes>
+      <identifiers>
+        <line cusip="610333AW6" moodystrancheid="830111020" map_tier="cusip" map_status="ok" />
+        <line cusip="G6270NAL6" moodystrancheid="830111020" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="D-R" moodystrancheid="830111021" map_tier="cusip" map_status="ok" map_message="matched via cusip 610333AY2">
+      <original_balance>27,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>3.930810%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down; primary Original = sum of D-R-144A + D-R-REGS</notes>
+      <identifiers>
+        <line cusip="610333AY2" moodystrancheid="830111021" map_tier="cusip" map_status="ok" />
+        <line cusip="G6270NAM4" moodystrancheid="830111021" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="E" moodystrancheid="824086840" map_tier="cusip" map_status="ok" map_message="matched via cusip 610334AC8">
+      <original_balance>20,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>3.930810%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down; primary Original = sum of E-144A + E-REGS</notes>
+      <identifiers>
+        <line cusip="610334AC8" moodystrancheid="824086840" map_tier="cusip" map_status="ok" />
+        <line cusip="G6271UAB1" moodystrancheid="824086840" map_tier="cusip" map_status="ok" />
+      </identifiers>
+    </class>
+    <class name="SUB" moodystrancheid="824086841" map_tier="cusip" map_status="ok" map_message="matched via cusip G6271UAA3">
+      <original_balance>50,320,000.00</original_balance>
+      <beginning_balance>50,320,000.00</beginning_balance>
+      <interest_rate>0.000000%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <principal_payment>0.00</principal_payment>
+      <ending_balance>50,320,000.00</ending_balance>
+      <notes>Primary = sum SUB-144A + SUB-REGS; Interest Paid 0.00; Prior Cumulative on Interest Detail not period cash</notes>
+      <identifiers>
+        <line cusip="610334AA2" map_tier="cusip" map_status="unmapped" map_message="no cusip in CDOnet CUSTOM_CDONET_TRANCHE_DATA for deal 824048437 (tried: 610334AA2)" />
+        <line cusip="G6271UAA3" moodystrancheid="824086841" map_tier="cusip" map_status="ok" />
+        <line cusip="610334AB0" map_tier="cusip" map_status="unmapped" map_message="no cusip in CDOnet CUSTOM_CDONET_TRANCHE_DATA for deal 824048437 (tried: 610334AB0)" />
+      </identifiers>
+    </class>
+  </classes>
+  <valuation_fees empty="true" />
+</noteval_export>

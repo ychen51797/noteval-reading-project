@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='utf-8'?>
+<noteval_export schema_version="4" source_folder="823428656_20260422_sdk">
+  <metadata>
+    <deal_id>823428656</deal_id>
+    <deal_name>OZLM FUNDING IV,LTD.</deal_name>
+    <report_title>Payment Date Report</report_title>
+    <payment_date date_source="payment_date" date_mismatch_note="Folder suffix 20260422 vs 01 date 20260410">2026-04-10</payment_date>
+    <currency>USD</currency>
+    <trustee>BNY (Corporate Trust Services - BNY)</trustee>
+  </metadata>
+  <classes>
+    <class name="Class X Senior Secured Floating Rate" moodystrancheid="825738546" map_tier="name" map_status="ok" trustee_tranche_name="X">
+      <original_balance>4,400,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>5.24360%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down; All In Rate</notes>
+    </class>
+    <class name="Class A-1-R Senior Secured Floating Rate" moodystrancheid="825738566" map_tier="name" map_status="ok" trustee_tranche_name="A1R">
+      <original_balance>348,500,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>5.84360%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+    </class>
+    <class name="Class A-2-R Senior Secured Floating Rate" moodystrancheid="825738567" map_tier="name" map_status="ok" trustee_tranche_name="A2R">
+      <original_balance>85,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>6.29360%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+    </class>
+    <class name="Class B-R Senior Secured Deferrable Floating Rate" moodystrancheid="825738568" map_tier="name" map_status="ok" trustee_tranche_name="BR">
+      <original_balance>41,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>6.79360%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+    </class>
+    <class name="Class C-R Senior Secured Deferrable Floating Rate" moodystrancheid="825738569" map_tier="name" map_status="ok" trustee_tranche_name="CR">
+      <original_balance>31,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>7.94360%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+    </class>
+    <class name="Class D-1-R Senior Secured Deferrable Floating Rate" moodystrancheid="825738570" map_tier="name" map_status="ok" trustee_tranche_name="D1R">
+      <original_balance>13,368,421.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>10.89360%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+    </class>
+    <class name="Class D-2-R Senior Secured Deferrable Floating Rate" moodystrancheid="825738571" map_tier="name" map_status="ok" trustee_tranche_name="D2R">
+      <original_balance>13,381,579.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>11.84360%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+    </class>
+    <class name="Class E-R Senior Secured Deferrable Floating Rate" moodystrancheid="825738572" map_tier="name" map_status="ok" trustee_tranche_name="ER">
+      <original_balance>12,000,000.00</original_balance>
+      <beginning_balance>0.00</beginning_balance>
+      <interest_rate>13.59360%</interest_rate>
+      <interest_payment>0.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>0.00</ending_balance>
+      <notes>Paid down</notes>
+    </class>
+    <class name="Subordinated Notes" moodystrancheid="823449167" map_tier="name" map_status="ok" trustee_tranche_name="B">
+      <original_balance>66,850,158.00</original_balance>
+      <beginning_balance>66,850,158.00</beginning_balance>
+      <interest_rate>0.00000%</interest_rate>
+      <interest_payment>155,000.00</interest_payment>
+      <interest_payable>0.00</interest_payable>
+      <principal_payment>0.00</principal_payment>
+      <deferred_interest>0.00</deferred_interest>
+      <ending_balance>66,850,158.00</ending_balance>
+      <notes>Interest Paid → Interest payment; 0% All In Rate normal</notes>
+    </class>
+  </classes>
+  <valuation_fees empty="true" />
+</noteval_export>
