@@ -63,7 +63,6 @@ When using **`server.py`** or **`noteval_llm.py`**, set an API key:
 | **`NOTEVAL_DRAFT_API_KEY`** or **`OPENAI_API_KEY`** | Completions endpoint key |
 | **`NOTEVAL_DRAFT_BASE_URL`** | OpenAI-compatible base URL (default `https://api.openai.com/v1`) |
 | **`NOTEVAL_DRAFT_MODEL`** | Model id (default `gpt-5.4`) |
-| **`NOTEVAL_INDEX_PREVIEW_ENRICH`** | `1` = LLM-rewrite page index previews after segmentation; `0` = rule-only |
 | **`NOTEVAL_DRAFT_USE_TOOLS`** | Default on — chunk/index tool calling; `0` for single bundle mode |
 
 ```powershell
@@ -126,9 +125,9 @@ Wells Fargo rows with **`waterfall_path`** populate both trees in the same deal 
 
 **Artifacts:** `_chunks/`, `_page_index.md`, `_manifest.md`, optional `_chunks_structured/pdd_idd_pdfplumber.md`, optional `_*_waterfall*` set.
 
-### Index enrichment (UI pipeline)
+### Page index (SDK extraction)
 
-After segmentation, the UI may run **`noteval_index_preview.py`** to LLM-tag index previews. Disable with **`NOTEVAL_INDEX_PREVIEW_ENRICH=0`**.
+**`pdf_workflow.py`** writes rule-based **`_page_index.md`** previews during segmentation. The **SDK agent** reads that index directly — no LLM index enrichment step.
 
 ### Vision / table escalation (Computershare PDD+IDD)
 

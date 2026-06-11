@@ -62,7 +62,6 @@ _DRAFT_KEY_HINT = (
 import batch_segment as _bs  # noqa: E402  # type: ignore[import-untyped]
 import noteval_batch_cost as _batch_cost  # noqa: E402
 import noteval_chunk_select as _chunk_select  # noqa: E402
-import noteval_index_preview as _index_preview  # noqa: E402
 import noteval_llm as _draft  # noqa: E402
 import noteval_sdk_usage as _sdk_usage  # noqa: E402
 import get_file_path as _gfp  # noqa: E402  # type: ignore[import-untyped]
@@ -93,7 +92,6 @@ def health():
             "map_valuation_fees": True,
             "export_xml": _XML_EXPORT_SCRIPT.is_file(),
             "index_driven_chunks": _chunk_select.index_driven_enabled(),
-            "index_preview_enrich": _index_preview.index_preview_enrich_enabled(),
             "draft_use_tools": _draft.draft_config_public().get("use_tools_default"),
             "batch_export_xml": _XML_EXPORT_SCRIPT.is_file(),
             "compare_xml_db": _xml_db_compare is not None
@@ -1802,8 +1800,6 @@ class PipelineStartBody(ExtractionDirBody):
     chunk_paths: list[str] = Field(default_factory=list, max_length=48)
     index_driven_chunks: bool = True
     chunk_tree_03: Literal["primary", "waterfall", "both"] = "both"
-    enrich_index_previews: bool = True
-    """Rewrite ``_page_index.md`` (and waterfall index when present) via LLM before drafting."""
     max_bytes_per_chunk: int = Field(default=100_000, ge=4096, le=500_000)
     max_total_chunk_chars: int = Field(default=160_000, ge=8000, le=500_000)
     max_total_chunk_chars_04: int = Field(default=80_000, ge=4000, le=300_000)
@@ -1890,28 +1886,6 @@ def _pipeline_worker(job_id: str, body: PipelineStartBody) -> None:
                     f"Active folder is {active.name}; LLM writes to {deal_dir.name} (not *_sdk).",
                 )
         result["output_dir"] = str(out)
-
-        if body.enrich_index_previews:
-            _pipeline_log(job_id, "LLM index preview enrichment …")
-            try:
-                enrich_results = _index_preview.enrich_output_dir(
-                    out, include_waterfall=True, force=False
-                )
-                result["index_preview"] = [
-                    {
-                        "index": str(r.index_path.name),
-                        "skipped": r.skipped,
-                        "batches": r.batches,
-                        "note": r.note,
-                    }
-                    for r in enrich_results
-                ]
-                for r in enrich_results:
-                    tag = "SKIP" if r.skipped else "OK"
-                    _pipeline_log(job_id, f"  index {r.index_path.name}: [{tag}] {r.note or ''}")
-            except Exception as e:
-                _pipeline_log(job_id, f"  WARN: index preview enrichment failed: {e!s}")
-                result["index_preview"] = [{"error": str(e)}]
 
         order = ("01", "02", "03", "04")
         want = set(body.targets) if body.targets else set(order)
@@ -2097,49 +2071,7 @@ def extraction_draft_config():
         "agent_resolved_path": str(ap) if ap else None,
     }
     cfg["index_driven_chunks_default"] = _chunk_select.index_driven_enabled()
-    cfg["index_preview_enrich"] = _index_preview.enrich_public_config()
     return cfg
-
-
-class EnrichPageIndexBody(ExtractionDirBody):
-    include_waterfall: bool = True
-    force: bool = False
-
-
-@app.post("/api/extraction/enrich-page-index")
-def extraction_enrich_page_index(body: EnrichPageIndexBody):
-    """LLM-rewrite ``_page_index.md`` previews before index-driven chunk selection."""
-    cfg = _draft.draft_config_public()
-    if not cfg.get("configured"):
-        raise HTTPException(status_code=503, detail=f"LLM not configured. {_DRAFT_KEY_HINT}")
-    if not _index_preview.index_preview_enrich_enabled():
-        raise HTTPException(
-            status_code=400,
-            detail="Index preview enrichment disabled (NOTEVAL_INDEX_PREVIEW_ENRICH=off).",
-        )
-    out = _allowed_output_dir(body.output_dir)
-    try:
-        results = _index_preview.enrich_output_dir(
-            out,
-            include_waterfall=body.include_waterfall,
-            force=body.force,
-        )
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e)) from e
-    return {
-        "ok": True,
-        "output_dir": str(out),
-        "results": [
-            {
-                "index": str(r.index_path),
-                "skipped": r.skipped,
-                "pages": r.pages_enriched,
-                "batches": r.batches,
-                "note": r.note,
-            }
-            for r in results
-        ],
-    }
 
 
 @app.post("/api/extraction/draft")
@@ -2310,16 +2242,8 @@ class SdkStartBody(ExtractionDirBody):
         default=False,
         description="When true, run validate_noteval.py after the agent (default: validate in UI).",
     )
-    compare_llm: bool = False
     model: str = ""
     timeout_seconds: int = Field(default=7200, ge=120, le=14_400)
-
-
-class CompareLlmSdkBody(BaseModel):
-    """Compare deliverables in ``output_dir`` (LLM) vs ``output_dir_sdk`` (default: sibling ``*_sdk``)."""
-
-    output_dir: str = Field(..., min_length=1)
-    sdk_dir: str = ""
 
 
 def _sdk_dirs_from_source(source: Path) -> tuple[Path, Path]:
@@ -2370,7 +2294,6 @@ def _sdk_worker(job_id: str, body: SdkStartBody) -> None:
         "sdk_dir": None,
         "fee_mapping": None,
         "validation": None,
-        "compare": None,
     }
     try:
         if not _cursor_api_key_configured():
@@ -2512,37 +2435,6 @@ def _sdk_worker(job_id: str, body: SdkStartBody) -> None:
                 f"validate_noteval exit {v.get('returncode')}; report at {v.get('report_path')}",
             )
 
-        compare_script = BASE / "noteval_extractor" / "scripts" / "compare_llm_sdk_outputs.py"
-        sdk_sibling = deal_dir.parent / f"{deal_dir.name}_sdk"
-        if (
-            body.compare_llm
-            and compare_script.is_file()
-            and sdk_sibling.is_dir()
-            and sdk_sibling != deal_dir
-        ):
-            proc_cmp = subprocess.run(
-                [
-                    sys.executable,
-                    str(compare_script),
-                    str(deal_dir),
-                    str(sdk_sibling),
-                ],
-                cwd=str(BASE),
-                capture_output=True,
-                text=True,
-                **_SUBPROCESS_TEXT_KW,
-                timeout=60,
-                env=_python_subprocess_env(),
-            )
-            result["compare"] = {
-                "returncode": proc_cmp.returncode,
-                "stdout": (proc_cmp.stdout or "")[-8000:],
-                "stderr": (proc_cmp.stderr or "")[-2000:],
-            }
-            if proc_cmp.stdout:
-                for line in proc_cmp.stdout.splitlines()[-40:]:
-                    _sdk_log(job_id, f"compare: {line}")
-
         with _SDK_LOCK:
             job = _SDK_JOBS.get(job_id)
             if job is not None:
@@ -2596,7 +2488,7 @@ def extraction_sdk_prepare(body: ExtractionDirBody):
 def extraction_sdk_start(body: SdkStartBody):
     """
     Background job: run ``cursor_sdk_compare/run-extract.mjs`` (extraction + map_valuation_fees when 03).
-    Set ``run_validate=true`` to run validate_noteval.py after the agent. ``compare_llm=true`` for benchmarks.
+    Set ``run_validate=true`` to run validate_noteval.py after the agent.
     """
     cfg = sdk_config_public()
     if not cfg.get("configured"):
@@ -2628,34 +2520,6 @@ def extraction_sdk_status(job_id: str):
     if job is None:
         raise HTTPException(status_code=404, detail="Unknown job_id")
     return {"job_id": job_id, **job}
-
-
-@app.post("/api/extraction/compare-llm-sdk")
-def extraction_compare_llm_sdk(body: CompareLlmSdkBody):
-    """Print deliverable presence / line counts for LLM folder vs ``*_sdk`` sibling."""
-    source = _allowed_output_dir(body.output_dir)
-    if body.sdk_dir.strip():
-        llm_dir = source
-        sdk_dir = _allowed_output_dir(body.sdk_dir)
-    else:
-        llm_dir, sdk_dir = _sdk_resolve_dirs(source, prepare=False)
-    compare_script = BASE / "noteval_extractor" / "scripts" / "compare_llm_sdk_outputs.py"
-    if not compare_script.is_file():
-        raise HTTPException(status_code=500, detail="compare_llm_sdk_outputs.py missing")
-    proc = subprocess.run(
-        [sys.executable, str(compare_script), str(llm_dir), str(sdk_dir), "--diff"],
-        cwd=str(BASE),
-        capture_output=True,
-        text=True,
-        **_SUBPROCESS_TEXT_KW,
-        timeout=120,
-    )
-    return {
-        "llm_dir": str(llm_dir),
-        "sdk_dir": str(sdk_dir),
-        "returncode": proc.returncode,
-        "report": (proc.stdout or "") + (proc.stderr or ""),
-    }
 
 
 @app.post("/api/extraction/validate")

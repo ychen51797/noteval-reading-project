@@ -1575,7 +1575,6 @@ async function runBatchSdkQueue() {
           {
             output_dir: dealDir,
             prepare: false,
-            compare_llm: false,
             run_validate: false,
             targets: sdkTargets,
           },
@@ -1756,7 +1755,6 @@ async function startSdkExtraction() {
     const { res, data } = await apiPostJson("/api/extraction/sdk/start", {
       output_dir: out,
       prepare: false,
-      compare_llm: false,
       run_validate: false,
       targets: sdkTargets,
       force_reextract: forceReSdk,
