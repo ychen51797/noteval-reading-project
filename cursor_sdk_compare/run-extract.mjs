@@ -10,8 +10,8 @@
  * Usage (from repo root):
  *   cd cursor_sdk_compare && npm run extract -- ../noteval_extractor/output/<deal>
  *
- * Validate after extraction:
- *   py -3 noteval_extractor/scripts/validate_noteval.py noteval_extractor/output/<deal>
+ * After extraction (when 03 is in targets), map_valuation_fees.py runs automatically.
+ * Optional validate: pass without --no-validate (off by default; UI runs validate separately).
  *
  * Usage / estimated cost: logs/noteval_sdk_usage.log (JSONL). Disable with NOTEVAL_SDK_USAGE_LOG=off.
  */
@@ -220,7 +220,7 @@ Segmentation already exists under that folder. **Do not modify** \`_chunks/\`, \
 2. **Read each repo reference at most once** — Open \`${agentPath}\` and \`noteval_extractor/SKILL.md\` **one time each** at the start (skim; do not paste into chat). For templates, read **only** the matching \`## File NN\` section from \`noteval_extractor/references/extraction-templates.md\` when drafting that file — **not** the full templates doc repeatedly.
 3. **Chunk files: open only what you need** — Never read every \`pages_*.txt\` in a folder. Open **only** chunks that contain your mapped pages. Prefer **partial reads** (search within a chunk for \`--- Page N ---\`) over loading whole multi-hundred-page chunks when the manifest shows a smaller slice would suffice.
 4. **Do not re-read** a chunk or reference file you already used in this run unless a deliverable is incomplete.
-5. **Do not run validate_noteval.py** — validation is a separate step after this job. Note any obvious gaps in \`04_extraction_summary.md\`.
+5. **Do not run validate_noteval.py or map_valuation_fees.py** — both run automatically after this job when **03** is in targets. Note any obvious gaps in \`04_extraction_summary.md\`.
 
 ## References (order)
 
@@ -390,6 +390,23 @@ async function main() {
     if (result.status === "error") {
       await logRunFailureDetails(run, result, { sdkDir, targets, agentId });
       process.exit(2);
+    }
+
+    if (targets.includes("03")) {
+      const rel = sdkDir.replace(/\\/g, "/");
+      console.error("\nRunning map_valuation_fees.py …");
+      const m = spawnSync(
+        process.platform === "win32" ? "py" : "python3",
+        [
+          "-3",
+          join(REPO_ROOT, "noteval_extractor", "scripts", "map_valuation_fees.py"),
+          rel,
+        ],
+        { cwd: REPO_ROOT, stdio: "inherit", shell: process.platform === "win32" }
+      );
+      if (m.status !== 0) {
+        process.exit(m.status === null ? 4 : m.status);
+      }
     }
 
     if (validate) {

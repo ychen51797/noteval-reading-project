@@ -73,7 +73,7 @@ Include at minimum: **printed class name**, **original / beginning / ending** pr
 
 **Identifiers under each class:** For every **`Economic class`** in **`### Tranche by listing`** that maps to this **primary** **`Class`**, emit one **`<line>`** per row (same order as **`02`**) with **only** **`isin`** and **`cusip`** when present. Skip rows that would produce an empty **`<line>`** (both missing or **`N/A`**). If no lines remain, omit **`<identifiers>`** entirely.
 
-**Tranche mapping (schema 4):** After **`map_tranches.py`** resolution, set **`moodystrancheid`** on **`<class>`** and each **`<line>`** when known. **CUSIP present:** lookup **only** `[CDOnet_DL].CUSTOM_CDONET_TRANCHE_DATA.MOODYSTRANCHEID` (via CUSIP…CUSIP9). **No CUSIP:** normalized XML class name ↔ `ems.noteval_tranche_mapping.trustee_tranche_name` → **`tranche_id`**. Add **`map_tier`** (`cusip` | `name`), **`map_status`**, and optional **`trustee_tranche_name`** / **`map_message`**.
+**Tranche mapping (schema 4):** After **`map_tranches.py`** resolution, set **`moodystrancheid`** on **`<class>`** and each **`<line>`** when known. **Tier 1 — CUSIP present (always):** lookup **only** `[CDOnet_DL].CUSTOM_CDONET_TRANCHE_DATA` (via CUSIP…CUSIP9); **`map_tier="cusip"`**. No name fallback when a CUSIP was supplied but CDOnet has no hit. **Tier 2 — no CUSIP:** **`map_class`** / normalized class name ↔ `ems.noteval_tranche_mapping.trustee_tranche_name` → **`tranche_id`**; **`map_tier="name"`**. Add **`map_status`**, and optional **`trustee_tranche_name`** / **`map_message`**. Emit **`map_class`** on **`<class>`** (schema 3 and 4).
 
 **Example:**
 

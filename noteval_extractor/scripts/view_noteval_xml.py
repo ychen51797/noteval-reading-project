@@ -97,6 +97,7 @@ def build_markdown(root: ET.Element, *, source: str) -> str:
             "Map tier",
             "Map status",
             "Trustee tranche",
+            "Original",
             "Beginning",
             "Interest pmt",
             "Principal pmt",
@@ -112,6 +113,7 @@ def build_markdown(root: ET.Element, *, source: str) -> str:
                 ce.get("map_tier", ""),
                 ce.get("map_status", ""),
                 ce.get("trustee_tranche_name", ""),
+                _text(ce.find("original_balance")),
                 _text(ce.find("beginning_balance")),
                 _text(ce.find("interest_payment")),
                 _text(ce.find("principal_payment")),
@@ -191,6 +193,7 @@ def build_html(root: ET.Element, *, source: str) -> str:
                 f"<td>{_esc(ce.get('map_tier'))}</td>"
                 f"<td>{_esc(st)}</td>"
                 f"<td>{_esc(ce.get('trustee_tranche_name'))}</td>"
+                f"<td class='num'>{_esc(_text(ce.find('original_balance')))}</td>"
                 f"<td class='num'>{_esc(_text(ce.find('beginning_balance')))}</td>"
                 f"<td class='num'>{_esc(_text(ce.find('interest_payment')))}</td>"
                 f"<td class='num'>{_esc(_text(ce.find('principal_payment')))}</td>"
@@ -210,7 +213,7 @@ def build_html(root: ET.Element, *, source: str) -> str:
                         f"<td colspan='2'>↳ {_esc(cusip or isin)}</td>"
                         f"<td colspan='2'>{_esc(line.get('map_tier'))}</td>"
                         f"<td>{_esc(line.get('map_status'))}</td>"
-                        f"<td colspan='4'>tranche {_esc(tid)}</td>"
+                        f"<td colspan='5'>tranche {_esc(tid)}</td>"
                         f"</tr>\n"
                     )
 
@@ -264,7 +267,7 @@ def build_html(root: ET.Element, *, source: str) -> str:
     <thead>
       <tr>
         <th>Class</th><th>Moodys tranche id</th><th>Tier</th><th>Status</th>
-        <th>Trustee tranche</th><th>Beginning</th><th>Interest pmt</th>
+        <th>Trustee tranche</th><th>Original</th><th>Beginning</th><th>Interest pmt</th>
         <th>Principal pmt</th><th>Ending</th>
       </tr>
     </thead>

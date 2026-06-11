@@ -5,6 +5,9 @@ noteval_extractor/references/xml-export.md (schema_version 3 or 4).
 With ``--map-tranches``: writes ``01_report_metadata.xml``, resolves
 ``moodystrancheid`` on ``<class>`` / ``<line>``, sets ``schema_version="4"``.
 
+Every ``<class>`` element gets a ``map_class`` attribute (compact EMS lookup key
+from ``normalize_class_label``), on schema 3 and 4.
+
 Usage:
   py -3 noteval_extractor/scripts/export_noteval_xml.py <extraction_dir>
   py -3 noteval_extractor/scripts/export_noteval_xml.py <extraction_dir> --map-tranches
@@ -285,6 +288,8 @@ def default_out_dir() -> Path:
 def _apply_map_attrs(el: ET.Element, result: Any) -> None:
     if result.moodystrancheid:
         el.set("moodystrancheid", result.moodystrancheid)
+    if getattr(result, "matched_cusip", None):
+        el.set("map_cusip", result.matched_cusip)
     if result.map_tier:
         el.set("map_tier", result.map_tier)
     if result.map_status:
@@ -355,6 +360,45 @@ def build_xml(
     if meta01.trustee and meta01.trustee.upper() != "N/A":
         ET.SubElement(md, "trustee").text = meta01.trustee
 
+    # Load pdfplumber structured data when available.
+    # parse_pdfplumber_cusip_class → authoritative CUSIP→class (overrides markdown listing)
+    # parse_pdfplumber_pdd_rows / parse_pdfplumber_idd_rows → per-CUSIP balance/rate/interest
+    #   read directly from vector-geometry column cells (immune to nth-band positional errors)
+    pdfplumber_cusip_class: dict[str, str] = {}
+    pdfplumber_pdd: dict[str, dict[str, str]] = {}  # cusip.upper() → pdd row dict
+    pdfplumber_idd: dict[str, dict[str, str]] = {}  # cusip.upper() → idd row dict
+    structured_path = extraction_dir / "_chunks_structured" / "pdd_idd_pdfplumber.md"
+    if structured_path.is_file():
+        try:
+            from pdfplumber_pdd_idd_md import (
+                parse_pdfplumber_cusip_class,
+                parse_pdfplumber_pdd_rows,
+                parse_pdfplumber_idd_rows,
+            )
+            _structured_text = structured_path.read_text(encoding="utf-8")
+            pdfplumber_cusip_class = parse_pdfplumber_cusip_class(_structured_text)
+            for r in parse_pdfplumber_pdd_rows(_structured_text):
+                pdfplumber_pdd[r["cusip"].upper()] = r
+            for r in parse_pdfplumber_idd_rows(_structured_text):
+                pdfplumber_idd[r["cusip"].upper()] = r
+        except Exception:
+            pass
+
+    # Pre-collect primary class names so the pdfplumber override can be gated:
+    # only override when the pdfplumber-assigned class actually exists in the primary
+    # table (prevents phantom class names from pdfplumber truncation — e.g. "B" when
+    # the deal only has "B-R" — from silently re-routing CUSIPs to non-existent classes).
+    _cb_pre = find_class_balance_table(t02)
+    _primary_classes: set[str] = set()
+    if _cb_pre and len(_cb_pre) > 1:
+        _ci_pre = lambda name: _col_exact(_cb_pre[0], name)
+        _icls_pre = _ci_pre("Class") or 0
+        for _r in _cb_pre[1:]:
+            if len(_r) > _icls_pre:
+                _cn = _r[_icls_pre].strip()
+                if _cn and not _cn.lower().startswith("total"):
+                    _primary_classes.add(_cn)
+
     listing_table = find_listing_table(t02)
     listing_rows: list[dict[str, str]] = []
     if listing_table and len(listing_table) > 1:
@@ -369,11 +413,62 @@ def build_xml(
         for row in listing_table[1:]:
             if not any(x.strip() for x in row):
                 continue
-            listing_rows.append({
-                "economic_class": gi(row, "Economic class"),
+            md_class = gi(row, "Economic class")
+            cusip_raw = gi(row, "CUSIP")
+            # If pdfplumber says this CUSIP belongs to a different class than the
+            # markdown listing, trust pdfplumber ONLY when:
+            #   (a) the markdown listing class is empty/blank (CUSIP is orphaned), OR
+            #   (b) the pdfplumber class exists in the primary table AND the markdown
+            #       class does NOT exist in the primary table (pdfplumber is correcting
+            #       a bad markdown assignment to a phantom class).
+            # Do NOT override when the markdown already has a valid primary-class
+            # assignment — the analyst listing is more reliable than the pdfplumber
+            # parser's col0-glue heuristics (which can misread truncated "-R" suffixes).
+            override_note = ""
+            if pdfplumber_cusip_class and cusip_raw:
+                pb_class = pdfplumber_cusip_class.get(cusip_raw.upper())
+                if pb_class and pb_class != md_class:
+                    md_in_primary = not _primary_classes or md_class in _primary_classes
+                    pb_in_primary = not _primary_classes or pb_class in _primary_classes
+                    apply_override = (
+                        # Only override when: markdown has a non-blank class that doesn't
+                        # exist in the primary table (phantom class), AND pdfplumber's
+                        # class does exist in the primary table.
+                        # Blank md_class = intentional orphan — do NOT route to any class.
+                        bool(md_class)
+                        and pb_in_primary
+                        and not md_in_primary
+                    )
+                    if apply_override:
+                        override_note = (
+                            f"pdfplumber override: {cusip_raw} → {pb_class} "
+                            f"(markdown had {md_class!r})"
+                        )
+                        md_class = pb_class
+            cusip_key = cusip_raw.upper() if cusip_raw else ""
+            pb_pdd = pdfplumber_pdd.get(cusip_key, {})
+            pb_idd = pdfplumber_idd.get(cusip_key, {})
+            # Use pdfplumber column values when present (direct column read beats
+            # nth-band inference from linearised text).
+            def _pb_or_md(pb_val: str, md_field: str) -> str:
+                if pb_val:
+                    return pb_val
+                return gi(row, md_field)
+            lr: dict[str, str] = {
+                "economic_class": md_class,
                 "isin": gi(row, "ISIN"),
-                "cusip": gi(row, "CUSIP"),
-            })
+                "cusip": cusip_raw,
+                "original_balance": _pb_or_md(pb_pdd.get("original_face", ""), "Original balance"),
+                "beginning_balance": _pb_or_md(pb_pdd.get("beginning_balance", ""), "Beginning balance"),
+                "interest_rate": _pb_or_md(pb_idd.get("coupon_rate", ""), "Interest rate"),
+                "interest_payment": _pb_or_md(pb_idd.get("interest_distribution", ""), "Interest payment"),
+                "principal_payment": _pb_or_md(pb_pdd.get("principal_distribution", ""), "Principal payment"),
+                "deferred_interest": _pb_or_md(pb_pdd.get("deferred_interest", ""), "Deferred interest"),
+                "ending_balance": _pb_or_md(pb_pdd.get("ending_balance", ""), "Ending balance"),
+            }
+            if override_note:
+                lr["_pdfplumber_override"] = override_note
+            listing_rows.append(lr)
 
     by_class: dict[str, list[dict[str, str]]] = {}
     for lr in listing_rows:
@@ -381,8 +476,16 @@ def build_xml(
         if ec:
             by_class.setdefault(ec, []).append(lr)
 
+    from map_tranches import normalize_class_label
+
     cb = find_class_balance_table(t02)
     classes_el = ET.SubElement(root, "classes")
+    primary_class_names: list[str] = []
+    deal_maps = (
+        tranche_mapper.maps_for_deal(deal_id)
+        if tranche_mapper and deal_id
+        else None
+    )
     if cb and len(cb) > 1:
         hdr = cb[0]
         ci = lambda name: _col_exact(hdr, name)
@@ -406,8 +509,23 @@ def build_xml(
             cname = row[iclass].strip()
             if not cname or cname.lower().startswith("total"):
                 continue
+            primary_class_names.append(cname)
+        for row in cb[1:]:
+            if len(row) <= iclass:
+                continue
+            cname = row[iclass].strip()
+            if not cname or cname.lower().startswith("total"):
+                continue
             ce = ET.SubElement(classes_el, "class")
             ce.set("name", cname)
+            map_class = normalize_class_label(
+                cname,
+                deal_maps=deal_maps,
+                peer_class_names=primary_class_names,
+                deal_name=meta01.deal_name or None,
+            )
+            if map_class:
+                ce.set("map_class", map_class)
             for tag, ix in cols.items():
                 if ix is None or ix >= len(row):
                     continue
@@ -434,30 +552,66 @@ def build_xml(
                         line.set("isin", isin)
                     if cusip:
                         line.set("cusip", cusip)
-                    if tranche_mapper and deal_id:
-                        _apply_map_attrs(
-                            line,
-                            tranche_mapper.resolve(
-                                deal_id, cusip=cusip or None, class_name=cname
-                            ),
-                        )
                 if not kept:
                     ce.remove(idel)
 
             if tranche_mapper and deal_id:
-                all_cusips: list[str] = []
+                listing_cusips: list[str] = []
                 for lr in kids:
                     c = (lr.get("cusip") or "").strip()
-                    if c and c.upper() != "N/A" and c not in all_cusips:
-                        all_cusips.append(c)
+                    if c and c.upper() != "N/A" and c not in listing_cusips:
+                        listing_cusips.append(c)
                 _apply_map_attrs(
                     ce,
                     tranche_mapper.resolve(
                         deal_id,
-                        cusips=all_cusips or None,
+                        cusips=listing_cusips or None,
                         class_name=cname,
+                        map_class=map_class or None,
+                        peer_class_names=primary_class_names,
+                        deal_name=meta01.deal_name or None,
                     ),
                 )
+
+    # ── moodystrancheid uniqueness conflict check ───────────────────────────────
+    # When two or more <class> elements share the same moodystrancheid it means
+    # one CUSIP was assigned to the wrong economic class in the listing table.
+    # Emit a <mapping_conflicts> block so the issue is visible in the XML and
+    # print a warning to stderr.
+    if tranche_mapper:
+        tid_to_classes: dict[str, list[str]] = {}
+        for ce in classes_el:
+            tid = ce.get("moodystrancheid", "")
+            if tid:
+                tid_to_classes.setdefault(tid, []).append(ce.get("name", "?"))
+        conflicts = {
+            tid: names
+            for tid, names in tid_to_classes.items()
+            if len(names) > 1
+        }
+        if conflicts:
+            mc_el = ET.SubElement(root, "mapping_conflicts")
+            mc_el.set("count", str(len(conflicts)))
+            for tid, names in sorted(conflicts.items()):
+                conf = ET.SubElement(mc_el, "conflict")
+                conf.set("moodystrancheid", tid)
+                conf.set("classes", ", ".join(names))
+                conf.set(
+                    "message",
+                    f"moodystrancheid {tid} shared by {len(names)} classes: "
+                    + ", ".join(names)
+                    + " — check CUSIP→class assignment in listing table "
+                    + "(pdfplumber_pdd_idd_md.py may have corrected some; "
+                    + "verify remaining conflicts manually)",
+                )
+            import sys as _sys
+            for tid, names in sorted(conflicts.items()):
+                print(
+                    f"WARNING mapping conflict: moodystrancheid {tid} "
+                    f"shared by {', '.join(names)} — verify CUSIP→class in 02 listing",
+                    file=_sys.stderr,
+                )
+    # ── end conflict check ──────────────────────────────────────────────────────
 
     vf = find_valuation_fees_table(parse_md_tables(d05)) if d05 else None
     if vf is None:

@@ -23,6 +23,12 @@ Report): when non-empty, that PDF is segmented into the **same** deal folder
 after the note PDF. Standard outputs stay ``_chunks/``, ``_page_index.md``,
 ``_manifest.md`` (from ``pdf_path``). Waterfall outputs are moved to
 ``_chunks_waterfall/``, ``_page_index_waterfall.md``, ``_manifest_waterfall.md``.
+
+**Primary PDF gate (optional):** set ``NOTEVAL_SEGMENT_GATE_PRIMARY=1`` to skip
+segmentation when the primary PDF is too large or lacks a payment-date anchor plus
+either tranche/class or waterfall/proceeds cues in early pages (see ``report_gate.py``).
+Waterfall-only reports (redeemed deals) still pass. Pass ``--no-primary-pdf-gate``
+to force a run even when the env gate is on.
 """
 
 from __future__ import annotations
@@ -37,6 +43,11 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
+
+try:
+    import report_gate as _report_gate
+except ImportError:
+    _report_gate = None
 
 
 def _repo_root() -> Path:
@@ -247,6 +258,11 @@ def main() -> None:
         action="store_true",
         help="Run all rows even if one fails; exit 1 if any failure.",
     )
+    parser.add_argument(
+        "--no-primary-pdf-gate",
+        action="store_true",
+        help="Ignore NOTEVAL_SEGMENT_GATE_PRIMARY for this run (segment even if gate would fail).",
+    )
     args = parser.parse_args()
 
     deal_paths = resolve_deal_paths_csv(args.deal_paths)
@@ -322,6 +338,24 @@ def main() -> None:
 
         if args.dry_run:
             continue
+
+        if (
+            not args.no_primary_pdf_gate
+            and _report_gate is not None
+            and _report_gate.primary_pdf_gate_enabled()
+        ):
+            ok_gate, gate_msg, gate_meta = _report_gate.assess_primary_noteval_pdf(
+                pdf,
+                waterfall_pdf=wf_path if wf_segment_ok and wf_path is not None else None,
+            )
+            if not ok_gate:
+                print(
+                    f"SKIP (primary PDF gate): {pdf}\n  reason: {gate_msg}\n  meta: {gate_meta}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                skipped += 1
+                continue
 
         output_dir.mkdir(parents=True, exist_ok=True)
         rc = _run_pdf_workflow(

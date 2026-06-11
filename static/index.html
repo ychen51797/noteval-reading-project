@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1c2430" />
+    <title>Noteval extractor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/style.css?v=20260611a" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <div class="site-brand">
+          <p class="site-eyebrow">CLO trustee payment reports</p>
+          <h1 class="site-title">Noteval extractor</h1>
+          <p class="site-lead">
+            Segment PDFs, draft deliverables <strong>01–04</strong>, map valuation fees, and validate — with
+            source text tied back to each page.
+          </p>
+        </div>
+        <nav class="pipeline-stepper" aria-label="Extraction pipeline">
+          <ol class="pipeline-stepper-list">
+            <li class="pipeline-step">
+              <span class="pipeline-step-code">01</span>
+              <span class="pipeline-step-label">Segment</span>
+            </li>
+            <li class="pipeline-step" aria-hidden="true">
+              <span class="pipeline-step-connector"></span>
+            </li>
+            <li class="pipeline-step">
+              <span class="pipeline-step-code">02</span>
+              <span class="pipeline-step-label">Extract</span>
+            </li>
+            <li class="pipeline-step" aria-hidden="true">
+              <span class="pipeline-step-connector"></span>
+            </li>
+            <li class="pipeline-step">
+              <span class="pipeline-step-code">03</span>
+              <span class="pipeline-step-label">Fees &amp; validate</span>
+            </li>
+            <li class="pipeline-step" aria-hidden="true">
+              <span class="pipeline-step-connector"></span>
+            </li>
+            <li class="pipeline-step">
+              <span class="pipeline-step-code">04</span>
+              <span class="pipeline-step-label">Review</span>
+            </li>
+          </ol>
+        </nav>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="panel panel-step panel-step--segment" id="segmentPanel" data-step-label="SEG">
+        <header class="panel-head">
+          <span class="panel-step-mark" aria-hidden="true">01</span>
+          <div class="panel-head-text">
+            <h2>Segmentation</h2>
+            <p class="panel-deck muted">
+              Resolve the trustee PDF, check eligibility, and write <code>_chunks/</code> plus page index.
+            </p>
+          </div>
+        </header>
+        <form class="lookup-form" id="lookupForm">
+          <label class="field field-grow">
+            <span>Deal ID and payment date</span>
+            <input
+              type="text"
+              id="locate_deal_line"
+              name="locate_deal_line"
+              autocomplete="off"
+              placeholder="825275100  3/16/2026"
+              required
+            />
+          </label>
+          <button type="submit" class="primary" id="locateSegmentBtn">Locate &amp; segment PDF</button>
+        </form>
+        <p class="muted locate-format-hint">
+          One line: <strong>deal ID</strong>, space, <strong>payment date</strong> (e.g.
+          <code>825275100 3/16/2026</code>). If that deal is already segmented, the existing output folder is
+          shown and <strong>Locate &amp; segment</strong> skips re-segmentation.
+        </p>
+        <div class="segment-secondary-toolbar">
+          <button type="button" class="primary secondary small" id="checkEligibilityBtn">
+            Check eligibility only
+          </button>
+        </div>
+        <p class="hint resolve-status" id="segmentStatusLine" aria-live="polite"></p>
+        <div class="segment-log-toolbar" id="segmentLogToolbar" hidden>
+          <button type="button" class="primary secondary small" id="segmentLogToggleBtn" aria-expanded="false">
+            Show segment log
+          </button>
+        </div>
+        <pre class="result segment-log" id="segmentLogBox" hidden></pre>
+      </section>
+
+      <section class="panel batch-panel panel-step panel-step--segment" id="batchPanel" data-step-label="SEG">
+        <header class="panel-head">
+          <span class="panel-step-mark" aria-hidden="true">01</span>
+          <div class="panel-head-text">
+            <h2>Batch deals</h2>
+            <p class="panel-deck muted batch-lead">
+              The table starts with <strong>5 rows</strong>; paste or add rows to queue more (up to <strong>50 deals</strong>),
+              then segment in one run, then run batch extraction in <strong>2. Extraction</strong>.
+            </p>
+          </div>
+        </header>
+        <ol class="muted batch-lead-steps">
+          <li>
+            <code>deal_id</code>, space, payment date (e.g. <code>825275100 3/16/2026</code>)
+          </li>
+          <li>
+            <strong>Run batch segmentation</strong> — for rows that still need it: resolve the PDF path, check
+            eligibility and segment PDF. Skips deals that are already segmented.
+          </li>
+        </ol>
+        <div class="batch-toolbar">
+          <button type="button" class="primary secondary" id="batchAddRowBtn">Add row</button>
+          <button type="button" class="primary secondary" id="batchPasteOpenBtn">Paste multiple deals</button>
+          <button type="button" class="primary secondary" id="batchPasteFoldersOpenBtn">Paste output folders</button>
+          <label class="batch-check">
+            <input type="checkbox" id="batchContinueOnError" />
+            <span class="muted">Continue on error</span>
+          </label>
+        </div>
+        <div class="batch-table-wrap">
+          <table class="batch-table" aria-label="Batch segmentation deals">
+            <thead>
+              <tr>
+                <th class="batch-col-idx">#</th>
+                <th class="batch-col-line">Deal ID + payment date (one line)</th>
+                <th class="batch-col-output">Output folder (click path to make active)</th>
+                <th class="batch-col-status">Status</th>
+                <th class="batch-col-action"></th>
+              </tr>
+            </thead>
+            <tbody id="batchQueueBody"></tbody>
+          </table>
+        </div>
+        <div class="batch-run-toolbar">
+          <button
+            type="button"
+            class="primary"
+            id="batchRunBtn"
+            title="Resolve, path check, and segment each row; skips rows already segmented."
+          >
+            Run batch segmentation
+          </button>
+          <button type="button" class="primary secondary batch-stop-btn" disabled>Stop</button>
+        </div>
+        <p class="hint muted" id="batchRunStatus" aria-live="polite"></p>
+      </section>
+
+      <section class="panel cockpit panel-step panel-step--bridge" id="cockpitSection" data-step-label="DIR">
+        <header class="panel-head">
+          <span class="panel-step-mark panel-step-mark--muted" aria-hidden="true">↳</span>
+          <div class="panel-head-text">
+            <h2>Active output folder</h2>
+            <p class="panel-deck muted cockpit-lead">
+              Set automatically after segmentation, or paste a path to an existing segmented folder
+              (<code>_chunks/pages_*.txt</code> present). Use it for single-deal <strong>Run SDK agent</strong>.
+            </p>
+          </div>
+        </header>
+        <div class="cockpit-toolbar">
+          <label class="field field-grow">
+            <span>Path</span>
+            <input
+              type="text"
+              id="cockpitOutputDir"
+              spellcheck="false"
+              placeholder="Filled after segment — or paste / pick a folder"
+            />
+          </label>
+          <button type="button" class="primary secondary" id="cockpitCopyPathBtn">Copy path</button>
+          <button type="button" class="primary secondary" id="cockpitCopyAllPathsBtn">Copy all paths</button>
+        </div>
+        <div class="cockpit-paths-section">
+          <div class="cockpit-paths-head">
+            <span class="muted cockpit-paths-title">Recent folders (this session)</span>
+            <div class="cockpit-paths-actions">
+              <button type="button" class="primary secondary small" id="cockpitRememberPathBtn">Remember path</button>
+              <button type="button" class="primary secondary small" id="cockpitClearPathsBtn">Clear list</button>
+            </div>
+          </div>
+          <ul class="cockpit-output-paths" id="cockpitOutputPathsList" aria-label="Recent output folders"></ul>
+          <p class="hint muted cockpit-paths-empty" id="cockpitPathsEmptyHint">
+            No folders yet — they appear after segmentation.
+          </p>
+        </div>
+      </section>
+
+      <section class="panel pipeline-panel panel-step panel-step--extract" id="pipelinePanel" data-step-label="EXT">
+        <header class="panel-head">
+          <span class="panel-step-mark" aria-hidden="true">02</span>
+          <div class="panel-head-text">
+            <h2>Extraction</h2>
+            <p class="panel-deck muted pipeline-lead">
+              Requires a segmented deal folder above (<code>&lt;dealId&gt;_&lt;YYYYMMDD&gt;</code>). The Cursor SDK agent
+              drafts deliverables <strong>01–04</strong> into that folder (validation is step 3).
+            </p>
+          </div>
+        </header>
+
+        <div class="extraction-status-band" aria-live="polite">
+          <p class="extraction-status-text" id="pipelineExtractionHint">Loading extraction status…</p>
+        </div>
+
+        <div class="extraction-scope-band" role="group" aria-labelledby="extractionScopeLegend">
+          <div class="extraction-scope-band-head">
+            <h3 class="extraction-scope-band-title" id="extractionScopeLegend">Extraction scope</h3>
+            <p class="muted extraction-scope-band-lead">
+              Unchecked = full <strong>01–04</strong>. Or pick files below.
+            </p>
+          </div>
+          <div class="extraction-scope-options">
+            <label class="extraction-scope-card" id="extractScopeCard0102">
+              <input type="checkbox" id="extractDeliverables0102Only" class="extraction-scope-card-input" />
+              <span class="extraction-scope-card-body">
+                <strong class="extraction-scope-card-title">01 &amp; 02 only</strong>
+                <span class="extraction-scope-card-desc">Metadata + tranches; skips 03, 04, map fees.</span>
+              </span>
+            </label>
+            <label class="extraction-scope-card" id="extractScopeCard0304">
+              <input type="checkbox" id="extractDeliverables0304Only" class="extraction-scope-card-input" />
+              <span class="extraction-scope-card-body">
+                <strong class="extraction-scope-card-title">03 &amp; 04 only</strong>
+                <span class="extraction-scope-card-desc">Waterfall + summary; keeps 01 &amp; 02 on disk.</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="extraction-options-band">
+          <label class="extraction-option-check">
+            <input type="checkbox" id="forceReextractCheck" />
+            <span class="extraction-option-check-text">
+              <strong>Force re-extract</strong>
+              <span class="muted extraction-option-check-desc">Overwrite deliverables even if already on disk</span>
+            </span>
+          </label>
+        </div>
+
+        <details class="extraction-deliverables">
+          <summary>Custom deliverables (01–04)</summary>
+          <p class="hint muted extraction-deliverables-hint">
+            When a scope preset above is checked, these checkboxes follow that preset. Otherwise choose which files the
+            agent should draft.
+          </p>
+          <div class="pipeline-targets" id="sdkPipelineTargets" aria-label="Deliverables to extract">
+            <label class="pipeline-target-check"><input type="checkbox" id="pipelineTarget01" checked /> 01</label>
+            <label class="pipeline-target-check"><input type="checkbox" id="pipelineTarget02" checked /> 02</label>
+            <label class="pipeline-target-check"><input type="checkbox" id="pipelineTarget03" checked /> 03</label>
+            <label class="pipeline-target-check"><input type="checkbox" id="pipelineTarget04" checked /> 04</label>
+          </div>
+        </details>
+
+        <div class="extraction-actions">
+          <div class="extraction-action-block">
+            <h3 class="extraction-action-title">Single deal</h3>
+            <p class="muted extraction-action-lead">Runs on the active output folder.</p>
+            <button
+              type="button"
+              class="primary"
+              id="pipelineSdkBtn"
+              title="Run Cursor SDK on the segmented deal folder."
+            >
+              Run SDK agent
+            </button>
+          </div>
+          <div class="extraction-action-block">
+            <h3 class="extraction-action-title">Batch</h3>
+            <p class="muted extraction-action-lead">
+              Each queued row with an output folder. Skips deals that already have the selected deliverables unless force
+              re-extract is on.
+            </p>
+            <div class="extraction-action-toolbar">
+              <button
+                type="button"
+                class="primary"
+                id="batchSdkRunBtn"
+                title="For each batch row with an output folder: Cursor agent (respects scope presets), optional map fees."
+              >
+                Run batch SDK extraction
+              </button>
+              <button type="button" class="primary secondary batch-stop-btn" disabled>Stop batch</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="hint muted extraction-run-status" id="pipelineStatus" aria-live="polite"></p>
+        <pre class="result pipeline-log" id="pipelineLog" aria-label="Extraction log"></pre>
+      </section>
+
+      <section class="panel validation-panel panel-step panel-step--validate" id="validationPanel" data-step-label="VAL">
+        <header class="panel-head">
+          <span class="panel-step-mark" aria-hidden="true">03</span>
+          <div class="panel-head-text">
+            <h2>Map valuation fees &amp; validate</h2>
+            <p class="panel-deck muted validation-lead">
+              <strong>Map valuation fees</strong> builds <code>05_valuation_relevant_fees.md</code> from the
+              <code>03</code> waterfall (deterministic; not done by the agent). Then <strong>Validate</strong> runs on the
+              active deal folder. <strong>Compare with DB</strong> maps tranches from export XML and diffs class fields
+              against <code>cdo_noteval_tranches</code> (run <strong>Export XML</strong> first). Warnings do not fail the run.
+            </p>
+          </div>
+        </header>
+        <div class="pipeline-validation-toolbar">
+          <button type="button" class="primary secondary" id="mapValuationFeesBtn">
+            Map valuation fees
+          </button>
+          <button type="button" class="primary" id="validationRunBtn">Validate</button>
+          <button
+            type="button"
+            class="primary secondary"
+            id="xmlExportBtn"
+            title="Writes noteval_export XML from 01–02 (03 optional) into noteval_extractor/xml."
+          >
+            Export XML
+          </button>
+          <button
+            type="button"
+            class="primary secondary"
+            id="compareXmlDbBtn"
+            title="Download .xlsx comparing export XML tranche rows to EMS cdo_noteval_tranches (Match rates + diffs)."
+          >
+            Compare with DB
+          </button>
+          <button
+            type="button"
+            class="primary secondary small"
+            id="validationReportToggleBtn"
+            aria-expanded="false"
+            hidden
+          >
+            Show full validation report
+          </button>
+        </div>
+        <p class="hint validation-summary muted" id="xmlExportStatus" aria-live="polite"></p>
+        <p class="hint validation-summary" id="validationReportStatus" aria-live="polite"></p>
+        <pre
+          class="result pipeline-validation-pre"
+          id="validationReportPre"
+          aria-label="Full validation report markdown"
+          hidden
+        ></pre>
+
+        <h3 class="cockpit-sub validation-batch-title">Batch validation &amp; export</h3>
+        <p class="muted validation-batch-lead">
+          Run <code>validate_noteval</code> on deal folders under <code>noteval_extractor/output</code>
+          (<code>{deal_id}_{YYYYMMDD}</code>). Writes <code>batch_validation_summary.md</code> and per-folder
+          <code>validation_report.md</code>.
+          <strong>Export batch to XML</strong> writes one <code>{deal_id}_{date}.xml</code> per queued folder under
+          <code>noteval_extractor/xml/</code> from extracted markdown (production feed; no tranche-id mapping). Works after <strong>01 &amp; 02 only</strong> extraction.
+        </p>
+        <div class="batch-validate-options">
+          <label class="batch-check">
+            <input type="checkbox" id="batchValidateQueueOnly" checked />
+            <span class="muted">Only batch queue rows with output folders</span>
+          </label>
+          <label class="batch-check">
+            <input type="checkbox" id="batchValidateStrict" />
+            <span class="muted">Strict (warnings fail batch)</span>
+          </label>
+        </div>
+        <div class="pipeline-validation-toolbar">
+          <button type="button" class="primary" id="batchValidateRunBtn">Run batch validation</button>
+          <button
+            type="button"
+            class="primary secondary"
+            id="batchExportXmlBtn"
+            title="Export noteval_export XML for each batch queue folder into noteval_extractor/xml."
+          >
+            Export batch to XML
+          </button>
+          <button
+            type="button"
+            class="primary secondary"
+            id="batchCompareXmlDbBtn"
+            title="Download .xlsx comparing batch queue export XML to cdo_noteval_tranches."
+          >
+            Compare batch with DB
+          </button>
+          <button type="button" class="primary secondary" id="batchValidationSummaryBtn">Load batch summary</button>
+          <button
+            type="button"
+            class="primary secondary small"
+            id="batchValidationSummaryToggleBtn"
+            aria-expanded="false"
+            hidden
+          >
+            Show full batch summary
+          </button>
+        </div>
+        <p class="hint validation-summary" id="batchValidationSummaryStatus" aria-live="polite"></p>
+        <pre
+          class="result pipeline-validation-pre"
+          id="batchValidationSummaryPre"
+          aria-label="Batch validation summary markdown"
+          hidden
+        ></pre>
+      </section>
+
+      <section class="panel wrapup-panel panel-step panel-step--review" id="wrapupSection" aria-labelledby="wrapupHeading" data-step-label="REV">
+        <header class="panel-head">
+          <span class="panel-step-mark" aria-hidden="true">04</span>
+          <div class="panel-head-text">
+            <h2 id="wrapupHeading">Tranche, waterfall &amp; admin</h2>
+            <p class="panel-deck muted wrapup-lead">
+              Review <strong>02</strong> and <strong>03</strong> for the active folder. Refreshes after extraction; use
+              <strong>Refresh</strong> after manual edits.
+            </p>
+          </div>
+        </header>
+        <div class="wrapup-toolbar wrapup-toolbar-row">
+          <label class="field field-grow wrapup-deal-field">
+            <span>Deal &amp; payment date</span>
+            <select id="wrapupDealSelect" class="wrapup-deal-select" aria-describedby="wrapupHeading">
+              <option value="">Loading…</option>
+            </select>
+          </label>
+          <div class="wrapup-toolbar-actions">
+            <button type="button" class="primary secondary" id="wrapupRefreshBtn">Refresh</button>
+            <button type="button" class="primary secondary" id="wrapupCopyBothBtn">Copy all panels</button>
+          </div>
+        </div>
+        <aside class="wrapup-deal-meta" id="wrapupDealMeta" aria-label="Deal identifiers and key dates" hidden>
+          <dl class="wrapup-deal-meta-grid">
+            <div class="wrapup-deal-meta-item">
+              <dt>Deal ID</dt>
+              <dd data-field="deal_id">—</dd>
+            </div>
+            <div class="wrapup-deal-meta-item">
+              <dt>Payment date</dt>
+              <dd data-field="payment_date">—</dd>
+            </div>
+            <div class="wrapup-deal-meta-item">
+              <dt>Determination date</dt>
+              <dd data-field="determination_date">—</dd>
+            </div>
+          </dl>
+        </aside>
+        <p class="hint muted" id="wrapupStatus" aria-live="polite"></p>
+        <div class="cockpit-grid wrapup-grid wrapup-grid-3">
+          <div class="cockpit-pane">
+            <h3 class="cockpit-sub">Tranche — <code>02</code></h3>
+            <div
+              class="cockpit-pre wrapup-pre wrapup-tranche-panel"
+              id="wrapupTranchePanel"
+              aria-label="Primary class balance grid from 02"
+            ></div>
+          </div>
+          <div class="cockpit-pane">
+            <h3 class="cockpit-sub">Waterfall &amp; fees — <code>03</code></h3>
+            <div
+              class="cockpit-pre wrapup-pre wrapup-fees-panel"
+              id="wrapupFeesPanel"
+              aria-label="Waterfall and fees from 03"
+            ></div>
+          </div>
+          <div class="cockpit-pane">
+            <h3 class="cockpit-sub">Admin grid — <code>03</code></h3>
+            <div
+              class="cockpit-pre wrapup-pre wrapup-admin-panel"
+              id="wrapupAdminPanel"
+              aria-label="Administrative Expenses grid from 03"
+            ></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="batch-paste-dialog" id="batchPasteDialog" aria-labelledby="batchPasteDialogTitle">
+      <h3 id="batchPasteDialogTitle">Paste multiple deals</h3>
+      <p class="muted batch-paste-hint">
+        One deal per line (deal ID, space, payment date). Fills blank rows first, then grows the table as needed (max 50).
+      </p>
+      <textarea
+        id="batchPasteTextarea"
+        class="batch-paste-textarea"
+        spellcheck="false"
+        rows="10"
+        placeholder="825275100 3/16/2026&#10;825275101 3/16/2026"
+      ></textarea>
+      <div class="batch-paste-actions">
+        <button type="button" class="primary" id="batchPasteApplyBtn">Apply to table</button>
+        <button type="button" class="primary secondary" id="batchPasteCancelBtn">Cancel</button>
+      </div>
+    </dialog>
+    <dialog class="batch-paste-dialog" id="batchPasteFoldersDialog" aria-labelledby="batchPasteFoldersDialogTitle">
+      <h3 id="batchPasteFoldersDialogTitle">Paste segmented output folders</h3>
+      <p class="muted batch-paste-hint">
+        One folder per line: full path, or basename like <code>824048437_20260422</code> under
+        <code>noteval_extractor/output</code>. Fills rows without an output folder first (deal line inferred when empty).
+      </p>
+      <textarea
+        id="batchPasteFoldersTextarea"
+        class="batch-paste-textarea"
+        spellcheck="false"
+        rows="10"
+        placeholder="C:/.../noteval_extractor/output/824048437_20260422&#10;830178020_20260422"
+      ></textarea>
+      <div class="batch-paste-actions">
+        <button type="button" class="primary" id="batchPasteFoldersApplyBtn">Apply to table</button>
+        <button type="button" class="primary secondary" id="batchPasteFoldersCancelBtn">Cancel</button>
+      </div>
+    </dialog>
+    <script src="/static/app.js?v=20260610b" type="module"></script>
+  </body>
+</html>

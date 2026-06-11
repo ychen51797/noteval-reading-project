@@ -49,10 +49,12 @@ r.sent = '0' and  ad.send_dm = 1 and
 ( ( r.report_format = 'PDF' and r.report_type like 'Quarterly%' )
 or (r.report_format = 'PDF' and r.report_type like 'Note%' )
 or (r.report_format = 'PDF' and r.report_type like '%Waterfall%'  )
-or (r.report_format = 'PDF' and r.report_type like '%payment%') 
+or (r.report_format = 'PDF' and r.report_type like '%payment%')
+or (r.report_format = 'PDF' and r.report_type like '%Noteval%')
 or (
 (trustee_file_name like '%Quarterly%' or trustee_file_name like '%Note%' or trustee_file_name like '%waterfall%' or trustee_file_name like '%payment%') 
-and  trustee_file_name not like '%notice%' and r.trustee = 'CDOMonitoring') 
+and  trustee_file_name not like '%notice%' and r.trustee = 'CDOMonitoring')
+or (report_type = 'Investor Report - Summary' and R.trustee = 'BONY')
 )
 and r.report_type not like '%notice%' and r.report_type <> 'Noteholder Updates'
 and r.payment_date is not null

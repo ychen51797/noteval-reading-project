@@ -1,377 +1,258 @@
 ---
 name: noteval_extractor
 description: >-
-  Agent workflow to extract note valuation / trustee payment report information
-  from PDFs: segment with segment_pdf, navigate via _page_index.md (and for Wells
-  Fargo optionally _page_index_waterfall.md + _chunks_waterfall/; for File 03
-  also attach note-val _chunks/ pages for a separate Administrative Expenses
-  statement when present), fill
-  extraction-templates.md (tables, checklist, source text) per section, then
-  validate with validate_noteval.py (writes validation_report.md). File 03
-  **Sub category** (legacy column header **fee_type**) uses the same normalized cross-deal literals for XML export and database
-  ingestion (map to warehouse keys in ETL if needed).
-  Use when the user wants human-in-the-loop or agent-led extraction, markdown
-  outputs, completeness checks, or a pipeline before/ alongside read_noteval
-  scripts. Set env for LLM UI (NOTEVAL_DRAFT_API_KEY or OPENAI_API_KEY; see
-  Prerequisites) when using server.py / noteval_llm.
+  Agent-led extraction of CLO and note valuation trustee payment PDFs into
+  structured markdown (01–04): segment via pdf_workflow/batch_segment, navigate
+  _page_index.md (Wells Fargo dual PDFs use _page_index_waterfall.md +
+  _chunks_waterfall/), fill extraction-templates.md, validate with
+  validate_noteval.py, then map_valuation_fees.py for 05. Covers Computershare
+  PDD/IDD pdfplumber mapping, Distribution in US$ fixed layouts, waterfall vs
+  class-balance scope, and Administrative Expenses grids. Use whenever the user
+  wants noteval extraction, trustee report parsing, fill extraction templates,
+  batch segment deals, markdown outputs with source text, completeness checks,
+  or a human-in-the-loop pipeline before/alongside read_noteval scripts — even
+  if they only mention payment date reports, class balances, or waterfall fees.
+  Set NOTEVAL_DRAFT_API_KEY when using server.py / noteval_llm.
 ---
 
 # noteval_extractor
 
-You are the **note valuation extraction agent**. Your job is to turn trustee / note valuation **PDF text** (one PDF for most trustees, **two** for Wells Fargo after `batch_segment.py`) into **structured markdown** in an output directory, with **traceable source text** and a **completeness checklist**, then (when available) run validation.
+You are the **note valuation extraction agent**. Turn trustee / note valuation **PDF text** (one PDF for most trustees, **two** for Wells Fargo) into **structured markdown** with **traceable source text**, a **completeness checklist**, validation, and fee mapping.
 
-**Sub category (File `03`, `### Valuation-relevant fees`):** The fee roll-up table is **three columns only:** **Main category** | **Sub category** | **Amount paid**. Populate **Sub category** with the **allowed literals** from **`extraction-templates.md`** — not ad hoc labels. (Older files may still label the leaf column **`fee_type`** and may include extra columns; **`map_valuation_fees.py`** / XML export accept those.) Those codes are the **stable leaf names** for **XML export** and **database** loads; **`Main category`** is the rollup (**Administrative expense**, **Management fees**, **Tax**, **Hedge**, **Other**). Printed payee / clause text stays in **`### Waterfall table`** / **Source Text** for audit.
+## Deliverables
 
-**`02` Deutsche Bank “Distribution in US$” — fixed column order (protocol, no reasoning, no header reconstruction):** Deutsche Bank trustee reports print a **Distribution in US$** grid with a **fixed, known column order**. Apply all mappings mechanically — no judgment, no header reconstruction required:
+| Step | File | Who |
+|------|------|-----|
+| 1 | `01_report_metadata.md` | Agent |
+| 2 | `02_tranche_class_balances.md` | Agent |
+| 3 | `03_interest_principal_waterfall.md` | Agent |
+| 4 | `04_extraction_summary.md` | Agent |
+| 5 | `05_valuation_relevant_fees.md` | **`map_valuation_fees.py`** (not hand-authored) |
 
-| As printed | Template field |
-|------------|----------------|
-| Class | Notes only |
-| Ccy | Notes only |
-| Original Face Value | `Original balance` |
-| Prior Principal Balance | `Beginning balance` |
-| Percent of Original Face Value (prior) | Notes only |
-| Optimal Interest | Notes only |
-| **Interest Paid** | **`Interest payment`** |
-| **Principal Paid** | **`Principal payment`** |
-| Total Payment | Notes only (cross-check: = Interest Paid + Principal Paid) |
-| Defaulted Interest | Notes only |
-| Cumulative Deferred/Defaulted Interest | Notes only |
-| **Current Principal Balance** | **`Ending balance`** |
-| Percent of Original Face Value (current) | Notes only |
+**Canonical layouts:** `references/extraction-templates.md` (Files **01**–**05**).
 
-**Critical:** pypdf linearization on this layout presents the **Interest Paid** column value at position 3 in the data stream (after Original Face Value and Prior Principal Balance), immediately before the percentage columns. Do **not** label this value as “Deferred/Cumulative” or “not period cash” — it is **Interest Paid**. The Cumulative Deferred/Defaulted Interest column appears later and is typically 0.00 for performing classes. **Known error — deal 825275100:** agent misread Interest Paid (3,836,500.73 for SUB-144A + 316,195.11 for SUB-REGS = 4,152,695.84 total) as “Deferred/Cumulative Interest — not period cash,” setting SUB Interest payment = 0.00. This is always wrong on Deutsche Bank Distribution in US$. Do **not** apply this fixed layout to any other trustee.
+**Domain depth (read when needed):**
 
-**`02` Distribution in US$ — trustee-specific fixed column order (protocol, no header reconstruction):** Each trustee prints a **fixed, known column order** for Distribution in US$ / class balance grids. **Do not** attempt to reconstruct camel-jammed headers by splitting tokens — that is free-form reasoning that produces errors (e.g. mislabeling **Interest Paid** as **Deferred/Cumulative**). Instead, identify the trustee and apply the matching fixed layout below mechanically.
+- **`references/file-02-domain-rules.md`** — Distribution in US$ column layouts, Computershare pdfplumber CUSIP→class, class-name protocol, principal vs balance mapping.
+- **`references/xml-export.md`** — XML export from **`05`**.
 
-**US Bank — Distribution in US$ (wide voucher):**
-`Original Face Value` | `Beginning Principal Balance` | `Principal Paid` → `Principal payment` | `Interest Paid` → `Interest payment` | `Ending/Current Principal Balance` → `Ending balance` | `Total Payment` (cross-check). Known deals: 825578539, 825594251, 830246667, 831182614, 867049059.
+For **programmatic** zero-LLM parsing or PDF reconciliation, use the **`read_noteval`** skill — not this agent workflow. Capture clause ladders and Section 11.1 disbursements in **`03`** per **`extraction-templates.md`**; do not re-derive layouts here when **`read_noteval`** already covers them.
 
-**US Bank — Notes Information / Section 3 grid (BNY-style):**
-`Original Principal Outstanding` | `Beginning Principal Outstanding` → `Beginning balance` | `All In Rate` → `Interest rate` | `Interest Due` → `Interest payable` | `Deferred Interest Due` → `Deferred interest` | `Interest Paid` → `Interest payment` | `Principal Paid` → `Principal payment` | `Ending Principal Outstanding` → `Ending balance`. Known deals: 825288561, 824976105, 830947388, 831268599, 867302616, 867555158.
+## Non-negotiable gates
 
-**Computershare — PDD/IDD (Principal/Interest Distribution Detail):**
-`Original Face` | `Period Beginning Balance` → `Beginning balance` | `Principal Distribution` → `Principal payment` | `Deferred Interest` | `Ending Balance` → `Ending balance` | `Coupon Rate` → `Interest rate`. Known deals: 500020237, 823904788, 824910826, 867424755, 868776484.
+- **`02` vs `03` scope** — Class / distribution / deferred interest in **`02`** only. Fee grids, Section 11.1 waterfalls, and admin expense vouchers in **`03`** only. Never paste an admin grid into **`02`**.
+- **Fees → `05`, not `03`** — Do **not** add **`### Valuation-relevant fees`** under **`03`** on new runs. Capture fee cash in **`### Waterfall table`** and/or **`### Disbursement ladder`** with **Amount paid** on each fee line, then run **`map_valuation_fees.py`**. **`### Administrative Expenses grid`** is audit / voucher tie-out only — not a source for **`05`**.
+- **Computershare PDD/IDD** — Read **`_chunks_structured/pdd_idd_pdfplumber.md` first**; never nth-position CUSIP↔class pairing. See **`references/file-02-domain-rules.md`**.
+- **Validate loop** — After **`02`** (and before finishing), run **`validate_noteval.py`**; fix Rule 5 roll-forward warnings on Distribution in US$ rows before ship.
+- **Source Text** — Verbatim from **`_chunks/`** or **`_chunks_waterfall/`** with **Page N** labels.
 
-**Opening/Closing Balance layout (Citibank and similar):**
-`Original Face Value` | `Opening Balance` → `Beginning balance` | `Repayment of Principal` → `Principal payment` | `Closing Balance` → `Ending balance` | `Accrued Interest Due` → `Interest payable` | `Deferred Interest`. Known deals: 831358226, 867046842, 867325679.
-
-**Unknown trustee layout:** If the deal’s trustee does not match any layout above, read the column headers **verbatim from the printed page** using the page index and chunk text — do **not** guess or reconstruct. Record a **`### Column mapping`** in **`## Extracted Data`** citing the exact printed header line. If headers are genuinely ambiguous in the linearized text, flag in **Notes** and escalate — do not invent a mapping.
-
-**Self-validation loop (every `02` save, required for wide vouchers):** After writing **`02_tranche_class_balances.md`**, run `python noteval_extractor/scripts/validate_noteval.py <output-dir>` and **read `validation_report.md`**. Treat **any** Rule 5 **principal roll-forward** warning on a **Distribution in US$**-sourced row as a **column mis-map** (the most common signature is a single-class delta equal to that class's **`Interest payment`** — i.e. **Total Payment** copied into **`Ending balance`**). Re-open the chunk, identify the trustee, re-apply the correct **fixed column order** from the trustee-specific layout table above, re-map by column title, save, and re-run the validator. Loop until Rule 5 passes (or the trustee's own printed columns demonstrably do not tie — document in **Notes** with the failing line quoted).
-
-**`02` class names — same vs different (protocol, string equality only, no reasoning):** Apply this decision tree mechanically: **(1) Strip whitespace** from both names. **(2) String equality check:** if `strip(A) == strip(B)` → same class, one primary row. If not equal → different class, separate primary row. **Stop. No further judgment.** Do **not** evaluate whether names sound similar, mean the same thing, or belong to the same tranche family — that is reasoning, not a protocol. **Examples of different classes that must not be merged:** `Subordinated Notes` ≠ `Subordinated Preferred Return Notes`; `A2L-R2` ≠ `AL1-R2`; `D-R` ≠ `D-RR`. **(3) Program slices exception — fixed rule, not judgment:** If the name ends with a known program suffix (`-144A`, `-REGS`, `-REG S`, `-AI`, `-RegS`) after stripping, remove that suffix and apply the equality check on the base name. If the base names match → same primary row, separate listing rows. Example: `A-144A` and `A-REGS` → base `A` == `A` → one primary `A`, two listing rows. **(4) Identical base name, multiple CUSIP rows → Multi-listing:** one primary row + `### Tranche by listing` per `extraction-templates.md`. Set `Multi-listing tranches? = Y` in Summary.
-
-**`02` class labels (Note Class / Class, not CUSIP):** The **`Class`** column in **`### Class balance table (primary)`** and **`### Distribution grid`**, and **`Economic class`** in **`### Tranche by listing`**, must follow the trustee’s **printed** tranche name (**Note Class**, **Class**, **SUB**, **B-1**, etc.) from the **Note Class** column on **Computershare** PDD/IDD tables — **not** the **CUSIP** in the **Identifier** column. Put **CUSIP** / **ISIN** only in **listing** identifier columns when **`Multi-listing`** = **Y**. **Computershare PDD/IDD layout:** **every** **Note Class** section (**A-R**, **F-R**, **SUB**, **X**, …) ends with **Sub Totals:** = **aggregated $ for all CUSIP listings in that section** (use for **primary** when printed). When a tranche has **two or more CUSIPs** with **split balances**, **Sub Totals** is the **tranche total** — per-CUSIP slices go in **listing** only. **Sub Totals** is **not** the **SUB** note class name and **not** “every line is SUB.” **Refinance labels:** **-R** = refinanced once; **-RR** = twice; some deals print **`2`** instead (**CR2** = twice refinanced, same role as **CRR**). Latest line (**CRR**, **CR2**, **C-RR**, **D-RR**, …) usually **carries payment**; **CR**, **C-R**, **D**, … are often **paid down** (**0.00** period beginning on **Sub Totals**). **SUB interest cash:** on **Interest Distribution Detail**, map **`Interest payment`** from the **SUB** class **Sub Totals** / footer **Interest Distribution** column (**not** **0.00** because coupon is **0** or **Next Payment** says **Residual**). When the class / **Distribution Summary** table shows **Interest paid** **0.00** but **`03`** **interest-proceeds** waterfall pays **Holders of the Subordinated Notes** (e.g. U.S. Bank **(V)**), **fill `Interest payment`** from that waterfall **Payment** — see **`extraction-templates.md`** (*`02` class table ≠ `03` waterfall Paid* exception). **D**, **D-R**, **D-RR**, **CR**, **CRR**, etc. are **different** primary rows. See **`extraction-templates.md`** File **`02`** (*Dual exhibits*, *Refinance -R / -RR*, *Two CUSIPs under one economic class*).
-
-**`02` Computershare PDD/IDD — pdfplumber-first CUSIP→class (required):** On **Principal / Interest Distribution Detail**, pypdf linearization prints **(1)** a CUSIP strip in registration/alphabetical order, **(2)** a Note Class label stack, **(3)** Sub Totals $ bands — these three blocks are **not in the same order**, so CUSIP position in the pypdf stream **cannot** reliably determine which Note Class it belongs to. **Required workflow:**
-
-1. **Open `_chunks_structured/pdd_idd_pdfplumber.md` first** (pdfplumber uses vector geometry to group each CUSIP under its printed Note Class section). Read each table: the first column carries the Note Class header; the Identifier column carries the CUSIPs grouped under it. This is the **authoritative CUSIP → Note Class mapping**. Use it to populate **`Economic class`** in **`### Tranche by listing`**.
-2. **Use Sub Totals $ from the pdfplumber table** (the "Sub Totals:" row under each class section) for **primary** **`Original balance`**, **`Beginning balance`**, **`Principal payment`**, and **`Ending balance`** — not the nth-position band from the pypdf label stack. Copy verbatim. **Required arithmetic check (no reasoning — pure arithmetic):** after copying all CUSIP rows for a section into `### Tranche by listing`, verify that the sum of individual CUSIP balances equals the section's Sub Totals: `sum(CUSIP beginning balances in section) = Sub Totals beginning balance`. If this fails, you have either missed a CUSIP, double-counted one, or assigned a CUSIP to the wrong section — correct the listing assignment mechanically and re-sum. Do not alter the Sub Totals value itself. **Example:** A1-R2 has two CUSIPs: CUSIP-X balance 0.00 (paid-down), CUSIP-Y balance 1,000.00; Sub Totals = 1,000.00; check: 0.00 + 1,000.00 = 1,000.00 ✓. Both CUSIPs still appear as separate listing rows under A1-R2.
-3. **Fallback only — applies exclusively when `_chunks_structured/pdd_idd_pdfplumber.md` does not exist:** Do **not** assign by nth-label ↔ nth-band position — the label stack, CUSIP strip, and Sub Totals bands are three independently ordered blocks and positional pairing produces cascade errors. Instead assign by arithmetic: for each Sub Totals band, find the CUSIP row(s) in the same page whose individual balances sum to that Sub Totals value — those CUSIPs belong to the class whose label matches that band. Verify: `sum(CUSIP balances matched to band) = Sub Totals balance`. If no exact arithmetic match exists, flag in Notes and escalate — do not guess by position.
-4. **One primary row per distinct printed Note Class**; page-break orphan CUSIPs (extra Sub Totals band without a label on that page) go in **listing** only.
-5. **Never collapse two pdfplumber sections into one primary row (non-negotiable):** If pdfplumber produces N distinct sections (each with its own Sub Totals row), the `02` primary table must have exactly N rows — one per section. **Do not** merge two adjacent sections into one because their names look similar (e.g. `A2L-R2` and `AL1-R2`), one has all-zero balances, or you believe one is "just a label." A paid-down class (0.00 balance) is still a separate primary row. A loan tranche (e.g. `A2L-R2`) with a CUSIP and its own Sub Totals is its own class — never absorb it into its neighbor. Collapsing sections shifts every subsequent class assignment by one, corrupting all downstream balances and interest payments. **Known example — deal 867151089:** agent collapsed `A2L-R2` (BCC3N2PH0, 10M) into `AL1-R2`, reducing 10 sections to 9 primary rows, which shifted B-R2→C-R2, C-R2→D-R2, D-R2→SUB, inflating SUB by 22M.
-
-**Do not use nth-CUSIP-in-strip → nth-label pairing** — the two lists are independently ordered. Known failures from nth-band: **824431650** (A-R omitted; B-R–C1 shifted), **824169432** (C-R+ wrong balance), **825519711** (97988QBJ2 assigned to SUB instead of E-RR). Full procedure: **`extraction-templates.md`** *Computershare PDD/IDD — refinance-chain Sub Totals alignment*.
-
-> **pdfplumber tail-label direction — the tail names the NEXT section, not the current one (required):** In the pdfplumber `pdd_idd_pdfplumber.md` file, the first column (Note Class / col0) for a CUSIP row often ends with a glued token after `Sub Totals:`. That token — whether it is a single character or a full class name like **`AL3-R2`** — is the **next** section's class label, **not** the class for the row it appears on. The CUSIP belongs to the class whose name was the tail on the **preceding** row. **Concrete example — deal 867151089 `BCC3N3Y39`:** the col0 text reads `BCC3N3Y39 0.00 ... Sub Totals: 0.00 ... AL3-R2`. The agent read this as "BCC3N3Y39 = AL3-R2." That is wrong. `AL3-R2` is the header of the *following* section; the preceding row's tail was `AL2-R2`, so BCC3N3Y39 belongs to **AL2-R2**. This off-by-one compounded across the entire class chain: HAG8 was called C-R2 instead of B-R2, HAJ2 was called D-R2 instead of C-R2, HAL7 was called SUB instead of D-R2, and SUB's balance was inflated by 22M. **Rule:** `CUSIP row tail = next class`. Assign CUSIP to the class named by the *previous* row's tail, or equivalently, by the explicit `| Note Class |` section header above the current block.
-
-> **Never override pdfplumber CUSIP→class with a "follow-up correction" from the linearized label stack (required):** Once you have read `_chunks_structured/pdd_idd_pdfplumber.md` and established CUSIP→class assignments from its section headers, **do not re-derive those assignments from the linearized pypdf text** as a correction or validation pass. The single most common follow-up error: a class (e.g. **D1**) has no CUSIP visible in the linearized CUSIP strip near its label → agent concludes "D1 has no CUSIP / no interest" and shifts all remaining classes by one, overriding correct pdfplumber data. **This is always wrong.** The reason a class appears "missing" from the linearized CUSIP strip is that pypdf linearizes CUSIPs in registration-alphabetical order, independent of class order — a CUSIP may be physically far from its class label in the text stream. pdfplumber uses vector geometry (box boundaries on the printed page) to correctly group each CUSIP under its class section. **Known example — deal 869770740 D1:** pdfplumber correctly assigned `55823RAG4`+`G5703AAD1` → **D1** and `55823RAJ8` → **D2**. The follow-up agent re-read the linearized strip, saw no CUSIP adjacent to the "D1" label, set D1 interest = 0.00, and shifted D2/E/F/SUB balances and interest values all by one class. **Rule:** if pdfplumber says CUSIP X → class Y, that mapping stands. A "missing CUSIP" in the linearized stream is **not** evidence that the class has no balance — it only means pypdf printed that CUSIP far from the label.
-
-**`02` Computershare multi-CUSIP section — Sub Totals is the class aggregate (required):** When a Note Class section in the pdfplumber table contains **two or more CUSIPs** (including cases with three or more CUSIPs — e.g. two paid-down + one active, or three with split balances), the **Sub Totals row is the sum of ALL CUSIPs in that section** — use it directly as the **primary beginning balance** for that class. **Do not** use only the active CUSIP's individual balance; **do not** try to recompute the aggregate yourself — the trustee's printed Sub Totals is authoritative. Every CUSIP in the section goes in **`### Tranche by listing`** under the same **`Economic class`**, even if its individual balance is 0.00. **Do not** reassign a 0.00-balance CUSIP to a different class just because it appears paid-down. **Known example — deal 825519711 E-RR:** pdfplumber groups **97988QBJ2** (0.00, paid-down) and **97988QBK9** (60,000,000.00, active) both under the **E-RR** Note Class section; the printed Sub Totals = **60,000,000.00** → **E-RR primary beginning balance = 60,000,000.00** (0 + 60M). The "SUB" token visible after the Sub Totals numbers in the pdfplumber glued first-column is the **next section header**, not the class name for the QBJ2/QBK9 rows. EMS confirms: both CUSIPs share moodystrancheid **869519604** (= E-RR). **Setting E-RR beginning balance to 0.00 is wrong** — it means only QBJ2 was captured and QBK9 was missed or mis-routed.
-
-**`02` SUB / F footer — multiple CUSIPs (required):** When **two or more CUSIPs** stack near a **SUB** or **F** footer in **`_chunks/`**, **do not** assign **both** to **SUB** (or **F**) because of the footer or a glued **tail token** — **one `### Tranche by listing` row per CUSIP**; **`Economic class`** from **that** CUSIP's **Sub Totals** / **Original Face** only. **Primary SUB** = SUB CUSIPs only — do not sum **F** / **E** originals into **SUB** (e.g. **824169432**: **31679NAN4** → **F** **12M**, **31679NAQ7** → **SUB** **34.2M**). See **`extraction-templates.md`** *SUB / F footer — multiple CUSIPs*.
-
-**`02` waterfall-only + SUB IRR hurdle (required):** When **no** class balance / PDD / IDD exhibit exists, fill **`02`** from **Section 11.1** ladders only (**first `$`** = paid at step; **`$0.00` `$X`** = running balance). **Holders of the Subordinated Notes until … Internal Rate of Return** on **Principal Proceeds** **(T)** (mirror **(V)** on interest proceeds) → **`Interest payment`**, **not** **`Principal payment`** — source pool ≠ field type (**830482172**). See **`extraction-templates.md`** *waterfall-only package* and *SUB IRR hurdle on principal proceeds*.
-
-This skill is **agent procedure**. For **programmatic** USB / Deutsche parsing, use **`read_noteval_usbank`**, **`read_noteval_deutsche`**, or **`read_noteval_logical_disb`** as appropriate.
+---
 
 ## Prerequisites
 
-- Python with **`pypdf`** (`pip install pypdf`). **`pdfplumber`** (`pip install pdfplumber`) is **strongly recommended**: when installed, **`pdf_workflow.py`** writes **`_chunks_structured/pdd_idd_pdfplumber.md`** (Principal / Interest Distribution Detail tables → Markdown via vector geometry). This file is the **authoritative CUSIP → Note Class mapping** for Computershare PDD/IDD — it determines which CUSIP belongs to which economic class (E-RR, SUB, etc.) without relying on linearized text ordering. The **`export_noteval_xml.py`** exporter reads this file automatically and overrides the listing-table `Economic class` when pdfplumber disagrees. The exporter also emits a `<mapping_conflicts>` block and stderr warning when two classes share the same `moodystrancheid` — always investigate such warnings before loading to the database.
-- **`segment_pdf.py`** from **CS-Structured-Skills** (`rmbs-deal-doc-extractor/scripts/segment_pdf.py`), or set **`NOTEVAL_SEGMENT_PDF`**, or use **`--segment-script`** on the workflow runner.
-- **`noteval_extractor/scripts/pdf_workflow.py`** (runs Step 1: segmentation). The repo may also ship **`scripts/pdf_workflow.py`** as a thin wrapper to the same script.
+- Python with **`pypdf`** (`pip install pypdf`). **`pdfplumber`** strongly recommended — **`pdf_workflow.py`** writes **`_chunks_structured/pdd_idd_pdfplumber.md`** for Computershare PDD/IDD (authoritative CUSIP→class; also used by **`export_noteval_xml.py`**).
+- **`segment_pdf.py`** from CS-Structured-Skills, or set **`NOTEVAL_SEGMENT_PDF`**, or **`--segment-script`** on the workflow runner.
+- **`noteval_extractor/scripts/pdf_workflow.py`** for Step 1 segmentation.
 
 ### Environment variables (LLM / web UI)
 
-If you use the repo’s **`server.py`** web UI or anything that calls **`noteval_llm.py`** (OpenAI-compatible chat completions), **set an API key** before starting the server; otherwise LLM calls will fail.
+When using **`server.py`** or **`noteval_llm.py`**, set an API key:
 
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| **`NOTEVAL_DRAFT_API_KEY`** | Set this **or** `OPENAI_API_KEY` | Preferred API key for the completions endpoint. |
-| **`OPENAI_API_KEY`** | Fallback | Used when `NOTEVAL_DRAFT_API_KEY` is unset. |
-| **`NOTEVAL_DRAFT_BASE_URL`** | No | Base URL without trailing slash (default `https://api.openai.com/v1`). Point at any OpenAI-compatible provider if needed. |
-| **`NOTEVAL_DRAFT_MODEL`** | No | Model id (default `gpt-5.4`). Built-in cost table includes `gpt-5.4` ($2.50 / $15.00 per 1M in/out, approximate). |
-| **`NOTEVAL_DRAFT_USAGE_LOG`** | No | Path to append JSONL usage lines; default under repo **`logs/noteval_draft_api_usage.log`**. Set to `0` or `off` to disable. |
-| **`NOTEVAL_DRAFT_PRICE_INPUT_PER_1M`** / **`NOTEVAL_DRAFT_PRICE_OUTPUT_PER_1M`** | No | Optional USD per 1M tokens for cost estimates (override built-in table). |
-| **`NOTEVAL_INDEX_PREVIEW_ENRICH`** | No | When **`1`** (default), the UI pipeline calls **`noteval_index_preview.py`** after segmentation to **LLM-rewrite** `_page_index.md` (and `_page_index_waterfall.md` when present) before index-driven drafts. Set **`0`** / **`off`** to keep rule-only previews from **`pdf_workflow.py`**. |
-| **`NOTEVAL_INDEX_PREVIEW_MODEL`** | No | Model for index enrichment (default: same as **`NOTEVAL_DRAFT_MODEL`**). |
-| **`NOTEVAL_INDEX_PREVIEW_BATCH_PAGES`** | No | Pages per API call (default **`10`**). |
-| **`NOTEVAL_INDEX_PREVIEW_FORCE`** | No | Set **`1`** to re-enrich even if the index already says **LLM-enriched**. |
-| **`NOTEVAL_DRAFT_USE_TOOLS`** | No | Default **on** — function calling (`read_page_index`, `read_chunk_pages`, …). Set **`0`** / **`off`** for one pre-built chunk bundle per call. |
-| **`NOTEVAL_DRAFT_MAX_TOOL_TURNS`** | No | Max tool round-trips per deliverable (default **`14`**). Requires a model/API that supports **`tools`** on chat completions. |
-
-**Windows (PowerShell, current session):**
+| Variable | Purpose |
+|----------|---------|
+| **`NOTEVAL_DRAFT_API_KEY`** or **`OPENAI_API_KEY`** | Completions endpoint key |
+| **`NOTEVAL_DRAFT_BASE_URL`** | OpenAI-compatible base URL (default `https://api.openai.com/v1`) |
+| **`NOTEVAL_DRAFT_MODEL`** | Model id (default `gpt-5.4`) |
+| **`NOTEVAL_INDEX_PREVIEW_ENRICH`** | `1` = LLM-rewrite page index previews after segmentation; `0` = rule-only |
+| **`NOTEVAL_DRAFT_USE_TOOLS`** | Default on — chunk/index tool calling; `0` for single bundle mode |
 
 ```powershell
 $env:NOTEVAL_DRAFT_API_KEY = "your-key-here"
-# optional:
-# $env:NOTEVAL_DRAFT_BASE_URL = "https://api.openai.com/v1"
-# $env:NOTEVAL_DRAFT_MODEL = "gpt-5.4-mini"
 ```
 
-**macOS / Linux (bash, current session):**
+Do not commit secrets. See full env table in repo docs if tuning index preview or vision rasterization.
 
-```bash
-export NOTEVAL_DRAFT_API_KEY="your-key-here"
-# optional:
-# export NOTEVAL_DRAFT_BASE_URL="https://api.openai.com/v1"
-# export NOTEVAL_DRAFT_MODEL="gpt-5.4-mini"
-```
-
-Persist keys the usual way for your OS (User environment variables on Windows, `~/.profile` / shell rc on Unix). Do not commit secrets into the repo.
+---
 
 ## Workflow overview
 
 | Step | Action |
 |------|--------|
-| **1** | Segment the PDF (`noteval_extractor/scripts/pdf_workflow.py`) into `_chunks/`, `_page_index.md`, `_manifest.md` (and **`_chunks_structured/pdd_idd_pdfplumber.md`** when **`pdfplumber`** is installed — optional layout aid for PDD/IDD). |
-| **2** | Read **`_page_index.md`** to map sections to page numbers. |
-| **3** | Load **`references/extraction-templates.md`** — strict per-file templates (**01**–**04** in order; no standalone **`05_*.md`**; **06** deprecated). |
-| **4** | For each extraction target: locate pages → read **`_chunks/`** (and for **`02`** on Computershare: **read `_chunks_structured/pdd_idd_pdfplumber.md` first** — it is the **authoritative CUSIP → Note Class mapping** via PDF vector geometry; use it to assign `Economic class` in listing and Sub Totals $ for primary; **never** assign by nth-position of the pypdf label stack or CUSIP strip; if the file is absent, assign by arithmetic match: `sum(CUSIP balances) = Sub Totals` — not by position) (for **`03`**, **`_chunks_waterfall/`** when Wells Fargo dual segmentation exists; **also** the note-valuation **`_chunks/`** pages with a separate Administrative Expenses statement) → fill template → write under **`<output-dir>/`**. |
-| **5** | Run **`validate_noteval.py`** on **`<output-dir>/`** (writes **`validation_report.md`**). It flags common **`03`** gaps (fees, negatives, etc.) and, when **`## Source Text`** contains the Computershare **(O)** “admin not paid under **(B)**” block, checks that **`O(a)`** **Amount paid** matches **Source Text** (**lockstep** — see **`extraction-templates.md`**). |
+| **1** | Segment PDF(s) → `_chunks/`, `_page_index.md`, `_manifest.md` (+ waterfall tree for Wells Fargo) |
+| **2** | Read page index(es); map sections to page ranges |
+| **3** | Load **`extraction-templates.md`** |
+| **4** | Extract **`01`**–**`04`** section by section |
+| **5** | **`validate_noteval.py`** → read **`validation_report.md`**; fix errors and material warnings |
+| **6** | After **`01`**–**`04`**: **`map_valuation_fees.py`** → **`05_valuation_relevant_fees.md`** + **`fee_mapping_report.md`** (automatic in SDK / UI pipeline when **`03`** is in scope); re-validate |
 
 ---
 
-## Wells Fargo vs single-PDF trustees (e.g. U.S. Bank)
+## Wells Fargo vs single-PDF trustees
 
-**Single PDF (typical U.S. Bank and similar):** `get_file_path.py` / `deal_paths.csv` has **`pdf_path`** only ( **`waterfall_path`** empty). `batch_segment.py` writes one set under **`<output-dir>/`**: **`_chunks/`**, **`_page_index.md`**, **`_manifest.md`**. Tranche / distribution / class tables **and** waterfall or fee grids usually all appear in that one PDF — map everything from **`_page_index.md`**, read **`_chunks/`** for **`01`**, **`02`**, and **`03`**, and cite that same tree in **Source Text**. **Split deliverables, not duplicate tables:** class / distribution / per-tranche interest & principal stay in **`02`**; **Administrative Expenses** grids and **Section 11.1** waterfalls stay in **`03`** (**`### Waterfall table`** (grid) **and/or `### Disbursement ladder`** (clause-only) — **one payee / one amount per row** for **`map_valuation_fees.py`** → **`05`**; **do not** author **`### Valuation-relevant fees`** inside **`03`** on new runs) — **do not** paste an admin-expense **grid** into **`02`** just because it shares the PDF.
+**Single PDF (typical U.S. Bank):** One **`_chunks/`** tree. **`01`**, **`02`**, **`03`** all from **`_page_index.md`** + **`_chunks/`**.
 
-**Wells Fargo (two PDFs, one deal folder):** `deal_paths.csv` has **`pdf_path`** (Note Valuation Report — tranche / class / distribution style content) and **`waterfall_path`** (Waterfall Calculations Report — waterfall fees and related calculations). `batch_segment.py` still uses **one** output folder per deal and payment date (e.g. **`825275100_20260316/`**), but produces **two** segmentation stacks:
+**Wells Fargo (two PDFs):** Same output folder, two segmentation stacks:
 
 | Role | Artifacts |
 |------|-----------|
-| Note valuation (`pdf_path`) | **`_page_index.md`**, **`_chunks/`**, **`_manifest.md`** |
-| Waterfall (`waterfall_path`) | **`_page_index_waterfall.md`**, **`_chunks_waterfall/`**, **`_manifest_waterfall.md`** |
+| Note valuation | **`_page_index.md`**, **`_chunks/`**, **`_manifest.md`** |
+| Waterfall | **`_page_index_waterfall.md`**, **`_chunks_waterfall/`**, **`_manifest_waterfall.md`** |
 
-**Extraction routing:** Use **`_page_index.md`** + **`_chunks/`** for **`01`** and **`02`** (and any note-val-only pages). **Wells Fargo — `03` and fees:** When **`_chunks_waterfall/`** and **`_page_index_waterfall.md`** exist, build **`03`** waterfall content (**`### Waterfall table`**, logical ladder, **`### Valuation-relevant fees`** as the **fee-only roll-up** from that waterfall, fee-related **`### Other waterfall lines`**) from **`_page_index_waterfall.md`** + **`_chunks_waterfall/`** + **`_manifest_waterfall.md`** **only** — **do not** take **waterfall / Section 11.1** fee **$** or waterfall **Source Text** from **`_chunks/`** (note-val PDF is not the authority for that ladder on this layout). On the **Waterfall Calculations Report**, lines that show **two** dollar amounts with **no** headers: **left** = **`Amount paid`** for that step; **right** = running / remainder (**`Amount available / running`**) unless **`03`** **`### Column mapping`** proves otherwise — see **`extraction-templates.md`** File **`03`** (**Wells Fargo — two-number rows**). **Administrative Expenses grid (required attachment):** For trustee packages that print a **separate Administrative Expenses** (or equivalent) **statement** on the **note-valuation** PDF, **always** attach that page’s **`_chunks/`** file(s) when producing **`03`**, and use them for **`### Administrative Expenses grid`**, the grid’s **`### Column mapping`**, and **verbatim Source Text** for that exhibit (the admin grid is usually **not** in waterfall-only chunks). **`### Valuation-relevant fees`** **`Amount paid`** stays **waterfall / ladder only** per File **`03`** — **do not** populate the fee roll-up from the admin-grid **`$`**. If the note-val PDF repeats a waterfall headline for context only, mention it in **`04`** / **`03` Notes** without copying non-grid fee **$** from **`_chunks/`**. **`01`** / **`02`** stay on **`_chunks/`** only. In **`04_extraction_summary.md`**, state explicitly that the run used **dual segmentation (Wells Fargo)** when the waterfall artifacts exist.
+**Routing:** **`01`** / **`02`** from note-val tree only. **`03`** waterfall ladder and fee **Amount paid** from **`_chunks_waterfall/`** when it exists — **not** from note-val **`_chunks/`** for those amounts. **Always** attach note-val **`_chunks/`** for a **separate Administrative Expenses** statement when present (**`### Administrative Expenses grid`** + grid Source Text). Document dual segmentation in **`04`**.
 
-**Waterfall report vs `### Valuation-relevant fees`:** Trustee **proceeds application** PDFs (Waterfall Calculations Report, **Section 11.1** grids, Computershare **Application of Interest/Principal Proceeds**, etc.) list **all** payment steps in priority order — **fees**, **taxes**, **admin**, **class interest**, **class principal**, **subordinated / residual distributions**, and other **structural** lines. That full picture belongs in **`### Waterfall table`** (and **`## Source Text`**) for audit and tie-out. **`### Valuation-relevant fees`** is **not** a duplicate of the whole exhibit: it is the **fee-only roll-up** — **omit** class **interest** and **class principal** rows (and other non-fee cashflows); those amounts remain **authoritative in `02`**. **Tax** priorities in the waterfall (e.g. **(A)** payment of taxes owed by the **Issuer** / **Co-Issuers**) are **valuation-relevant** → include in **`### Valuation-relevant fees`** as **Main category** **`Tax`** with **Sub category** **`tax_gross_amounts`** (full clause still belongs in **`### Waterfall table`** / **Source Text**); **do not** park those lines **only** under **`### Other waterfall lines`**. When an **Administrative Expenses** **grid** exists, treat it as the **reference** for fee cash on **Paid on the Distribution Date** (trustee, collateral admin, senior/sub management on the same grid, etc.); when the grid prints a **Total** / clear **Paid on DD** aggregate for bundled **admin-band** cash, you **may** use **one** **`administrator_expenses`** row in **`### Valuation-relevant fees`** from that **total** instead of summing many itemized lines — **keep** line detail in **`### Administrative Expenses grid`** / **Source Text** and **Notes** once per **`extraction-templates.md`**; **then** add **Section 11.1** / waterfall fee rows **only** when they are **not** already represented at the **same** **`Amount paid`** (within rounding) — use **Notes** to tie matching waterfall clauses instead of a second row. **Different** paid amounts (e.g. **(B)(a)** vs **(O)(a)**) stay **separate** rows. **`validate_noteval.py`** warns when a legacy **Description** column (if present) looks like a class interest/principal line misfiled under fees.
+**Wells Fargo two-number rows:** Left **`$`** = **Amount paid**; right = running / available unless **`### Column mapping`** says otherwise.
+
+**Waterfall vs fees:** **`### Waterfall table`** / ladder captures the full priority picture for audit. Class interest/principal stay authoritative in **`02`**. Fee typing (**Main category**, **Sub category**, **Amount paid**) is produced in **`05`** by the mapper — not duplicated by hand in **`03`**.
 
 ---
 
 ## Step 1: Segment the PDF
 
-Run from the **repository root** (the folder that contains `noteval_extractor/`). This wraps `segment_pdf.py`:
+From repository root:
 
 ```powershell
 py -3 noteval_extractor/scripts/pdf_workflow.py "<path-to.pdf>" "<output-dir>"
 ```
 
-Equivalent (if present):
+**Exactly two arguments:** PDF path and output directory. Use a **per-deal subfolder** (e.g. `output/825275100_20260316/`).
 
-```powershell
-py -3 scripts/pdf_workflow.py "<path-to.pdf>" "<output-dir>"
-```
-
-**Exactly two arguments:** (1) path to the **`.pdf`** file, (2) **one** output directory where `_chunks/` and the index will be written (created if needed). Do not pass a third path — that triggers `unrecognized arguments`.
-
-**Per-PDF output folder (recommended):** Use a **dedicated subfolder per report** so runs never overwrite each other. Put all runs under one parent (e.g. `noteval_extractor/output/`), and name the **leaf** folder after the **PDF file stem** (filename without `.pdf`), e.g. `180118_175.pdf` → `...\output\180118_175\`, or `197545_1.pdf` → `...\output\197545_1\`. The script creates that leaf directory; you do not need to create it first.
-
-**Batch segmentation from `deal_paths.csv`:** After `get_file_path.py` writes paths, run:
+**Batch:**
 
 ```powershell
 py -3 noteval_extractor/scripts/batch_segment.py --deal-paths noteval_extractor/test/deal_paths.csv --output-root noteval_extractor/output
 ```
 
-Omit `--deal-paths` / `--output-root` to use defaults: `noteval_extractor/test/deal_paths.csv` if present, otherwise **`deal_paths.csv` in the parent folder of the repo** (e.g. `…/projects/deal_paths.csv`). Output root defaults to `noteval_extractor/output`. Each row is written under **`output/<deal_id>_YYYYMMDD/`** when `deal_id` and `payment_date` are present, else **`output/<pdf-stem>/`**. If **`waterfall_path`** is set (Wells Fargo), the note PDF populates the unsuffixed **`_chunks/`** / index / manifest and the waterfall PDF populates **`*_waterfall*`** artifacts in the **same** folder (see **Wells Fargo vs single-PDF** above). Rows with `status` ≠ `ok` are skipped when a `status` column exists.
+Wells Fargo rows with **`waterfall_path`** populate both trees in the same deal folder.
 
-**Artifacts produced** (by `segment_pdf.py`; each run writes one set — `batch_segment.py` may run twice into the same deal folder for Wells Fargo, adding the suffixed waterfall set):
+**Artifacts:** `_chunks/`, `_page_index.md`, `_manifest.md`, optional `_chunks_structured/pdd_idd_pdfplumber.md`, optional `_*_waterfall*` set.
 
-- **`<output-dir>/_chunks/`** — text files such as `pages_001_030.txt` (page markers + raw `pypdf` text).
-- **`<output-dir>/_page_index.md`** — table of page → short preview (navigation).
-- **`<output-dir>/_manifest.md`** — chunk list and sizes.
-- **`<output-dir>/_chunks_waterfall/`**, **`_page_index_waterfall.md`**, **`_manifest_waterfall.md`** — only when **`waterfall_path`** was segmented for that deal folder.
+### Index enrichment (UI pipeline)
 
-Segmentation does **not** interpret sections; that is your job in Step 4.
+After segmentation, the UI may run **`noteval_index_preview.py`** to LLM-tag index previews. Disable with **`NOTEVAL_INDEX_PREVIEW_ENRICH=0`**.
 
-### LLM index preview enrichment (UI / unattended pipeline)
+### Vision / table escalation (Computershare PDD+IDD)
 
-After Step 1, the **noteval UI pipeline** (and **`POST /api/extraction/enrich-page-index`**) may run **`noteval_index_preview.py`** to replace rule-based preview lines with **LLM-written** section tags (e.g. **Distribution in US$**, **Distribution of Interest Proceeds**) so **`noteval_chunk_select`** routes **`01`** / **`02`** / **`03`** more reliably. The first rule-based index is copied to **`_page_index_rules.md`** (primary PDF only). Enriched `_page_index.md` is marked with **LLM-enriched previews** in the header.
-
-```powershell
-py -3 noteval_index_preview.py "<output-dir>"
-# or: py -3 noteval_extractor/scripts/enrich_page_index.py "<output-dir>"
-```
-
-Disable with **`NOTEVAL_INDEX_PREVIEW_ENRICH=0`**, or pass **`enrich_index_previews: false`** on pipeline start. Re-run manually with **`NOTEVAL_INDEX_PREVIEW_FORCE=1`**.
-
-### When to add raster / table images or vision (PDD + IDD, multi-CUSIP)
-
-`segment_pdf.py` / **`_chunks/`** use **linear text** from **pypdf**. That loses **spatial** layout: **Principal Distribution Detail** and **Interest Distribution Detail** often print **headers above or below** the number strip, **Sub Totals** / footer class labels offset from **CUSIP** rows, and **several CUSIP lines per printed Note Class** (144A / Reg S / AI). In those situations—**especially** when **both** PDD and IDD exist and must merge **row-by-row**, and **`Multi-listing`** = **Y**—plain token order is a **last resort**.
-
-**Recommended escalation (human or automated):**
-
-1. **Render** the PDD/IDD **PDF pages** to **images** (or export vector table regions) and align columns by **geometry**, not reading order.
-2. Use **table extraction** on vector PDFs (**camelot**, **tabula**, etc.) when lines and cells are real paths—not only raster OCR.
-3. Use a **vision / multimodal** model on **cropped table images** (or PDF-native screenshots) to read **column headers**, **Note Class** cells, and **which $ belongs to which heading**—then transcribe into **`02`** with **`## Source Text`** still quoting **`_chunks/`** plus a short **Notes** line such as *class columns confirmed from page image* when values were not unambiguous in text alone.
-
-The default **LLM draft** path uses **tool calling** (`noteval_llm.openai_chat_completion_with_tools`) and does **not** attach PDF screenshots. The legacy **chunk-bundle** path (`noteval_llm.openai_chat_completion`) may rasterize pages when **`NOTEVAL_DRAFT_PAGE_IMAGES=1`** (default **off**) and deliverable **`02`** matches **either**: **(A)** chunk bundle contains **Principal Distribution Detail** and **Interest Distribution Detail** plus fragile-layout cues (**≥3** lines containing **Sub Totals** and **≥4** CUSIP-leading lines, **or** **≥6** CUSIP-leading lines); **or** **(B)** **Payment Date Report**–style layouts — e.g. ``_chunks_structured/payment_date_report_pdfplumber.md`` in the bundle and/or linear chunks that fingerprint **Payment Date Report** + **Notes Information** + **Beginning Principal** + **Principal Paid** + **Interest Paid** / **Interest Due** (BNY-style Section 3 consolidated class economics; for **(B)** without fragile cues, structured **payment_date_report_pdfplumber** or the linear fingerprint is enough). Pages rasterized for vision use the **same 1-based page set** as index-driven **`02`** chunk selection (`noteval_chunk_select.index_driven_pages`); if that is unavailable, the server falls back to PDD/PDR index-keyword hits plus neighbors. Capped by **`NOTEVAL_DRAFT_PAGE_IMAGE_MAX_PAGES`** (default **8**). Requires **PyMuPDF** (`pip install pymupdf`). When images are attached, the text portion of the user message may be truncated to **`NOTEVAL_DRAFT_VISION_USER_TEXT_CAP`** (default **120000**) characters. Prefer **validate_noteval** + heading-first rules first; use logs / **`vision`** field on the draft API response to see whether PNGs were attached.
+When linear **`_chunks/`** text loses spatial layout (multi-CUSIP, dual PDD+IDD), prefer pdfplumber first, then table extraction or vision on cropped page images. Default LLM draft uses tool calling without screenshots unless **`NOTEVAL_DRAFT_PAGE_IMAGES=1`**.
 
 ---
 
-## Very large PDFs (e.g. 300+ pages)
+## Very large PDFs (300+ pages)
 
-Payment / trustee PDFs may be **very long** (300+ pages or more). The method does **not** change:
+Use **`_page_index.md`** to locate sections; read only matching **`_chunks/pages_*.txt`** ranges per **`_manifest.md`**. No end-to-end read required.
 
-1. Use **`<output-dir>/_page_index.md`** to find which pages mention metadata, classes, waterfall, fees, or similar.
-2. Open **only** the **`<output-dir>/_chunks/pages_*.txt`** files (and byte ranges within them) that cover those page numbers — see **`_manifest.md`** for chunk boundaries.
-
-You do **not** need to read the entire PDF end-to-end if the index already shows where the useful sections live.
-
-### No tranche or waterfall in the PDF (or not in the searched pages)
-
-If, after a reasonable pass over the **index** and the **relevant chunks**, there is **no** material that supports **`02`** (tranche / class balances) and/or **`03`** (waterfall / proceeds), that is **acceptable**:
-
-- Write **`01`** and **`04_extraction_summary.md`** from whatever exists (cover, TOC, headers).
-- For **`02`** / **`03`**, use **N/A** prose, empty primary tables where the template allows, and **Source Text** that quotes the closest evidence (e.g. “no notes table in extracted pages”) or the TOC lines you used to decide **N/A**.
-- In **`04_extraction_summary.md`**, state explicitly that **tranche** and/or **waterfall** content was **absent** (or not located), and which page ranges were checked.
-
-Downstream tooling may have nothing to consume for **`02`** / **`03`** on that run — that is expected for some report types or redacted bundles. If you run **`validate_noteval.py`**, it may still expect minimal structure in **`02`**; resolve per project convention (e.g. honest **N/A** row, or skip validation when the report truly has no class exhibit).
+**No tranche/waterfall content:** **`02`** / **`03`** may be **N/A** with honest Source Text and **`04`** documentation. Validation may still expect minimal structure — resolve per project convention.
 
 ---
 
 ## Step 2: Read the page index
 
-Open **`<output-dir>/_page_index.md`** (always — this indexes the **note valuation** / primary PDF).
+Open **`<output-dir>/_page_index.md`** always. If **`_page_index_waterfall.md`** exists, use it for **`03`** waterfall pages (page numbers are **per PDF**).
 
-- Scan previews to find **Note Valuation Report**, **Distribution**, **class** / **ISIN** tables, **Determination** / **Payment** dates, and any note-val PDF content you need for **`01`** / **`02`**. For a **separate Administrative Expenses** (or **Senior expenses** / **fee schedule**) **grid**, search **section titles** and **row labels** (trustee, collateral admin, legal, rating) — not only the exact column phrases **Paid on the Distribution Date** / **Due from current period** (headers vary or OCR may drop them; use **`### Column mapping`** in **`03`** per **`extraction-templates.md`** File **03**). **Deutsche Bank NVR:** the voucher grid is often on **Administrative Cap and Expenses** — extract **`### Administrative Expenses grid`** from the **Administrative Expenses** block only (**(i) Trustee**, …); **do not** put **Administrative Expenses Cap** formula rows in the grid.
-- If **`_page_index_waterfall.md`** exists (Wells Fargo), open it **for `03` waterfall pages** and map **waterfall / fee / calculation** pages there (page numbers are **per PDF**). **Do not** use **`_page_index.md`** / **`_chunks/`** to source **waterfall ladder** fees or **waterfall** fee **Source Text** when **`_chunks_waterfall/`** exists — those parts of **`03`** (including **`### Valuation-relevant fees`** **`Amount paid`**) come **only** from the waterfall chunk tree. **Still** use **`_page_index.md`** / **`_chunks/`** to locate and read a **separate Administrative Expenses** statement for **`### Administrative Expenses grid`** + grid **Source Text** (always attach those chunk pages when that exhibit exists).
-- For **single-PDF** trustees, the same **`_page_index.md`** often still lists **waterfall** / **Section 11.1** / fees — use that one index for everything.
-- Record **page ranges** (inclusive) per extraction target before reading chunks (saves tokens and keeps context tight).
+Map: metadata → **`01`**; class / distribution / PDD / IDD → **`02`**; waterfall / Section 11.1 / admin grids → **`03`**. Record **inclusive page ranges** before reading chunks.
+
+For admin grids, search section titles and row labels — not only exact column phrases. **Deutsche Bank NVR:** admin grid from **Administrative Expenses** block only, not cap formula rows.
 
 ---
 
 ## Step 3: Extraction templates
 
-Use **`noteval_extractor/references/extraction-templates.md`** as the **canonical layout** for each markdown deliverable: **`01`**, **`02`**, **`03`**, **`04`** (four files in order; **no** standalone **`05_*.md`** — class-distribution pages and **per-class deferred interest** belong in **`02`**; **`06`** is deprecated in favor of **`03`**). It mirrors the RMBS doc-extractor style: fixed filenames, stable table headers, fenced templates, and checklists per file. **Per-class security identifiers (**`ISIN`**, **`CUSIP`**) in **`02`** appear **only** in **`### Tranche by listing`** when **`Multi-listing tranches?`** = **Y** — **`### Class balance table (primary)`** and **`### Distribution grid`** are **economic Class** + amounts **without** identifier columns (reduces wrong CUSIP-to-class pairing); deal-level routing fields stay in **`01`** **Document routing**. **ETL:** map warehouse instruments / positions using **primary** **`Class`** (tranche name) **and** **listing** **`Economic class`** + **`ISIN`** / **`CUSIP`** + **`CUSIP line id`** (and **`Listing / program`** when present); see **`extraction-templates.md`** **Database / warehouse mapping**.
+Use **`references/extraction-templates.md`** — fixed filenames, stable headers, three-part structure per file:
 
-Every extraction file must include, in order:
+1. **Extracted Data**
+2. **Completeness Checklist**
+3. **Source Text** (verbatim, **Page N**)
 
-1. **Extracted Data** — structured tables / fields the downstream **noteval analysis** needs.
-2. **Completeness Checklist** — checkboxes for required data points (tranches, fees, dates, …).
-3. **Source Text** — **verbatim** excerpts from **`_chunks_waterfall/`** (Wells Fargo waterfall **`03`** ladder), from **`_chunks/`** for **note-valuation** pages (including a **separate Administrative Expenses** statement when present), and from **`_chunks/`** alone when single-PDF — enough to audit; prefix blocks with **Page N** and make the chunk path explicit when both trees exist.
-
-For a one-off single-topic file only, you may use the shorter pointer in **`references/extraction_template.md`**, but prefer **`extraction-templates.md`** for full runs.
-
-Refine **`extraction-templates.md`** over time; do not invent a conflicting layout without updating the reference.
+**ETL note:** ISIN/CUSIP in **`02`** listing tables only when **`Multi-listing = Y`**. Primary **`Class`** is economic tranche name.
 
 ---
 
 ## Step 4: Extract section by section
 
-> **Phrasing over position (LLMs — non-negotiable):** Trustee PDFs in **`_chunks/`** often scramble **column order** (headers stacked above/below numbers). **Primary rule:** map each amount to the **`02`** / **`03`** field that matches the **printed column or section title** (**Interest Paid**, **Deferred Interest Paid**, **All In Rate**, **Principal Paid**, clause **(C) …**, etc.). **Do not** map from horizontal position, markdown template column order, “nth decimal after CUSIP,” or “**the €/$ after All In Rate**.” **All In Rate 0.00000% on Subordinated Notes is normal** — it does **not** mean interest cash is zero; read the **Interest Paid** / **Interest Distribution** column by name. Use **positional** mapping **only** when **no** header words exist on the page — **Notes** once. **`03` Administrative Expenses grid:** declare the **payment column** in **`### Column mapping`** — see File **03**.
+For each target:
 
-> **Extracted Data amounts — no currency prefix:** In **`## Extracted Data`** money columns across **`01`–`04`**, use **numeric values only** (no **€**, **$**, **£** on each cell); keep **EUR** / **USD** / etc. in **`Currency`** / metadata fields. **`## Source Text`** remains verbatim from chunks.
+1. Pick page numbers from Step 2 (correct index per Wells Fargo routing).
+2. Read only needed chunk ranges. **Computershare `02`:** read **`pdd_idd_pdfplumber.md` first**.
+3. Fill **Extracted Data** per template.
+4. Tick checklist items **only after** the matching subsection exists.
+5. Paste **Source Text**.
+6. Write **`01`**–**`04`** to **`<output-dir>/`**.
 
-> **Day counts — never in template columns (`02`):** Trustee class tables often print **No. of Days** / **Days in period** / similar **integers** (e.g. 360, 968) **between** rate columns and **Interest payment**. **Do not** put day-count integers into **`Interest payment`**, **`Interest payable`**, **`Principal payment`**, **`Principal payable`**, **`Deferred interest`**, **`Dividend`**, **`Ending balance`**, or **`Interest rate`** — they are **accrual metadata**, not money or coupon. **We do not extract day count into structured tables** (no day-count column; do not invent one). If audit needs it, a **single** optional **Notes** phrase may say e.g. "PDF prints 968 accrual days" — **never** present a bare integer in a money cell.
+### File `02` (summary)
 
-> **Interest vs principal — column titles for *this* PDF, not a fixed field order:** Assign each **money** amount to **`Interest payment`** / **`Principal payment`** (and payable / deferred) using the **printed heading** (or the **same header row** as other classes on that exhibit) in the chunk — **Interest Payment**, **Principal Payment**, **Deferred Interest**, **Ending** / **End of Period Principal**, etc. **Do not** assume one trustee’s column sequence applies to another deal, and **do not** map by **markdown template column order** or blind left-to-right **pypdf** token order after **CUSIP** / rate columns. **Re-read the header block** for the table you are extracting when labels differ from prior deals. If headings are garbled, **Notes** once when you inferred — still **never** map the day count itself into a money field.
+Read **`references/file-02-domain-rules.md`** before editing class tables. Highlights:
 
-> **`Principal payment` = Principal Distribution column only — never the Ending balance (non-negotiable):** `Principal payment` must equal the trustee-printed **`Principal Distribution`** (or *Prin Dist* / *Principal Paid* / *Principal Payment*) column value — **never** the **Ending Balance**, **Current Balance**, **Beginning Balance**, or any other balance. **Self-check:** if `Principal payment` equals (or is close to) `Beginning balance` or `Ending balance` for an active class, you have made this error — correct it to `0.00` and restore `Ending balance` to the printed ending. On a period with no redemption, `Principal Distribution = 0.00` for all classes and `Ending balance = Beginning balance`. **Computershare PDD five-column band** (linearized pypdf / `_chunks/` text): the five numbers per Sub Totals band are **Original Face | Beginning Balance | Principal Distribution | Deferred Interest | Ending Balance** — the **third** (often 0.00) is `Principal payment`, the **fifth** is `Ending balance`. The **Note/Equity Balances** page prints `Original Balance | Current Balance` — `Current Balance` = Ending balance, not a payment. **Concrete example — deal 868122450 B-R:** Beginning = 105,000,000.00, Principal Distribution = 0.00, Ending = 105,000,000.00; correct: `Principal payment = 0.00`, `Ending balance = 105,000,000.00`. Writing `Principal payment = 105,000,000.00` is wrong.
+- Trustee-specific **Distribution in US$** fixed layouts (Deutsche, US Bank wide voucher, BNY Notes Information, Computershare PDD/IDD, Citibank opening/closing).
+- **pdfplumber-first** CUSIP→class; one primary row per Note Class section.
+- **`Principal payment`** from principal distribution column only — never ending balance.
+- Dual PDD+IDD exhibits: merge by economic class; balances from principal exhibit.
+- **SUB / Distribution Summary** zero-dividend rule; **Preference Share** as primary rows; NVR **Periodic Interest Amount** → **`Interest payment`**.
 
-> **Non-numeric placeholders (`02` + `03` — pipeline):** When a cell that should hold **money** or a **numeric interest rate** contains **any non-numeric word or token** (not only **Residual**): e.g. **Residual**, **Nil**, **Various**, **N/A**, **n/a**, **TBD**, **Pending**, **--**, em dash alone, **None**, or other **trustee / OCR placeholders** with **no** parseable amount or **%**-style rate, put **`N/A`** or **blank** / **`0.00`** (money only, when zero is correct) in **## Extracted Data** — **do not** copy those literals into columns meant for ETL/XML numbers. **Legitimate rate text** that **includes digits or %** (e.g. **5.2500%**, **SOFR + 450 bps**) stays **verbatim** per the **Interest rate (accrual)** rules. **`## Source Text`** stays verbatim from chunks. Optional **Notes** once (e.g. "PDF prints Residual in coupon column").
+Run **`validate_noteval.py`** after each **`02`** save when working Distribution in US$ layouts.
 
-For **each extraction target** below, repeat:
+### File `03` (summary)
 
-1. Use **Step 2** mapping to pick **page numbers** for this target (note-val index vs waterfall index per **Wells Fargo vs single-PDF** above).
-2. Open the matching **`_chunks/pages_*.txt`** or **`_chunks_waterfall/pages_*.txt`** files and read only the needed page ranges. **Wells Fargo:** for **`03`** waterfall / fee roll-up, use **`_chunks_waterfall/`** when that tree exists; **also** open the **note-valuation** **`_chunks/`** pages for a **separate Administrative Expenses** statement when present (**`### Administrative Expenses grid`** + grid **Source Text** — **not** for **`### Valuation-relevant fees`** **`$`**).
-3. Fill **Extracted Data** tables/fields per **`extraction-templates.md`**.
-4. Tick every applicable item in **Completeness Checklist** **only after** the matching **`## Extracted Data`** subsection exists in the saved file (e.g. **`03`**: do **not** mark **`### Valuation-relevant fees`** **`[x]`** until **`### Valuation-relevant fees`** is present with data rows or explicit **N/A** — see **`extraction-templates.md`** File **03** *ship gate*). Otherwise mark **N/A** with one-line justification.
-5. Paste **Source Text** from the chunk files (quote blocks or fenced excerpts; label **Page N**).
-6. Write the file to **`<output-dir>/`** using the names in **`extraction-templates.md`**, e.g. `01_report_metadata.md`, `02_tranche_class_balances.md`, `03_interest_principal_waterfall.md`, `04_extraction_summary.md` (omit N/A optional legacy files but record them in **`04_extraction_summary.md`**). **Before saving `03`, confirm `### Valuation-relevant fees` is in the file** (`03_interest_principal_waterfall.md` — fee table rows **or** documented **N/A**). **Do not** create **`05_*.md`** — per-class distribution grids (**Distribution in US$**, etc.) and **deferred interest** go in **`02`** per the template. **Do not** put an **Administrative Expenses** (or other fee) **grid** in **`02`** — **`03`** only. **`02`** primary (and **Tranche by listing** / **Distribution grid**) tables include **`Interest payable`** and **`Principal payable`** alongside **Interest payment** / **Principal payment** when the trustee reports due/payable vs paid separately (or payable-only). When the same **economic** tranche appears under **144A / Reg S / AI** (etc.) with **different CUSIPs** (**two or more CUSIPs under one printed class label**), or the **same class label** repeats on **multiple CUSIP rows** (Computershare-style), **map each CUSIP to the correct economic class** (see **`extraction-templates.md`** **Footer / stacked class labels vs CUSIP rows** — **do not** assign a **Reg S** CUSIP to **B1** **only** because a footer lists **A**, **B1**, **B2** in vertical order when both lines are **class A**), use **`02`** **primary** row (**class-level totals** from the trustee **class** line when present — **not** only a **zero** slice row) + **`### Tranche by listing`** (**one row per CUSIP**, each with a **`CUSIP line id`** per **`extraction-templates.md`**) and set **`04`** (summary) flag **Multi-listing tranches** when any class has **>1** CUSIP row. When **`Multi-listing tranches?`** = **N**, **omit** **`### Tranche by listing`** **or** leave it **without data rows** — **do not** duplicate **`### Distribution grid`** there.
+**Include when present:**
 
-**Dual principal / interest exhibits (e.g. *Principal Distribution Detail* + *Interest Distribution Detail*, same CUSIPs):** **Required** when both appear in the PDF: fill **`02`** **`Principal payment`** / **`Principal payable`** (and principal balances) from the **principal** grid — on that exhibit, **Principal distribution** / **Principal distributed** / like-named **cash** columns are **`Principal payment`** (principal **actually paid** this distribution date; distinguish **Principal Distribution Factor** and other **factor** columns); **`Interest payment`** / **`Interest payable`** (and deferred when printed there) from the **interest** grid — merge into **primary** by **economic Class**; use **`### Tranche by listing`** **`CUSIP`** / **`ISIN`** rows to align security lines when **`Multi-listing`** = **Y**. **`Beginning balance`** and **`Ending balance`** on **`02`** are **principal** balances: **`Ending balance`** = **ending principal balance** — copy the cell the trustee labels **Ending balance** / **Ending principal** / **Current principal** (or equivalent **wording**) on the **principal** exhibit, **not** from the interest grid and **not** from **Original balance** / original face unless that label truly applies to period-ending principal (rare). **Interest rate / interest $:** Prefer **Coupon** / **Coupon rate** / **Interest distribution** / **Interest paid** **column titles** and section names on **Interest Distribution Detail**; **do not** treat **factor**-labeled columns (**~1000**, etc.) as coupon. On sparse lines, align **cash** to **Interest distribution**-type labels or the **same header** as sibling CUSIP rows; use **order-only** guesses **only** as a last resort (**Notes**). When **coupon** is **0** but another **$** on the line is clearly **distributed interest** (by label or row pattern), map it to **`Interest payment`**. Use a **third** **Interest Rate Fixing** page when needed; scan **`_page_index.md`** for *fixing*, *benchmark*, *margin*. Do not populate **interest** cells only from the principal grid when the interest exhibit has the real values. Quote **both** exhibits in **`02` Source Text**. See **`extraction-templates.md` File 02** (*Dual exhibits*, *Interest rate — third table*).
+- **`### Waterfall table`** and/or **`### Disbursement ladder`** / **`### Logical / clause waterfall`**
+- **`### Administrative Expenses grid`** (only when PDF prints a separate admin table)
+- **`### Column mapping`** for waterfall and admin grid payment columns
+- **`### Other waterfall lines`** for structural / unmapped rows
 
-**SUB / Distribution Summary (zero dividends, declining principal):** When **Distribution Summary** or **Distribution in US$** shows **Dividends** **0.00**, **0%** coupon, and **Closing/Ending** principal **<** **Opening/Beginning**, set **`Principal payment`** = Beginning − Ending and **`Interest payment`** / **`Interest payable`** **0.00** — even if the trustee prints the **$** under **Accrued Interest** / **Current Payable**. **IDD** footer **Interest Distribution** applies only when a **separate** interest exhibit shows non-zero interest by column label and is **not** overridden by this rule. See **`extraction-templates.md` File 02** (*SUB / subordinated — Distribution Summary*).
+**Do not include on new runs:** **`### Valuation-relevant fees`** (that is **`05`**).
 
-**Preference Share / Preferred Shares (primary, not supplementary):** When the **class / tranche summary** in the report lists **Preference Share** or **Preferred Shares** **alongside note classes**, add **one primary row** per printed label with the same balance / interest / principal column mapping as notes. **Do not** move equity to **`### Supplementary lines`** just because it is not debt — supplementary is for **issuer-level lines not on the class summary**. See **`extraction-templates.md` File 02** (*Preference Share / Preferred Shares — primary row required*).
+**Fees workflow:**
 
-**NOTE VALUATION REPORT — Periodic Interest Amount:** On **NOTE VALUATION REPORT** (Section **10.5(b)** style), **Periodic Interest Amount on [Class]** with a numeric **$** → **`Interest payment`** — **not** **`Interest payable`** only. **Beginning** ← **Aggregate Principal Amount … as of the Calculation Date**; **Ending** ← **after giving effect to … principal payments**. See **`extraction-templates.md` File 02** (*Note Valuation Report — Periodic Interest Amount*).
+1. Extract raw waterfall / ladder rows with **Amount paid** on fee lines (+ admin grid for audit).
+2. Ensure **paid vs payable** columns match printed headers (Amount Due / Payment / Running Balance; Citibank Distribution / Per Cap / Balance — see **`extraction-templates.md`** File **03**).
+3. Run **`map_valuation_fees.py`** — mapper applies **Sub category** literals (`trustee_expenses`, `collateral_admin_fees`, `senior_management_fees`, `tax_gross_amounts`, etc.).
 
-**DISTRIBUTION REPORT — Section 10.5(b):** **(C) interest payable** on secured notes → **`Interest payable`**; **(D) payments on the Subordinated Notes** → **`Interest payment`** (required). **Applicable Periodic Rate** (subsection **(v)**) → **`Interest rate`** — read that page, not page 1 only. See **`extraction-templates.md` File 02** (*Distribution Report — Section 10.5(b) class summary*).
+**Non-fee lines** (class interest/principal, residual distributions, swap structural steps) stay in waterfall table / **`02`** — not in **`05`**.
 
-**Notes Information (BNY Payment Date Report):** **Interest Paid** → **`Interest payment`**; **Deferred Interest Paid** / **Deferred Interest Due** → **`Deferred interest`** only. **0% All In Rate** on **SUB** does **not** zero **Interest payment** when **Interest Paid** is non-zero. See **`extraction-templates.md` File 02** (*Notes Information grid*).
+### Extraction targets
 
-**Coupon vs interest rate:** When the class or distribution exhibit prints **Coupon**, **Coupon rate**, **Annual coupon**, or similar as the per-tranche accrual for the period, treat it as the tranche **interest rate** and map the printed value into **`02`** column **`Interest rate`** (see **`extraction-templates.md` File 02** blockquote under **Interest rate (accrual)**). When that cell is **any non-numeric word or placeholder** (not a rate with digits/%), use **`N/A`** — do **not** copy the literal word into **`Interest rate`** for ETL.
-
-### Extraction targets (initial set)
-
-Adjust names to the PDF; add files if the deal has extra sections.
-
-| # | Target | Typical hints in page index |
-|---|--------|------------------------------|
-| 1 | **Report metadata** → `01_report_metadata.md` | Report title, payment / determination / distribution dates, deal name; **`Payment date`** = **`Distribution date`** by business definition for CLO trustee reports (same calendar date in both columns); **Next Payment:** in headers fills both when that is the only anchor (`extraction-templates.md` **File 01**) |
-| 2 | **Tranche / class balances (+ optional distribution / multi-listing)** → `02_tranche_class_balances.md` | **No Administrative Expenses / fee grid in `02`** — those are **`03`** only. … **Ending balance** (and beginning) **as printed on the principal exhibit** — template **`Ending balance`** = **ending principal balance** (trustee **Ending balance** / equivalent column on **Principal Distribution Detail** (**Principal distribution** / **Principal distributed** **cash** column = **`Principal payment`** when that label is **paid** principal — **not** **Principal Distribution Factor**) or merged principal grid; **not** original face, **not** interest-only exhibit balances unless the PDF uses that column for principal); **no** recomputation … |
-| 3 | **Interest / principal waterfall** (grid and/or logical ladder) → `03_interest_principal_waterfall.md` | **Wells Fargo** (when **`_chunks_waterfall/`** exists): build **`### Waterfall table`**, **`### Valuation-relevant fees`**, and fee-related **`### Other waterfall lines`** from **`_page_index_waterfall.md`** + **`_chunks_waterfall/`** — **do not** use **`_chunks/`** for those **waterfall** amounts or **waterfall** **Source Text**. **Always** attach **note-valuation** **`_chunks/`** pages for a **separate Administrative Expenses** statement when the package includes one (**`### Administrative Expenses grid`** + grid **Source Text**). **Single-PDF** trustees: scan **`_page_index.md`** and **`_chunks/`** for all **`03`** content. **Do not** duplicate per-class **interest/principal** lines in **`03`** when the same amounts are already in **`02`** — keep class cash in **`02`**, use **`03`** for fees/structural lines + **verbatim Source Text**. **Fees workflow (always this order):** (**1**) **Extract** raw fee lines into the waterfall / ladder tables, **Administrative Expenses grid** when present (for **audit / voucher tie-out** — **not** to populate **`### Valuation-relevant fees`**), and **Source Text**; (**2**) **Clean up** (non-fees out, correct paid vs payable columns on **waterfall / ladder** rows per **`extraction-templates.md` File 03** — **do not** lift admin-grid **$** into the fee roll-up); (**3**) **Standardize** into **`### Valuation-relevant fees`** with **Main category** + **Sub category** + **`Amount paid`** only (legacy **`fee_type`** column = same leaf cell; extra columns in older files tolerated); literals: **`trustee_expenses`**, **`collateral_admin_fees`**, **`administrator_expenses`**, **`coissuer_fees`**, **`senior_management_fees`**, **`subordinate_management_fees`** or alternate **`subordinated_management_fees`**, **`fees_to_hedge_counterparty`** (alternate **`hedge_fees`** in older files), **`tax_gross_amounts`** for **waterfall tax** priorities (e.g. **(A)** Issuer taxes), **`other_fees_01`**–**`03`** with **Main category** **`Other`** when multiple **Other**-rollup lines; put **unmapped** / **uncertain** lines in **`### Other waterfall lines`** / **Notes** / **`04`**. |
-| 4 | **Summary** → `04_extraction_summary.md` | Compiled counts, flags, cross-checks; note **dual segmentation (Wells Fargo)** when **`_chunks_waterfall/`** was used |
-
-### Administrative / Senior Expenses (typical CLO waterfall)
-
-> **Why both `### Administrative Expenses grid` and `### Waterfall table`:** The trustee often prints a **separate Administrative Expenses** **grid** that **rolls up** admin cash — often columns for **due** vs **paid** / **settled** this period (labels vary: **Paid on the Distribution Date**, **Payment**, **Paid**, **Due**, **Payable**, **Prior**, … — see **`extraction-templates.md`** File **03** *Recognizing the admin grid when column titles differ*), sometimes a **single total** or clearly bounded subtotals — in one exhibit. **Section 11.1** (or equivalent) **waterfall** text usually shows **indenture priority** and often **itemizes** lines (trustee, collateral admin, counsel, rating, **(B)** vs **(O)** cap repeats, etc.). **Capture both:** the **grid** is for **voucher / tie-out** in **`### Administrative Expenses grid`** and **Source Text**; **`### Valuation-relevant fees`** is built **only** from the **waterfall / ladder** (same economic cash — **do not** copy grid **$** into the fee roll-up to avoid noise; reconcile voucher **gross** vs cap in **Notes** / **`04`**).
-
-> **Voucher gross total:** When the admin exhibit ends with a **lone total** line (e.g. **`46,863.59`** after all fee rows — **Amount Paid (EUR)** sum), add a **`Total (voucher, as printed)`** row to **`### Administrative Expenses grid`** in **`Paid on the Distribution Date`**. Waterfall **(C)** **Administrative Expenses** **paid** may be **lower** than that gross (**Senior Expenses Cap**, etc.) — keep **both** figures and **Notes** the tie-out (**`extraction-templates.md`** File **03**).
-
-Many CLO note valuation / payment-date waterfalls group **cash expenses before class interest** under an **Administrative** or **Senior expenses** block. **Build `### Valuation-relevant fees` from the waterfall / ladder only** (grid is **not** a source for **`Amount paid`** / **Sub category**). **Extract raw lines** (waterfall + **`## Source Text`** + admin grid when present for **audit**) → **clean up** (drop non-fees, fix **paid** vs **payable** on **waterfall** rows per File **03**) → **standardize** in **`### Valuation-relevant fees`** (**Main category** + **Sub category** + **`Amount paid`** only for new files — legacy **`fee_type`** header accepted). **Non-fee recognition:** Lines that **distribute remaining Interest Proceeds and/or Principal Proceeds** **to noteholders** (e.g. **Payment of remaining Interest Proceeds**, **Payment of remaining Principal Proceeds**, combined **payment** steps, **pro rata** class buckets) are **note cashflows**, **not** fees — capture in **`### Waterfall table`** / **`02`**; **do not** put them in **`### Valuation-relevant fees`** (see **`extraction-templates.md`** File **03** *Hard exclude*). **Administrative Expenses grid:** still declare the **payment** column in **`### Column mapping`** when the grid is captured — for **grid accuracy** and **human audit**, **not** to populate **`### Valuation-relevant fees`**. **Trustee** lines map to **`trustee_expenses`** (**Main category** **`Administrative expense`**). **Collateral administration fee**, **collateral administrator** charges, and **collateral management fee** lines map to **`collateral_admin_fees`** when the **printed label** is the usual **trustee / securities-intermediary** wording **without** a **Senior** or **Subordinate** / **subordinated** **management** tier on that same line (trustees often spell **management** / **administration** loosely). When the line **explicitly** pairs **Senior** with **collateral management** (e.g. **Senior Collateral Management Fee** / **Fees**), use **`senior_management_fees`** (**Main category** **`Management fees`**) — **not** **`collateral_admin_fees`**. **Itemized vs total in `### Valuation-relevant fees`:** Admin-band literals (**`trustee_expenses`**, **`collateral_admin_fees`**, **`administrator_expenses`**, **`coissuer_fees`**) use **Main category** **`Administrative expense`**. **Management**, **tax**, and **hedge** fee lines use **Main categories** **`Management fees`**, **`Tax`**, and **`Hedge`** with **`senior_management_fees`** / **`subordinate_management_fees`** (alternate **`subordinated_management_fees`**), **`tax_gross_amounts`**, **`fees_to_hedge_counterparty`** (alternate **`hedge_fees`**) — **not** the admin main. When **two or more** fee lines truly belong under **Main category** **`Other`**, use **Sub category** **`other_fees_01`**, **`other_fees_02`**, **`other_fees_03`** in waterfall order. If the **waterfall** shows **separate amounts** for trustee / collateral admin / etc., you **may** use **one row per literal** for leaf-level export; do **not** merge itemized **`trustee_expenses`** or **`collateral_admin_fees`** into **`administrator_expenses`** when you **choose** the itemized path. If the **waterfall** shows **only** one combined admin **paid** total (cap, **To the Bank** lump, etc.), use **one** row: **Main category** **`Administrative expense`**, **Sub category** **`administrator_expenses`**, with **`Amount paid`** from that **waterfall** row — **keep** voucher / grid detail in **`### Administrative Expenses grid`** / **Source Text** and **Notes** once. **Counsel / trustee expense** reimbursements without a distinct contractual **trustee** line still roll into **`administrator_expenses`** (**Main category** **`Administrative expense`**). **Independent accountants, agents and counsel of Issuer** → **`administrator_expenses`** (**not** **`coissuer_fees`** or **`Other`**).
-
-> **Collateral administration / generic collateral management (no tier in the title):** **Collateral Administration Fee**, **Collateral Administrator** expense, or **Collateral Management Fee** when the **same printed line** does **not** say **Senior** or **Subordinate** / **subordinated** **management** maps to **`collateral_admin_fees`** (**Main category** **`Administrative expense`**). **Exception:** when the line **also** names **trustee** (e.g. **Trustee and Collateral Administrator** fees), use **`trustee_expenses`** — **not** **`collateral_admin_fees`**. That is the usual **trustee / admin** bucket for those labels.
-
-> **Senior Collateral Management Fee(s):** Many CLOs print **Senior Collateral Management Fee** or **Senior Collateral Management Fees** on the **interest proceeds** waterfall (often clause **(C)**) **and** on the **Administrative Expenses** grid — **Senior** in the title with **collateral management** means **senior / base manager** economics, **not** **`collateral_admin_fees`**. In **`### Valuation-relevant fees`**, use **Main category** **`Management fees`** and **Sub category** **`senior_management_fees`** — **not** **`Administrative expense`** and **not** **`collateral_admin_fees`**. Preserve the trustee’s wording in **`### Waterfall table`** / **`### Administrative Expenses grid`** / **Source Text**. **`Amount paid`** in **`### Valuation-relevant fees`** comes from the **waterfall** row; use **Notes** / **`04`** to tie the same line to the **grid** when both exist.
-
-> **Subordinate / junior collateral management fees (wording triggers):** Treat a line as **`subordinate_management_fees`** (**Main category** **`Management fees`**) when the PDF names **subordinate** or **subordinated** **management** or **collateral management**, a **Subordinate Collateral Management Fee** (or **Fees**), a **manager** / **management** **fee** clearly tied to the **junior** / **subordinate** collateral manager tier, or payment prose such as **to pay** / **pay** … **subordinate** … **management** or **manager** (including **accrued and unpaid Subordinate Collateral Management Fees** in narrative blocks). **Include** that row in **`### Valuation-relevant fees`** — **do not** leave the amount only under **`### Other waterfall lines`** or roll it into **`administrator_expenses`** when the label is explicitly **subordinate** / **junior** **management** (distinguish **senior** / **base** collateral management → **`senior_management_fees`**).
-
-> **Waterfall taxes → `### Valuation-relevant fees` (required):** **Section 11.1** (or equivalent) **priority (A)** / **first tax step** lines such as **payment of taxes** / **taxes owed by the Issuer** / **Co-Issuers** (wording varies) belong in **`### Valuation-relevant fees`** as **Main category** **`Tax`** and **Sub category** **`tax_gross_amounts`**, with **`Amount paid`** from the waterfall (and **due / payable** detail on **`### Waterfall table`** when the PDF separates them). **Issuer** in the label does **not** change this — it is still **`tax_gross_amounts`**, not **`administrator_expenses`**. Keep the same line in **`### Waterfall table`** for audit; **do not** use **`### Other waterfall lines`** **instead of** the typed valuation row.
-
-Reference hierarchy (deal order may differ):
-
-```
-1. Administrative / Senior Expenses  ← Trustee fees sit here
-   ├── Trustee fees
-   ├── Collateral administrator fees
-   ├── Audit / accounting fees
-   ├── Legal fees
-   ├── Rating agency fees
-   └── Other administrative costs (printing, filing, etc.)
-```
-
-This is **navigation only**: when sub-lines are **itemized with amounts**, map each to a **Sub category** literal and **Main category** per **`extraction-templates.md`** (**admin** vs **management** vs **tax** vs **hedge** vs **Other** mains). For a **single combined** admin **paid** on the **waterfall**, you **may** use **one** **`administrator_expenses`** row with **`Amount paid`** from that **waterfall** row (voucher / grid stays in **`### Administrative Expenses grid`** / **Source Text** for tie-out — **not** the source of **`### Valuation-relevant fees`** **`Amount paid`**). **Senior Collateral Management Fee** lines belong under **`Management fees`** / **`senior_management_fees`**, not under the **Collateral administrator** branch above (that branch is for **collateral administration** / **generic collateral management** fees without a **Senior** / **Subordinate** tier in the title).
-
-**`03` — indenture / Payment Date Report three-column grids:** Some CLO **Payment Date Report** exhibits (indenture **Section 11.1**, *Disbursements from Payment Account*) print **Amount Due**, **Payment**, and **Running Balance**. Map into the stable template columns as: **Amount Due** → **`Amount payable`** (what is **due** for that priority line — obligation / accrued amount; **not** necessarily cash paid), **Payment** → **`Amount paid`** (cash **actually disbursed**), **Running Balance** → **`Amount available / running`** (remainder after the step). Prose **interest due** / **amounts due** aligns with **payable**; it may **exceed** **paid** when a line is capped, partially paid, or unpaid. For **fee-style** questions (“what left the account?”), use **Payment** / **Amount paid**; for “what was owed on the line?”, use **Amount Due** / **Amount payable**. Add a short **`### Column mapping`** in **`03`** when this layout applies (see **`references/extraction-templates.md`** blockquote under File **03**).
-
-**`03` — Citibank (and similar) “Distribution / Per Cap / Balance” waterfalls:** Some **Citibank** trustee **Section 11.1** disbursement pages use headers like **Distribution**, **Per Cap**, and **Balance** (or **Total Admin Exp Distribution Per Cap Balance** style OCR) instead of **Amount Due / Payment / Running Balance**. In that layout, the **Distribution** column (and, on many deals, the **Per Cap** column when it carries the step’s cash-applied figure) is the **cash paid / settled** amount for the row — map it to template **`Amount paid`**. Map **Balance** to **`Amount available / running`**. If a separate **due** / **payable** column is absent, leave **`Amount payable`** blank or derive only when the indenture text for that clause clearly states an obligation amount; document once in **`03`** **`### Column mapping`**.
-
-Cross-check ambiguous tables against **`read_noteval_usbank`** / **`read_noteval_deutsche`** skills when automating the same layouts later.
+| # | Output | Typical index hints |
+|---|--------|---------------------|
+| 1 | `01_report_metadata.md` | Title, payment / determination dates, deal name |
+| 2 | `02_tranche_class_balances.md` | Distribution in US$, PDD/IDD, class summary — **no admin grids** |
+| 3 | `03_interest_principal_waterfall.md` | Section 11.1, Application of Proceeds, admin expense grid |
+| 4 | `04_extraction_summary.md` | Counts, flags, dual-segmentation note, multi-listing flag |
 
 ---
 
 ## Step 5: Validate
 
-Run:
-
 ```powershell
 py -3 noteval_extractor/scripts/validate_noteval.py "<output-dir>"
 ```
 
-**`noteval_extractor/scripts/validate_noteval.py`** — checks required files (`01`, `02`, `04_extraction_summary.md`), at least one class row in `02`, consolidated **02 class coverage vs Source Text** (capped), waterfall/ladder and column-mapping sanity in `03`, **02↔03** class-cash cross-checks (review-only), and **WARN** when **`03`** has fee-like rows but **`05`** is missing/empty (run **`map_valuation_fees.py`** first). Passing **INFO** rows omitted unless **`--verbose`**. Use **`--strict`** to exit with code 1 on warnings.
+Checks required files, class rows in **`02`**, waterfall sanity in **`03`**, **WARN** when fee-like **`03`** rows exist but **`05`** is missing. Use **`--strict`** for merge gates.
 
-If the script is unavailable, do a **manual validation pass** — re-open each `01`–`04` markdown file, confirm every checklist item is addressed, and add **`validation_report.md`** yourself.
+Fix before finishing:
+
+- **Rule 5** principal roll-forward on Distribution in US$ → column mis-map
+- **Rule 5b/5c/5d** PDD column issues
+- Missing **`05`** when **`03`** has fee disbursements
 
 ---
 
-## Optional: install as a Cursor project skill
+## Step 6: Map valuation fees
 
-Copy **`noteval_extractor/`** to **`.cursor/skills/noteval_extractor/`** in the project so the agent loads it by default (do not use the reserved `skills-cursor` namespace).
+**Runs automatically** after SDK / LLM pipeline extraction when **`03`** is in targets. When invoking the agent manually in Cursor, run this yourself immediately after saving **`01`**–**`04`**:
 
-## Optional: Noteval Extractor subagent (Cursor)
+```powershell
+py -3 noteval_extractor/scripts/map_valuation_fees.py "<output-dir>"
+```
 
-For delegation in chat, use **`noteval_extractor/agents/noteval-extractor-agent.md`** — the same definition is committed at **`.cursor/agents/noteval-extractor-agent.md`** for Cursor Desktop when this repo is the project root. Copy either path to your user or other project **`.cursor/agents/`** if you want the subagent listed there. Ask: *Use the **noteval-extractor-agent** with output directory …*
+Always run when **`03`** was written (the script is idempotent). Produces **`05_valuation_relevant_fees.md`** and **`fee_mapping_report.md`**. Re-run after **`03`** edits. Review skipped / ambiguous lines in the mapping report.
+
+**Sub category literals** and fee taxonomy: **`extraction-templates.md`** Files **03** and **05**.
+
+---
+
+## Optional: install as Cursor skill
+
+Copy **`noteval_extractor/`** to **`.cursor/skills/noteval_extractor/`** in the project.
+
+## Optional: subagent delegation
+
+Use **`agents/noteval-extractor-agent.md`** (or **`.cursor/agents/noteval-extractor-agent.md`**) for focused extraction runs: *Use the **noteval-extractor-agent** with output directory …*

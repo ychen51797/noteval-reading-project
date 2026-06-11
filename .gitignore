@@ -3,6 +3,36 @@ venv/
 __pycache__/
 *.py[cod]
 .env
+**/.env
 
-# Generated extraction output (runs from pdf_workflow / agents)
+# Generated extraction runs (pdf_workflow / agents / batch)
+noteval_extractor/output/
 /output/
+
+# XML exports from extraction runs
+noteval_extractor/xml/
+
+# Large local test PDFs (use deal_paths + UNC paths on your machine)
+noteval_extractor/test/*.pdf
+
+# Generated Excel / mapping workbooks
+noteval_extractor/excel/*.xlsx
+
+# Local deal-path CSVs (keep *.example templates in test/)
+/deal_paths*.csv
+noteval_extractor/test/requests.csv
+
+# LLM + SDK usage / cost JSONL
+/logs/
+*.log
+
+# Cursor SDK compare harness
+/cursor_sdk_compare/node_modules/
+/cursor_sdk_compare/.env
+
+# Generated office docs (markdown sources are tracked)
+noteval_extractor/docs/*.docx
+noteval_extractor/docs/*.pdf
+
+# Scratch / accidental dumps
+skill_line25.txt

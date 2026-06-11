@@ -1,0 +1,10 @@
+deal_id,payment_date,deal_name,trustee,report_type,pdf_path,waterfall_path,status
+823941396,2026-01-15,Adams Mill CLO Ltd.,USBank,Quarterly Trustee Report,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\190291\190291_8.pdf,,ok
+830178020,2026-02-06,"Crestline Denali CLO XVI, Ltd.",Deutsche,Note Valuation Report,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\193766\193766_1.pdf,,ok
+825248878,2026-02-27,"Atlas Senior Loan Fund VII, Ltd.",WellsFargo,Note Valuation Report,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\195384\195384_9.pdf,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\195384\195384_10.pdf,ok
+867858582,2026-01-20,"BCRED BSL CLO 2021-2, Ltd.",BONY,NoteVal Report,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\192641\192641_5.pdf,,ok
+830857216,2026-01-15,"Venture 37 CLO, Limited",CitiBank,Note Valuation Report,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\192117\192117_21.pdf,,ok
+869711126,2026-01-02,"Silver Point SCF CLO VII, Ltd.",Western Alliance,Investor Payment Details,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\192149\192149_5.pdf,,ok
+500044938,2026-02-09,House of Europe Funding V PLC,BNP Paribas,Note Valuation Report,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\193759\193759_1.pdf,,ok
+830393917,2026-04-09,"Voya CLO 2017-3, Ltd.",State Street,Note Valuation Report,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\199257\199257_14.pdf,,ok
+825498083,2026-01-20,Dryden 49 Senior Loan Fund,USBank,Quarterly Trustee Report,\\amznfsxzygudex4.analytics.moodys.net\sdpprod\ard\temp\192259\192259_316.pdf,,ok

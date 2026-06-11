@@ -39,11 +39,13 @@ You are the **Noteval Extractor Agent** — you turn **segmented** trustee / not
    - `03_interest_principal_waterfall.md` — **`### Waterfall table`** and/or **`### Disbursement ladder`** plus **Administrative Expenses grid** when present; **do not** author **`### Valuation-relevant fees`** in **`03`** (mapper produces **`05`**). No duplicate class cash already in **`02`**.
    - `04_extraction_summary.md` — counts, flags, cross-checks, dual-segmentation note when applicable
 
-   When **`03`** has fee disbursements, run from repo root:
-   `py -3 noteval_extractor/scripts/map_valuation_fees.py "<output-dir>"`  
-   → **`05_valuation_relevant_fees.md`** and **`fee_mapping_report.md`**. Re-run after **`03`** edits.
+7. **Map valuation fees (automatic after extraction)** — Once **`01`**–**`04`** are saved and **`03`** was written, **always** run from repo root (SDK / UI pipelines do this for you; when invoking this agent directly, **you** must run it before validate):
 
-7. **Validate, then self-correct in a loop** — From repo root:
+   `py -3 noteval_extractor/scripts/map_valuation_fees.py "<output-dir>"`
+
+   → **`05_valuation_relevant_fees.md`** and **`fee_mapping_report.md`**. Run even when fee rows look sparse — the script is idempotent. Re-run after **`03`** edits.
+
+8. **Validate, then self-correct in a loop** — From repo root:
    `py -3 noteval_extractor/scripts/validate_noteval.py "<output-dir>"`  
    Read **`validation_report.md`**. Fix **all errors** and the following **warnings** before finishing:
    - **Rule 5 (principal roll-forward)** on any **Distribution in US$**-sourced row — almost always a **header-reconstruction failure** on the wide voucher layout (camel-jammed wrapped headers split positionally instead of by title; typical fingerprint: single-class delta = that class's **`Interest payment`**, i.e. **Total Payment** column copied into **`Ending balance`**). Re-open **`_chunks/`**, re-split the header, verify with the **`Total`** row arithmetic (`Total Payment = Principal Paid + Interest Paid`), re-map **by title** to **`02`** fields, re-save **`02_tranche_class_balances.md`**, and re-run the validator. See **`extraction-templates.md`** *Distribution in US$ — wide voucher header reconstruction* and SKILL **`02` Distribution in US$ — wide voucher (header-first, never positional)**.
@@ -55,7 +57,7 @@ You are the **Noteval Extractor Agent** — you turn **segmented** trustee / not
 
 - **One output folder per deal run** — page numbers are **per PDF**, not merged across primary vs waterfall trees.
 - **`02` vs `03` scope** — class / distribution / deferred on tranche rows stay in **`02`**; fee grids and waterfall ladders stay in **`03`** only (details in SKILL).
-- **Fees → `05`** — **`map_valuation_fees.py`** after **`03`**; do **not** hand-author **`### Valuation-relevant fees`** in **`03`** or **`05`**.
+- **Fees → `05`** — **`map_valuation_fees.py`** runs **automatically** after extraction when **`03`** is in scope (SDK / server pipeline); otherwise run it yourself before validate. Do **not** hand-author **`### Valuation-relevant fees`** in **`03`** or **`05`**.
 - **Source Text** — verbatim from **`_chunks/`** or **`_chunks_waterfall/`** with **Page N** labels per templates. For **Computershare PDD/IDD**, quote the full **Note Class** label stack + **Sub Totals** bands on each page; CUSIP → class assignment comes from **`_chunks_structured/pdd_idd_pdfplumber.md`** (vector geometry, authoritative) — **never** by nth-label ↔ nth-Sub Totals positional pairing (see SKILL **`02` Computershare PDD/IDD — pdfplumber-first CUSIP→class**).
 - **Computershare Sub Totals — every tranche** — **Sub Totals:** is printed **once per Note Class section** (aggregate over **all** CUSIPs in that section — including **split-balance** tranches). The label means **subtotal**, **not** tranche **SUB**. **Primary** economics from **Sub Totals**. Assignment of Sub Totals to a class is by pdfplumber section header (when available) or by arithmetic match to CUSIP balances — **never** by nth-position pairing of the label stack to the band list.
 - **Computershare PDD/IDD refinance-chain** — **Every** printed **Note Class** gets a **primary** row. Before finishing **`02`**: (1) open **`_chunks_structured/pdd_idd_pdfplumber.md`** — use it as authoritative CUSIP → class mapping and Sub Totals source (vector geometry, not linearized text); (2) run arithmetic check: `sum(CUSIP balances in section) = Sub Totals` for every section; (3) scan for page-break orphan CUSIPs. **Never** assign classes by nth-label ↔ nth-band positional pairing at any point. See templates **Computershare PDD/IDD — refinance-chain Sub Totals alignment**.
