@@ -6,6 +6,7 @@ import sys
 import tempfile
 import threading
 import uuid
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -61,12 +62,14 @@ _DRAFT_KEY_HINT = (
 
 import batch_segment as _bs  # noqa: E402  # type: ignore[import-untyped]
 import noteval_batch_cost as _batch_cost  # noqa: E402
-import noteval_chunk_select as _chunk_select  # noqa: E402
+import noteval_llm_pipeline as _llm_pipeline  # noqa: E402
+import noteval_pipeline_log as _pipeline_log_file  # noqa: E402
 import noteval_llm as _draft  # noqa: E402
 import noteval_sdk_usage as _sdk_usage  # noqa: E402
 import get_file_path as _gfp  # noqa: E402  # type: ignore[import-untyped]
 import batch_validate_noteval as _batch_validate  # noqa: E402
 import report_gate as _report_gate  # noqa: E402
+import noteval_resolve_and_extract as _resolve_extract  # noqa: E402
 
 try:
     import batch_tranche_mapping as _xml_db_compare  # noqa: E402
@@ -90,9 +93,27 @@ def health():
         "msg": "noteval UI backend",
         "capabilities": {
             "map_valuation_fees": True,
+            "classify_waterfall_fees": (_SCRIPTS / "classify_waterfall_fees.py").is_file(),
+            "run_fee_pipeline": (_SCRIPTS / "run_fee_pipeline.py").is_file(),
+            "fee_classification_pipeline": (_SCRIPTS / "run_fee_pipeline.py").is_file()
+            and (_SCRIPTS / "classify_waterfall_fees.py").is_file(),
+            "apply_pdfplumber_pdd": (_SCRIPTS / "apply_pdfplumber_pdd.py").is_file(),
+            "apply_pdfplumber_idd": (_SCRIPTS / "apply_pdfplumber_idd.py").is_file(),
+            "apply_distribution_usd": (_SCRIPTS / "apply_distribution_usd.py").is_file(),
+            "apply_distribution_summary": (
+                _SCRIPTS / "apply_distribution_summary.py"
+            ).is_file(),
+            "apply_distribution_report": (
+                _SCRIPTS / "apply_distribution_report.py"
+            ).is_file(),
+            "apply_payment_date_report": (
+                _SCRIPTS / "apply_payment_date_report.py"
+            ).is_file(),
+            "apply_waterfall_optimal_paid": (
+                _SCRIPTS / "apply_waterfall_optimal_paid.py"
+            ).is_file(),
             "export_xml": _XML_EXPORT_SCRIPT.is_file(),
-            "index_driven_chunks": _chunk_select.index_driven_enabled(),
-            "draft_use_tools": _draft.draft_config_public().get("use_tools_default"),
+            "draft_tools_mode": True,
             "batch_export_xml": _XML_EXPORT_SCRIPT.is_file(),
             "compare_xml_db": _xml_db_compare is not None
             and _xml_db_compare.openpyxl_available(),
@@ -133,6 +154,105 @@ def resolve_path(body: ResolvePathBody):
             detail=f"Could not query ARD: {e!s}",
         ) from e
     return row
+
+
+class ResolveAndExtractBody(BaseModel):
+    deal_id: str = Field(..., min_length=1)
+    payment_date: str = Field(..., min_length=1)
+    output_dir: str = Field(
+        "",
+        description=(
+            "Directory to write _chunks/, _page_index.md, _manifest.md (and "
+            "_chunks_waterfall/ for Wells Fargo). "
+            "When empty, auto-derived as the default output root / {deal_id}_{YYYYMMDD}."
+        ),
+    )
+    include_tables: bool = Field(
+        True,
+        description="Include raw pdfplumber table rows per page in the response body.",
+    )
+    include_structured: bool = Field(
+        True,
+        description=(
+            "Run fingerprint detection for PDD/IDD, Distribution in US$, and "
+            "Distribution Summary pages."
+        ),
+    )
+    extract_waterfall: bool = Field(
+        True,
+        description="Also extract the waterfall PDF when ARD returns one (Wells Fargo).",
+    )
+    summary_only: bool = Field(
+        False,
+        description=(
+            "When True, omit the full per-page text list from the response and return "
+            "only the compact summary (deal metadata + fingerprint page lists)."
+        ),
+    )
+    force_resegment: bool = Field(
+        False,
+        description=(
+            "When True, delete existing _chunks/, _chunks_structured/, indexes, and "
+            "manifests under output_dir before writing new segmentation."
+        ),
+    )
+
+
+@app.post("/api/resolve-and-extract")
+def resolve_and_extract(body: ResolveAndExtractBody):
+    """
+    Resolve the ARD PDF filepath via get_file_path, then extract text and structured
+    table layouts using pdfplumber — all from the server-side UNC path, without
+    uploading the PDF.
+
+    Returns a JSON body with:
+    - ``resolved``  — ARD metadata (deal_name, trustee, pdf_path, waterfall_path, status)
+    - ``primary``   — pdfplumber extraction of the note-val PDF
+    - ``waterfall`` — pdfplumber extraction of the waterfall PDF (Wells Fargo, or null)
+    - ``chunks_written`` — chunk-write summary when output_dir is set
+    - ``output_dir`` — resolved output directory path (or null)
+    - ``error``     — top-level error message (or null)
+
+    When ``summary_only=true``, the full ``pages`` lists are replaced by compact
+    fingerprint summaries (page counts + structured layout page numbers).
+    """
+    # Auto-derive output_dir from deal_id + payment_date when not provided,
+    # mirroring the CLI behaviour of noteval_resolve_and_extract.py.
+    if body.output_dir.strip():
+        out_dir: Path | None = Path(body.output_dir.strip())
+    else:
+        folder = _bs.output_folder_name(body.deal_id, body.payment_date, "")
+        out_dir = _bs.default_output_root() / folder
+
+    try:
+        result = _resolve_extract.resolve_and_extract(
+            body.deal_id,
+            body.payment_date,
+            output_dir=out_dir,
+            include_tables=body.include_tables,
+            include_structured=body.include_structured,
+            extract_waterfall=body.extract_waterfall,
+            force_resegment=body.force_resegment,
+        )
+    except SystemExit as e:
+        raise HTTPException(status_code=400, detail=_system_exit_message(e)) from e
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except ImportError as e:
+        raise HTTPException(
+            status_code=501,
+            detail=f"pdfplumber not installed on server: {e!s}. "
+                   "Run: py -3 -m pip install pdfplumber",
+        ) from e
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Extraction failed: {e!s}",
+        ) from e
+
+    if body.summary_only:
+        return _resolve_extract.extraction_summary(result)
+    return result
 
 
 class SegmentBody(BaseModel):
@@ -302,7 +422,13 @@ _DELIVERABLES = (
     "05_valuation_relevant_fees.md",
 )
 
+_FEE_ARTIFACTS = (
+    "fee_classification.md",
+    "fee_mapping_report.md",
+)
+
 _DELIVERABLE_SET = frozenset(_DELIVERABLES)
+_ALLOW_MISSING_FILES = _DELIVERABLE_SET | frozenset(_FEE_ARTIFACTS)
 
 _TARGET_TO_FILE: dict[str, str] = {
     "01": "01_report_metadata.md",
@@ -311,20 +437,12 @@ _TARGET_TO_FILE: dict[str, str] = {
     "04": "04_extraction_summary.md",
 }
 
-_EXTRACTION_TEMPLATES_MD = (
-    BASE / "noteval_extractor" / "references" / "extraction-templates.md"
-)
-_SKILL_MD = BASE / "noteval_extractor" / "SKILL.md"
+_EXTRACTION_TEMPLATES_MD = _draft.EXTRACTION_TEMPLATES_MD
+_SKILL_MD = _draft.SKILL_MD
 
 
 def _noteval_agent_md_path() -> Path | None:
-    for candidate in (
-        BASE / "noteval_extractor" / "agents" / "noteval-extractor-agent.md",
-        BASE / ".cursor" / "agents" / "noteval-extractor-agent.md",
-    ):
-        if candidate.is_file():
-            return candidate
-    return None
+    return _draft.noteval_agent_md_path()
 
 
 def _read_text_capped(path: Path, max_chars: int) -> tuple[str, bool]:
@@ -340,83 +458,12 @@ def _read_text_capped(path: Path, max_chars: int) -> tuple[str, bool]:
     )
 
 
-def _build_draft_repository_context(
-    *,
-    include_full_templates: bool,
-    full_templates_max_chars: int,
-    include_skill_md: bool,
-    skill_max_chars: int,
-    include_agent_md: bool,
-    agent_max_chars: int,
-) -> tuple[str, dict[str, object]]:
-    """Plain-text blocks for the LLM (SKILL, agent, optional full templates)."""
-    blocks: list[str] = []
-    meta: dict[str, object] = {}
-
-    if include_full_templates:
-        text, tr = _read_text_capped(_EXTRACTION_TEMPLATES_MD, full_templates_max_chars)
-        if text:
-            label = _EXTRACTION_TEMPLATES_MD.name
-            blocks.append(f"### Full `{label}` (entire reference; truncated={tr})\n\n{text}")
-            meta["full_templates"] = {"path": str(_EXTRACTION_TEMPLATES_MD), "truncated": tr}
-        else:
-            meta["full_templates"] = {"path": str(_EXTRACTION_TEMPLATES_MD), "skipped": True}
-
-    if include_skill_md:
-        text, tr = _read_text_capped(_SKILL_MD, skill_max_chars)
-        if text:
-            blocks.append(f"### Full `{_SKILL_MD.name}` (noteval workflow skill; truncated={tr})\n\n{text}")
-            meta["skill"] = {"path": str(_SKILL_MD), "truncated": tr}
-        else:
-            meta["skill"] = {"path": str(_SKILL_MD), "skipped": True}
-
-    if include_agent_md:
-        ap = _noteval_agent_md_path()
-        if ap:
-            text, tr = _read_text_capped(ap, agent_max_chars)
-            if text:
-                blocks.append(
-                    f"### `{ap.name}` (noteval extractor agent text; truncated={tr})\n\n{text}"
-                )
-                meta["agent"] = {"path": str(ap), "truncated": tr}
-            else:
-                meta["agent"] = {"path": str(ap), "skipped": True}
-        else:
-            meta["agent"] = {"skipped": True, "reason": "noteval-extractor-agent.md not found"}
-
-    return "\n\n---\n\n".join(blocks), meta
-
-
 def _slice_extraction_template(target: Literal["01", "02", "03", "04"]) -> str:
-    """Return the `## File NN` section from extraction-templates.md (excludes deprecated File 06 from File 03)."""
-    path = _EXTRACTION_TEMPLATES_MD
-    if not path.is_file():
-        raise HTTPException(
-            status_code=500,
-            detail=f"Missing {_EXTRACTION_TEMPLATES_MD}",
-        )
-    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    markers: dict[str, int] = {}
-    for i, line in enumerate(lines):
-        if line.startswith("## File "):
-            key = line[8:10]
-            if key in ("01", "02", "03", "04", "06"):
-                markers[key] = i
-    for need in ("01", "02", "03", "04"):
-        if need not in markers:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Could not find '## File {need}' in extraction-templates.md",
-            )
-    end_map = {
-        "01": markers["02"],
-        "02": markers["03"],
-        "03": markers.get("06", markers["04"]),
-        "04": len(lines),
-    }
-    start = markers[target]
-    end = end_map[target]
-    return "\n".join(lines[start:end]).strip() + "\n"
+    """Thin wrapper: map noteval_llm errors to HTTP 500 for the UI API."""
+    try:
+        return _draft.slice_extraction_template(target)
+    except (RuntimeError, ValueError) as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 def _allowed_output_dir(raw: str) -> Path:
@@ -625,8 +672,237 @@ def _child_file(base: Path, relative: str) -> Path:
     return target
 
 
+def _run_apply_distribution_usd(out: Path) -> dict[str, Any]:
+    """Patch ``02`` from pdfplumber Distribution in US$ when structured file exists."""
+    structured = out / "_chunks_structured" / "distribution_usd_pdfplumber.md"
+    if not structured.is_file():
+        return {
+            "ok": True,
+            "skipped": True,
+            "reason": "no distribution_usd_pdfplumber.md",
+            "changes": [],
+        }
+    if not (out / "02_tranche_class_balances.md").is_file():
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": "missing 02_tranche_class_balances.md",
+            "changes": [],
+        }
+    try:
+        from apply_distribution_usd import run as apply_distribution_usd_run  # type: ignore[import-untyped]
+    except ImportError as e:
+        return {"ok": False, "skipped": True, "reason": f"apply_distribution_usd import failed: {e}"}
+    try:
+        return apply_distribution_usd_run(out)
+    except FileNotFoundError as e:
+        return {"ok": False, "skipped": True, "reason": str(e)}
+
+
+def _run_apply_distribution_summary(out: Path) -> dict[str, Any]:
+    """Patch ``02`` from pdfplumber Distribution Summary (U.S. Bank) when structured file exists."""
+    structured = out / "_chunks_structured" / "distribution_summary_pdfplumber.md"
+    if not structured.is_file():
+        return {
+            "ok": True,
+            "skipped": True,
+            "reason": "no distribution_summary_pdfplumber.md",
+            "changes": [],
+        }
+    if not (out / "02_tranche_class_balances.md").is_file():
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": "missing 02_tranche_class_balances.md",
+            "changes": [],
+        }
+    try:
+        from apply_distribution_summary import (  # type: ignore[import-untyped]
+            run as apply_distribution_summary_run,
+        )
+    except ImportError as e:
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": f"apply_distribution_summary import failed: {e}",
+        }
+    try:
+        return apply_distribution_summary_run(out)
+    except FileNotFoundError as e:
+        return {"ok": False, "skipped": True, "reason": str(e)}
+
+
+def _run_apply_distribution_report(out: Path) -> dict[str, Any]:
+    """Patch ``02`` from pdfplumber Distribution Report (GoldenTree Pass-Through) when structured file exists."""
+    structured = out / "_chunks_structured" / "distribution_report_pdfplumber.md"
+    if not structured.is_file():
+        return {
+            "ok": True,
+            "skipped": True,
+            "reason": "no distribution_report_pdfplumber.md",
+            "changes": [],
+        }
+    if not (out / "02_tranche_class_balances.md").is_file():
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": "missing 02_tranche_class_balances.md",
+            "changes": [],
+        }
+    try:
+        from apply_distribution_report import (  # type: ignore[import-untyped]
+            run as apply_distribution_report_run,
+        )
+    except ImportError as e:
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": f"apply_distribution_report import failed: {e}",
+        }
+    try:
+        return apply_distribution_report_run(out)
+    except FileNotFoundError as e:
+        return {"ok": False, "skipped": True, "reason": str(e)}
+
+
+def _run_apply_payment_date_report(out: Path) -> dict[str, Any]:
+    """Patch ``02`` from pdfplumber Payment Date Report when structured file exists."""
+    structured = out / "_chunks_structured" / "payment_date_report_pdfplumber.md"
+    if not structured.is_file():
+        return {
+            "ok": True,
+            "skipped": True,
+            "reason": "no payment_date_report_pdfplumber.md",
+            "changes": [],
+        }
+    if not (out / "02_tranche_class_balances.md").is_file():
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": "missing 02_tranche_class_balances.md",
+            "changes": [],
+        }
+    try:
+        from apply_payment_date_report import (  # type: ignore[import-untyped]
+            run as apply_payment_date_report_run,
+        )
+    except ImportError as e:
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": f"apply_payment_date_report import failed: {e}",
+        }
+    try:
+        return apply_payment_date_report_run(out)
+    except FileNotFoundError as e:
+        return {"ok": False, "skipped": True, "reason": str(e)}
+
+
+def _run_apply_payment_date_factors(out: Path) -> dict[str, Any]:
+    raw = out / "_chunks_structured" / "payment_date_factors_raw.md"
+    if not raw.is_file():
+        return {
+            "ok": True,
+            "skipped": True,
+            "reason": "no payment_date_factors_raw.md",
+            "changes": [],
+        }
+    if not (out / "02_tranche_class_balances.md").is_file():
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": "missing 02_tranche_class_balances.md",
+            "changes": [],
+        }
+    try:
+        from apply_payment_date_factors import (  # type: ignore[import-untyped]
+            run as apply_payment_date_factors_run,
+        )
+    except ImportError as e:
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": f"apply_payment_date_factors import failed: {e}",
+        }
+    try:
+        return apply_payment_date_factors_run(out)
+    except FileNotFoundError as e:
+        return {"ok": False, "skipped": True, "reason": str(e)}
+
+
+def _run_apply_distribution_report_indenture(out: Path) -> dict[str, Any]:
+    if not (out / "02_tranche_class_balances.md").is_file():
+        return {"ok": True, "skipped": True, "reason": "no 02_tranche_class_balances.md", "changes": []}
+    try:
+        from apply_distribution_report_indenture import (  # type: ignore[import-untyped]
+            run as apply_distribution_report_indenture_run,
+        )
+    except ImportError as e:
+        return {"ok": False, "skipped": True, "reason": f"apply_distribution_report_indenture import failed: {e}"}
+    try:
+        return apply_distribution_report_indenture_run(out)
+    except FileNotFoundError as e:
+        return {"ok": False, "skipped": True, "reason": str(e)}
+
+
+def _run_apply_02_distribution_sources(out: Path) -> dict[str, Any]:
+    """Layer 1: header-mapped pdfplumber distribution columns overwrite ``02`` before validate."""
+    return {
+        "distribution_usd": _run_apply_distribution_usd(out),
+        "distribution_summary": _run_apply_distribution_summary(out),
+        "distribution_report": _run_apply_distribution_report(out),
+        "distribution_report_indenture": _run_apply_distribution_report_indenture(out),
+        "payment_date_report": _run_apply_payment_date_report(out),
+        "payment_date_factors": _run_apply_payment_date_factors(out),
+    }
+
+
+def _log_distribution_apply(
+    log_fn: Any,
+    distribution_apply: dict[str, Any] | None,
+) -> None:
+    """Emit pipeline/SDK log lines for Layer 1 distribution apply results."""
+    if not isinstance(distribution_apply, dict):
+        return
+    for key, label in (
+        ("distribution_usd", "apply_distribution_usd"),
+        ("distribution_summary", "apply_distribution_summary"),
+        ("distribution_report", "apply_distribution_report"),
+        ("distribution_report_indenture", "apply_distribution_report_indenture"),
+        ("payment_date_report", "apply_payment_date_report"),
+        ("payment_date_factors", "apply_payment_date_factors"),
+    ):
+        result = distribution_apply.get(key)
+        if not isinstance(result, dict):
+            continue
+        if result.get("skipped"):
+            reason = str(result.get("reason") or "").strip()
+            if reason and "no distribution_" not in reason:
+                log_fn(f"{label} skipped: {reason}")
+                for ek in ("grid_map_errors", "arithmetic_rejected_rows", "incomplete_rows"):
+                    extra = result.get(ek)
+                    if extra:
+                        preview = extra[:3] if isinstance(extra, list) else extra
+                        log_fn(f"  {label} {ek}: {preview}")
+        else:
+            src = result.get("map_source")
+            src_bit = f", map={src}" if src else ""
+            log_fn(
+                f"{label}: {len(result.get('changes') or [])} column patch(es) "
+                f"({result.get('printed_rows', '?')} printed / "
+                f"{result.get('economic_rows', '?')} economic rows{src_bit})"
+            )
+
+
 def _run_validate_noteval(out: Path) -> dict[str, Any]:
     """Run validate_noteval.py on ``out`` and return report text plus process metadata."""
+    distribution_apply = _run_apply_02_distribution_sources(out)
+    try:
+        import validate_noteval as vn
+
+        vn.fix_02_primary_table(out)
+    except Exception:
+        pass
     val_script = BASE / "noteval_extractor" / "scripts" / "validate_noteval.py"
     cmd = [sys.executable, str(val_script), str(out)]
     proc = subprocess.run(
@@ -650,7 +926,19 @@ def _run_validate_noteval(out: Path) -> dict[str, Any]:
         "report": report_text[:50_000],
         "report_path": str(report_path),
         "log_tail": ((proc.stdout or "") + (proc.stderr or ""))[-8000:],
+        "manual_review_flags": _manual_review_flags_for_dir(out),
+        "distribution_apply": distribution_apply,
     }
+
+
+def _manual_review_flags_for_dir(out: Path) -> list[dict[str, str]]:
+    """Structured R2/R3/R4/R13/R25 flags for UI and downstream (re-runs validate_dir in-process)."""
+    try:
+        import validate_noteval as vn
+
+        return vn.manual_review_flags(vn.validate_dir(out))
+    except Exception:
+        return []
 
 
 class ExtractionDirBody(BaseModel):
@@ -671,6 +959,23 @@ class ExtractionFileBody(ExtractionDirBody):
 
 class ExtractionValidateBody(ExtractionDirBody):
     strict: bool = False
+
+
+class RunFeePipelineBody(ExtractionDirBody):
+    """Run Step 5 fee pipeline on an already-extracted deal folder."""
+
+    run_llm: bool = Field(
+        True,
+        description="Run Step 5b LLM on uncertain / mapper-dropped fee rows.",
+    )
+    run_map: bool = Field(
+        True,
+        description="Run map_valuation_fees.py after classification (writes 05).",
+    )
+    apply_waterfall_cols: bool = Field(
+        True,
+        description="Run apply_waterfall_optimal_paid.py before classify when applicable.",
+    )
 
 
 @app.post("/api/extraction/artifacts")
@@ -720,7 +1025,7 @@ def extraction_artifacts(body: ExtractionDirBody):
             )
 
     deliverables: list[dict[str, object]] = []
-    for name in _DELIVERABLES:
+    for name in (*_DELIVERABLES, *_FEE_ARTIFACTS):
         fp = out / name
         ex = fp.is_file()
         sz = fp.stat().st_size if ex else 0
@@ -757,10 +1062,10 @@ def extraction_file(body: ExtractionFileBody):
     """Read a text file under output_dir (page index, chunk, manifest, deliverable)."""
     out = _allowed_output_dir(body.output_dir)
     rel_norm = body.relative_path.replace("\\", "/").strip().lstrip("/")
-    if body.allow_missing and rel_norm not in _DELIVERABLE_SET:
+    if body.allow_missing and rel_norm not in _ALLOW_MISSING_FILES:
         raise HTTPException(
             status_code=400,
-            detail="allow_missing is only allowed for 01–04 deliverable filenames",
+            detail="allow_missing is only allowed for 01–05 deliverables and fee_classification.md / fee_mapping_report.md",
         )
     target = _child_file(out, body.relative_path)
     if not target.is_file():
@@ -800,6 +1105,144 @@ def extraction_validate(body: ExtractionDirBody):
 
 
 _MAP_VALUATION_FEES_SCRIPT = BASE / "noteval_extractor" / "scripts" / "map_valuation_fees.py"
+_CLASSIFY_WATERFALL_FEES_SCRIPT = _SCRIPTS / "classify_waterfall_fees.py"
+
+
+def _run_classify_waterfall_fees(out: Path) -> dict[str, Any]:
+    if not _CLASSIFY_WATERFALL_FEES_SCRIPT.is_file():
+        return {
+            "returncode": 1,
+            "skipped": True,
+            "reason": f"classify_waterfall_fees.py missing: {_CLASSIFY_WATERFALL_FEES_SCRIPT}",
+            "output_file": str(out / "fee_classification.md"),
+            "mapped_count": 0,
+        }
+    try:
+        from classify_waterfall_fees import run as classify_waterfall_fees_run  # type: ignore[import-untyped]
+    except ImportError as e:
+        return {
+            "returncode": 1,
+            "skipped": True,
+            "reason": f"Could not import classify_waterfall_fees: {e}",
+            "output_file": str(out / "fee_classification.md"),
+            "mapped_count": 0,
+        }
+    out_path = out / "fee_classification.md"
+    try:
+        result = classify_waterfall_fees_run(out)
+    except FileNotFoundError as e:
+        return {
+            "returncode": 1,
+            "report_path": str(out_path),
+            "log_tail": str(e),
+            "mapped_count": 0,
+            "output_file": str(out_path),
+        }
+    mapped = int(result.get("mapped_count") or 0)
+    confident = int(result.get("confident_count") or 0)
+    uncertain = int(result.get("uncertain_count") or 0)
+    excluded = int(result.get("excluded_count") or 0)
+    wf_rows = int(result.get("waterfall_row_count") or 0)
+    log_tail = (
+        f"Wrote {result.get('output_file', out_path)}\n"
+        f"Classified {mapped} fee row(s) ({confident} confident, {uncertain} uncertain), "
+        f"excluded {excluded}, from {wf_rows} non-zero waterfall row(s)."
+    )
+    return {
+        "returncode": 0,
+        "log_tail": log_tail,
+        "mapped_count": mapped,
+        "confident_count": confident,
+        "uncertain_count": uncertain,
+        "excluded_count": excluded,
+        "waterfall_row_count": wf_rows,
+        "output_file": result.get("output_file", str(out_path)),
+    }
+
+
+def _maybe_run_classify_waterfall_fees(
+    out: Path, targets: list[str]
+) -> dict[str, Any] | None:
+    """Classify fee rows from ``03`` waterfall when **03** was extracted."""
+    if "03" not in targets:
+        return None
+    p03 = out / "03_interest_principal_waterfall.md"
+    if not p03.is_file():
+        return None
+    return _run_classify_waterfall_fees(out)
+
+
+def _llm_classify_fees(
+    out: Path,
+    *,
+    job_id: str | None = None,
+) -> dict[str, Any]:
+    """Step 5b — delegate to ``LLM/noteval_fee_classify.py``."""
+    import noteval_fee_classify  # noqa: E402
+
+    def _log(msg: str) -> None:
+        if job_id:
+            _pipeline_log(job_id, msg)
+
+    return noteval_fee_classify.classify_uncertain_fees(out, log=_log if job_id else None)
+
+
+def _apply_fee_pipeline_to_result(
+    result: dict[str, Any],
+    fee_pipeline: dict[str, Any],
+    *,
+    pipeline_usage_records: list[dict[str, Any]] | None = None,
+) -> None:
+    """Mirror ``run_fee_pipeline`` step dicts onto legacy API response keys."""
+    result["fee_pipeline"] = fee_pipeline
+    if fee_pipeline.get("waterfall_optimal_paid") is not None:
+        result["waterfall_optimal_paid"] = fee_pipeline["waterfall_optimal_paid"]
+    if fee_pipeline.get("classify") is not None:
+        result["fee_classification"] = fee_pipeline["classify"]
+    if fee_pipeline.get("llm_classify") is not None:
+        result["llm_fee_classification"] = fee_pipeline["llm_classify"]
+        if pipeline_usage_records is not None:
+            _draft.ensure_fee_classify_usage_in_records(pipeline_usage_records, fee_pipeline)
+        llm_fc = fee_pipeline["llm_classify"]
+        if isinstance(llm_fc, dict):
+            u = llm_fc.get("usage")
+            if isinstance(u, dict) and _draft.usage_record_is_billable(u):
+                result["fee_classify_usage"] = u
+    if fee_pipeline.get("map_fees") is not None:
+        result["fee_mapping"] = fee_pipeline["map_fees"]
+
+
+def _run_fee_pipeline(
+    out: Path,
+    *,
+    targets: list[str],
+    run_llm: bool,
+    run_validate: bool = False,
+    job_id: str | None = None,
+    log_fn: Callable[[str], None] | None = None,
+) -> dict[str, Any] | None:
+    """Headless Step 5 — ``run_fee_pipeline.run`` when **03** exists."""
+    if "03" not in targets:
+        return None
+    if not (out / "03_interest_principal_waterfall.md").is_file():
+        return None
+    from run_fee_pipeline import run as run_fee_pipeline_run  # type: ignore[import-untyped]
+
+    def _log(msg: str) -> None:
+        if log_fn is not None:
+            log_fn(msg)
+        elif job_id:
+            _pipeline_log(job_id, msg)
+
+    return run_fee_pipeline_run(
+        out,
+        apply_waterfall_cols=True,
+        run_classify=True,
+        run_llm=run_llm,
+        run_map=True,
+        run_validate=run_validate,
+        log=_log,
+    )
 
 
 def _run_map_valuation_fees(out: Path) -> dict[str, Any]:
@@ -807,7 +1250,10 @@ def _run_map_valuation_fees(out: Path) -> dict[str, Any]:
     if not script.is_file():
         raise HTTPException(status_code=500, detail=f"map_valuation_fees.py missing: {script}")
     try:
-        from map_valuation_fees import run as map_valuation_fees_run  # type: ignore[import-untyped]
+        from map_valuation_fees import (  # type: ignore[import-untyped]
+            FeeClassificationIncompleteError,
+            run as map_valuation_fees_run,
+        )
     except ImportError as e:
         raise HTTPException(
             status_code=500,
@@ -816,7 +1262,7 @@ def _run_map_valuation_fees(out: Path) -> dict[str, Any]:
     report_path = out / "fee_mapping_report.md"
     try:
         result = map_valuation_fees_run(out)
-    except FileNotFoundError as e:
+    except (FeeClassificationIncompleteError, FileNotFoundError) as e:
         return {
             "returncode": 1,
             "report": "",
@@ -847,6 +1293,82 @@ def _run_map_valuation_fees(out: Path) -> dict[str, Any]:
     }
 
 
+def _run_apply_pdfplumber_idd(out: Path) -> dict[str, Any]:
+    try:
+        from apply_pdfplumber_idd import run as apply_pdfplumber_idd_run  # type: ignore[import-untyped]
+    except ImportError as e:
+        return {"ok": False, "skipped": True, "reason": f"apply_pdfplumber_idd import failed: {e}"}
+    try:
+        return apply_pdfplumber_idd_run(out)
+    except FileNotFoundError as e:
+        return {"ok": False, "skipped": True, "reason": str(e)}
+
+
+def _maybe_run_apply_pdfplumber_idd(
+    out: Path, targets: list[str]
+) -> dict[str, Any] | None:
+    """Patch ``02`` interest columns from pdfplumber IDD when **02** was extracted."""
+    if "02" not in targets:
+        return None
+    p02 = out / "02_tranche_class_balances.md"
+    if not p02.is_file():
+        return None
+    structured = out / "_chunks_structured" / "pdd_idd_pdfplumber.md"
+    if not structured.is_file():
+        return None
+    return _run_apply_pdfplumber_idd(out)
+
+
+def _run_apply_pdfplumber_pdd(out: Path) -> dict[str, Any]:
+    try:
+        from apply_pdfplumber_pdd import run as apply_pdfplumber_pdd_run  # type: ignore[import-untyped]
+    except ImportError as e:
+        return {"ok": False, "skipped": True, "reason": f"apply_pdfplumber_pdd import failed: {e}"}
+    try:
+        return apply_pdfplumber_pdd_run(out)
+    except FileNotFoundError as e:
+        return {"ok": False, "skipped": True, "reason": str(e)}
+
+
+def _maybe_run_apply_pdfplumber_pdd(
+    out: Path, targets: list[str]
+) -> dict[str, Any] | None:
+    """Patch ``02`` principal/balance columns from pdfplumber PDD when **02** was extracted."""
+    if "02" not in targets:
+        return None
+    p02 = out / "02_tranche_class_balances.md"
+    if not p02.is_file():
+        return None
+    structured = out / "_chunks_structured" / "pdd_idd_pdfplumber.md"
+    if not structured.is_file():
+        return None
+    return _run_apply_pdfplumber_pdd(out)
+
+
+def _run_apply_waterfall_optimal_paid(out: Path) -> dict[str, Any]:
+    try:
+        from apply_waterfall_optimal_paid import (  # type: ignore[import-untyped]
+            run as apply_waterfall_optimal_paid_run,
+        )
+    except ImportError as e:
+        return {"ok": False, "skipped": True, "reason": f"apply_waterfall_optimal_paid import failed: {e}"}
+    try:
+        return apply_waterfall_optimal_paid_run(out)
+    except FileNotFoundError as e:
+        return {"ok": False, "skipped": True, "reason": str(e)}
+
+
+def _maybe_run_apply_waterfall_optimal_paid(
+    out: Path, targets: list[str]
+) -> dict[str, Any] | None:
+    """Patch Available|Optimal|Paid|Unpaid waterfall grids in ``03``."""
+    if "03" not in targets:
+        return None
+    if not (out / "03_interest_principal_waterfall.md").is_file():
+        return None
+    return _run_apply_waterfall_optimal_paid(out)
+
+
 def _maybe_run_map_valuation_fees(
     out: Path, targets: list[str]
 ) -> dict[str, Any] | None:
@@ -868,7 +1390,18 @@ def _extraction_map_valuation_fees_handler(body: ExtractionDirBody) -> dict[str,
             status_code=400,
             detail="03_interest_principal_waterfall.md missing — run extraction first.",
         )
+    classify_result = _run_fee_pipeline(
+        out,
+        targets=["03"],
+        run_llm=False,
+        run_validate=False,
+    )
+    if classify_result is None:
+        classify_result = _run_classify_waterfall_fees(out)
     result = _run_map_valuation_fees(out)
+    if classify_result is not None:
+        result["fee_classification"] = classify_result.get("classify") or classify_result
+        result["fee_pipeline"] = classify_result
     if result["returncode"] != 0:
         raise HTTPException(
             status_code=400 if "Missing" in (result.get("log_tail") or "") else 500,
@@ -887,6 +1420,73 @@ def extraction_map_valuation_fees(body: ExtractionDirBody):
 def extraction_map_valuation_fees_alt(body: ExtractionDirBody):
     """Alias for clients that use underscores in the path."""
     return _extraction_map_valuation_fees_handler(body)
+
+
+def _extraction_run_fee_pipeline_handler(body: RunFeePipelineBody) -> dict[str, Any]:
+    """
+    Run Step 5 fee pipeline on an extracted deal: classify → optional LLM 5b → optional map 05.
+    """
+    out = _allowed_output_dir(body.output_dir)
+    p03 = out / "03_interest_principal_waterfall.md"
+    if not p03.is_file():
+        raise HTTPException(
+            status_code=400,
+            detail="03_interest_principal_waterfall.md missing — run extraction with 03 first.",
+        )
+    try:
+        from run_fee_pipeline import run as run_fee_pipeline_run  # type: ignore[import-untyped]
+    except ImportError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not import run_fee_pipeline: {e}",
+        ) from e
+
+    pipeline = run_fee_pipeline_run(
+        out,
+        apply_waterfall_cols=body.apply_waterfall_cols,
+        run_classify=True,
+        run_llm=body.run_llm,
+        run_map=body.run_map,
+        run_validate=False,
+    )
+    if pipeline.get("skipped"):
+        raise HTTPException(
+            status_code=400,
+            detail=pipeline.get("reason") or "fee pipeline skipped",
+        )
+    classify = pipeline.get("classify") or {}
+    if classify.get("skipped"):
+        raise HTTPException(
+            status_code=400,
+            detail=classify.get("reason") or "classify_waterfall_fees failed",
+        )
+
+    response: dict[str, Any] = {
+        "ok": bool(pipeline.get("ok")),
+        "output_dir": str(out),
+        "reason": pipeline.get("reason"),
+    }
+    _apply_fee_pipeline_to_result(response, pipeline)
+    llm_fc = pipeline.get("llm_classify") or {}
+    if isinstance(llm_fc, dict):
+        u = llm_fc.get("usage")
+        if isinstance(u, dict) and _draft.usage_record_is_billable(u):
+            response["fee_classify_usage"] = u
+            if u.get("cost_usd") is not None:
+                response["fee_classify_cost_usd"] = u.get("cost_usd")
+    return response
+
+
+@app.post("/api/extraction/run-fee-pipeline")
+def extraction_run_fee_pipeline(body: RunFeePipelineBody):
+    """Classify fees from 03, optionally run LLM Step 5b, optionally map to 05."""
+    return _extraction_run_fee_pipeline_handler(body)
+
+
+@app.post("/api/extraction/run_fee_pipeline")
+def extraction_run_fee_pipeline_alt(body: RunFeePipelineBody):
+    """Alias for clients that use underscores in the path."""
+    return _extraction_run_fee_pipeline_handler(body)
 
 
 _XML_EXPORT_SCRIPT = BASE / "noteval_extractor" / "scripts" / "export_noteval_xml.py"
@@ -1026,7 +1626,8 @@ class CompareXmlDbBody(BaseModel):
 def extraction_compare_xml_db(body: CompareXmlDbBody):
     """
     Map tranches from export XML and compare class fields to EMS ``cdo_noteval_tranches``.
-    Returns an .xlsx with Match rates, Tranche mapping, and Summary sheets.
+    Also compares summed ``valuation_fees`` in XML to ``SUM(amount)`` in ``cdo_noteval_deal``.
+    Returns an .xlsx with Match rates, Fee totals, Tranche mapping, and Summary sheets.
     """
     out = _allowed_output_dir(body.output_dir)
     names = [n.strip() for n in body.folder_names if n and n.strip()]
@@ -1087,14 +1688,18 @@ def extraction_export_xml(body: ExtractionExportXmlBody):
 
 
 def _batch_export_folder_path(folder_name: str, source: str) -> Path:
-    """Resolve output folder for batch XML export (LLM deal dir vs *_sdk)."""
+    """Resolve output folder for batch XML export.
+
+    SDK and LLM deliverables both live in ``{dealId}_{YYYYMMDD}`` folders. Legacy
+    ``*_sdk`` / ``*_llm`` suffixes on queue names are stripped before lookup.
+    """
+    _ = source  # discovery filter only; path resolution is the same for both pipelines
     base = folder_name.strip()
-    if source == "sdk":
-        if base.endswith("_sdk"):
-            return (_OUTPUT_ROOT / base).resolve()
-        return (_OUTPUT_ROOT / f"{base}_sdk").resolve()
-    stem = base.replace("_sdk", "").replace("_llm", "")
-    return (_OUTPUT_ROOT / stem).resolve()
+    for suf in ("_sdk", "_llm"):
+        if base.endswith(suf):
+            base = base[: -len(suf)]
+            break
+    return (_OUTPUT_ROOT / base).resolve()
 
 
 class BatchExportXmlBody(BaseModel):
@@ -1370,255 +1975,8 @@ def extraction_deliverable_save(body: ExtractionDeliverableSaveBody):
     return {"ok": True, "path": str(path.resolve()), "filename": fn}
 
 
-def _normalize_chunk_rel(p: str) -> str:
-    n = p.replace("\\", "/").strip().lstrip("/")
-    if not n or ".." in Path(n).parts:
-        raise HTTPException(status_code=400, detail="Invalid chunk_paths entry")
-    if not (n.startswith("_chunks/") or n.startswith("_chunks_waterfall/")):
-        raise HTTPException(
-            status_code=400,
-            detail="chunk_paths must be under _chunks/ or _chunks_waterfall/",
-        )
-    if Path(n).suffix.lower() != ".txt":
-        raise HTTPException(status_code=400, detail="Only .txt chunk files are allowed")
-    return n
-
-
-def _gather_chunk_bundle(
-    out: Path,
-    *,
-    chunk_paths: list[str],
-    chunk_tree: Literal["primary", "waterfall", "both"],
-    max_bytes_per_chunk: int,
-    max_total_chunk_chars: int,
-    for_deliverable: str | None = None,
-    use_index_chunks: bool = True,
-) -> tuple[str, list[str], str | None]:
-    note_parts: list[str] = []
-    used: list[str] = []
-    parts: list[str] = []
-    budget = max_total_chunk_chars
-    per = max_bytes_per_chunk
-
-    index_page_filter: set[int] | None = None
-    index_sel: _chunk_select.ChunkSelectionResult | None = None
-    index_map_prefix = ""
-    if chunk_paths:
-        rels = [_normalize_chunk_rel(x) for x in chunk_paths]
-    else:
-        rels: list[str] = []
-        if use_index_chunks and for_deliverable:
-            index_sel = _chunk_select.resolve_chunk_relpaths(
-                out,
-                for_deliverable=for_deliverable,
-                chunk_tree=chunk_tree,
-                explicit_paths=None,
-                use_index=use_index_chunks,
-            )
-        if index_sel is not None:
-            rels = list(index_sel.rel_paths)
-            if index_sel.pages:
-                index_page_filter = set(index_sel.pages)
-            if index_sel.note:
-                note_parts.append(index_sel.note)
-            if for_deliverable in ("01", "02", "03") and index_sel.pages is not None:
-                primary_previews, _ = _chunk_select.parse_page_index(out / "_page_index.md")
-                wf_previews, _ = _chunk_select.parse_page_index(out / "_page_index_waterfall.md")
-                index_map_prefix = _chunk_select.format_index_map_brief(
-                    for_deliverable,
-                    pages=sorted(index_sel.pages),
-                    rel_paths=rels,
-                    primary_previews=primary_previews,
-                    wf_previews=wf_previews if for_deliverable == "03" else None,
-                )
-        if not rels:
-            # ``04`` summarizes ``01``–``03`` on disk; index selection intentionally returns no chunks.
-            skip_chunk_fallback = for_deliverable == "04" and (
-                index_sel is not None or use_index_chunks
-            )
-            if use_index_chunks and index_sel is not None:
-                skip_chunk_fallback = True
-            if not skip_chunk_fallback:
-                if chunk_tree in ("primary", "both"):
-                    d = out / "_chunks"
-                    if d.is_dir():
-                        rels.extend("_chunks/" + f.name for f in sorted(d.glob("pages_*.txt")))
-                if chunk_tree in ("waterfall", "both"):
-                    d = out / "_chunks_waterfall"
-                    if d.is_dir():
-                        rels.extend(
-                            "_chunks_waterfall/" + f.name
-                            for f in sorted(d.glob("pages_*.txt"))
-                        )
-                if index_sel is not None and rels:
-                    note_parts.append(
-                        "Index match found no chunk files; fell back to all chunks in tree."
-                    )
-                elif use_index_chunks and index_sel is None and rels:
-                    note_parts.append(
-                        "No usable _page_index.md — fell back to all chunks in tree."
-                    )
-        if (
-            not rels
-            and for_deliverable != "04"
-            and use_index_chunks
-            and index_sel is not None
-            and index_sel.pages
-        ):
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    f"Index mapped pages {sorted(index_sel.pages)} for deliverable {for_deliverable} "
-                    "but no chunk file spans cover them. Re-segment or check _manifest.md."
-                ),
-            )
-        if not rels and for_deliverable != "04":
-            raise HTTPException(
-                status_code=400,
-                detail="No chunk files found. Segment the PDF or pass chunk_paths explicitly.",
-            )
-
-    total_chars = 0
-    prefix_blocks: list[str] = []
-    if index_map_prefix.strip():
-        prefix_blocks.append(index_map_prefix.strip())
-
-    primary_previews_02: list[_chunk_select.PagePreview] = []
-    if for_deliverable == "02":
-        primary_previews_02, _ = _chunk_select.parse_page_index(out / "_page_index.md")
-
-    if for_deliverable == "02":
-        structured_specs: tuple[tuple[str, str], ...] = (
-            (
-                "pdd_idd_pdfplumber.md",
-                "PDD / IDD tables — pdfplumber (Principal / Interest Distribution Detail pages)",
-            ),
-            (
-                "payment_date_report_pdfplumber.md",
-                "Payment Date Report / consolidated class economics — pdfplumber (fingerprint pages)",
-            ),
-        )
-        for fname, desc_short in structured_specs:
-            sp = out / "_chunks_structured" / fname
-            if not sp.is_file():
-                continue
-            try:
-                sz = sp.stat().st_size
-            except OSError:
-                continue
-            if sz <= 0:
-                continue
-            read_n = min(sz, min(per, 160_000))
-            with sp.open("rb") as f:
-                raw = f.read(read_n)
-            text = raw.decode("utf-8", errors="replace")
-            truncated_file = sz > read_n
-            rel_used = f"_chunks_structured/{fname}"
-            header = f"### File: `{rel_used}` ({desc_short})"
-            if truncated_file:
-                header += " (truncated: cap for structured file)"
-            block = header + "\n\n" + text
-            if total_chars + len(block) > budget:
-                remain = budget - total_chars
-                if remain > 500:
-                    block = block[:remain] + "\n\n[TRUNCATED to global chunk budget]\n"
-                    parts.append(block)
-                    used.append(rel_used)
-                    total_chars += len(block)
-                    note_parts.append(
-                        f"Global chunk budget reached after structured supplement `{fname}`."
-                    )
-            else:
-                parts.append(block)
-                used.append(rel_used)
-                total_chars += len(block)
-
-    for rel in rels:
-        if total_chars >= budget:
-            note_parts.append(
-                f"Stopped at global chunk budget ({budget} characters); remaining files omitted."
-            )
-            break
-        path = _child_file(out, rel)
-        if not path.is_file():
-            note_parts.append(f"Skipped missing: {rel}")
-            continue
-        try:
-            sz = path.stat().st_size
-        except OSError:
-            continue
-        read_n = min(sz, per)
-        with path.open("rb") as f:
-            raw = f.read(read_n)
-        text = raw.decode("utf-8", errors="replace")
-        if index_page_filter and (
-            rel.startswith("_chunks/") or rel.startswith("_chunks_waterfall/")
-        ):
-            text = _chunk_select.filter_chunk_text_to_pages(text, index_page_filter)
-        if for_deliverable == "02" and (
-            rel.startswith("_chunks/") or rel.startswith("_chunks_waterfall/")
-        ):
-            text = _chunk_select.annotate_02_chunk_pages(
-                text, previews=primary_previews_02
-            )
-        if for_deliverable == "03" and (
-            rel.startswith("_chunks/") or rel.startswith("_chunks_waterfall/")
-        ):
-            text = _chunk_select.annotate_03_chunk_pages(text)
-        truncated_file = sz > per
-        header = f"### File: `{rel}`"
-        if truncated_file:
-            header += " (truncated: max_bytes_per_chunk)"
-        if index_page_filter and (
-            rel.startswith("_chunks/") or rel.startswith("_chunks_waterfall/")
-        ):
-            header += f" (page filter: {sorted(index_page_filter)})"
-        block = header + "\n\n" + text
-        if total_chars + len(block) > budget:
-            remain = budget - total_chars
-            if remain > 500:
-                block = block[:remain] + "\n\n[TRUNCATED to global chunk budget]\n"
-                parts.append(block)
-                used.append(rel)
-            note_parts.append("Global chunk character budget reached mid-file.")
-            break
-        parts.append(block)
-        used.append(rel)
-        total_chars += len(block)
-
-    body_blocks = list(parts)
-    if for_deliverable == "02" and body_blocks:
-        try:
-            import noteval_layout_detect as _layout_detect
-
-            previews, _ = _chunk_select.parse_page_index(out / "_page_index.md")
-            lay = _layout_detect.detect_02_layout_from_index(previews)
-            preview_bundle = "\n\n".join(prefix_blocks + body_blocks)
-            lay = _layout_detect.refine_02_layout_from_chunks(lay, preview_bundle[:250_000])
-            layout_brief = _layout_detect.format_index_brief_for_02(
-                previews,
-                lay,
-                index_page_filter or set(),
-            )
-            prefix_blocks.append(layout_brief.strip())
-            note_parts.append(f"02 layout={lay.family} ({lay.confidence})")
-        except ImportError:
-            pass
-
-    bundle = "\n\n".join(prefix_blocks + body_blocks)
-    note = "; ".join(note_parts) if note_parts else None
-    return bundle, used, note
-
-
 class ExtractionDraftBody(ExtractionDirBody):
     target: Literal["01", "02", "03", "04"]
-    chunk_paths: list[str] = Field(default_factory=list, max_length=48)
-    index_driven_chunks: bool = True
-    chunk_tree: Literal["primary", "waterfall", "both"] = "primary"
-    max_bytes_per_chunk: int = Field(default=100_000, ge=4096, le=500_000)
-    max_total_chunk_chars: int = Field(default=180_000, ge=8000, le=500_000)
-    include_current_draft: bool = False
-    current_draft: str = ""
     extra_instructions: str = ""
     timeout_seconds: int = Field(default=300, ge=60, le=600)
     include_full_extraction_templates: bool = False
@@ -1627,17 +1985,8 @@ class ExtractionDraftBody(ExtractionDirBody):
     skill_max_chars: int = Field(default=50_000, ge=2000, le=120_000)
     include_agent_md: bool = True
     agent_max_chars: int = Field(default=35_000, ge=2000, le=80_000)
-    use_tools: bool | None = None
-    """When true, use OpenAI function-calling loop (read index/chunks via tools). When null, use NOTEVAL_DRAFT_USE_TOOLS env."""
     max_tool_turns: int | None = Field(default=None, ge=3, le=30)
-
-
-def _resolve_use_tools(setting: bool | None) -> bool:
-    if setting is True:
-        return True
-    if setting is False:
-        return False
-    return bool(_draft.draft_config_public().get("use_tools_default"))
+    prior_caps_per_file: int = Field(default=42_000, ge=2000, le=80_000)
 
 
 def _draft_deliverable_core(
@@ -1647,63 +1996,10 @@ def _draft_deliverable_core(
     *,
     prior_deliverables: str = "",
 ) -> dict[str, Any]:
-    """Run one LLM draft (no write). ``s`` is draft settings without output_dir/target."""
+    """Run one LLM draft via tool-calling (no write). ``s`` is draft settings without output_dir/target."""
     template_excerpt = _slice_extraction_template(target)
     fn = _TARGET_TO_FILE[target]
-    use_tools = _resolve_use_tools(s.get("use_tools"))
-
-    if use_tools:
-        repo_ctx, context_meta = _build_draft_repository_context(
-            include_full_templates=bool(s.get("include_full_extraction_templates")),
-            full_templates_max_chars=int(s.get("full_templates_max_chars", 100_000)),
-            include_skill_md=bool(s.get("include_skill_md", True)),
-            skill_max_chars=int(s.get("skill_max_chars", 50_000)),
-            include_agent_md=bool(s.get("include_agent_md", True)),
-            agent_max_chars=int(s.get("agent_max_chars", 35_000)),
-        )
-        prior = prior_deliverables
-        if target == "04" and not prior.strip():
-            prior = _read_prior_deliverables_for_04(out, int(s.get("prior_caps_per_file", 42_000)))
-        max_turns = s.get("max_tool_turns")
-        markdown, vision_meta, usage_record = _draft.openai_chat_completion_with_tools(
-            out_dir=out,
-            target=target,
-            filename=fn,
-            template_excerpt=template_excerpt,
-            repository_context=repo_ctx,
-            prior_deliverables=prior,
-            extra_instructions=str(s.get("extra_instructions") or ""),
-            read_prior_fn=lambda: _read_prior_deliverables_for_04(
-                out, int(s.get("prior_caps_per_file", 42_000))
-            ),
-            timeout=int(s.get("timeout_seconds", 300)),
-            max_turns=int(max_turns) if max_turns is not None else None,
-        )
-        return {
-            "markdown": markdown.strip(),
-            "filename": fn,
-            "chunks_used": [],
-            "gather_note": (
-                f"Tool-calling mode; turns={vision_meta.get('tool_turns')}; "
-                f"tools={len(vision_meta.get('tools_called') or [])} call(s)"
-            ),
-            "context_included": context_meta,
-            "model": _draft.draft_config_public().get("model"),
-            "vision": vision_meta,
-            "usage": usage_record,
-            "mode": "tools",
-        }
-
-    chunk_bundle, used_paths, gather_note = _gather_chunk_bundle(
-        out,
-        chunk_paths=list(s.get("chunk_paths") or []),
-        chunk_tree=s["chunk_tree"],
-        max_bytes_per_chunk=int(s["max_bytes_per_chunk"]),
-        max_total_chunk_chars=int(s["max_total_chunk_chars"]),
-        for_deliverable=target,
-        use_index_chunks=bool(s.get("index_driven_chunks", True)),
-    )
-    repo_ctx, context_meta = _build_draft_repository_context(
+    repo_ctx, context_meta = _draft.build_draft_repository_context(
         include_full_templates=bool(s.get("include_full_extraction_templates")),
         full_templates_max_chars=int(s.get("full_templates_max_chars", 100_000)),
         include_skill_md=bool(s.get("include_skill_md", True)),
@@ -1711,53 +2007,43 @@ def _draft_deliverable_core(
         include_agent_md=bool(s.get("include_agent_md", True)),
         agent_max_chars=int(s.get("agent_max_chars", 35_000)),
     )
-    current = str(s.get("current_draft") or "") if s.get("include_current_draft") else ""
-    user_msg = _draft.build_user_message(
+    prior = prior_deliverables
+    if target == "04" and not prior.strip():
+        prior = _draft.read_prior_deliverables_for_04(out, int(s.get("prior_caps_per_file", 42_000)))
+    max_turns = s.get("max_tool_turns")
+    markdown, draft_meta, usage_record = _draft.openai_chat_completion_with_tools(
+        out_dir=out,
         target=target,
         filename=fn,
-        repository_context=repo_ctx,
         template_excerpt=template_excerpt,
-        prior_deliverables=prior_deliverables,
-        chunk_bundle=chunk_bundle,
-        current_draft=current,
+        repository_context=repo_ctx,
+        prior_deliverables=prior,
         extra_instructions=str(s.get("extra_instructions") or ""),
-    )
-    markdown, vision_meta, usage_record = _draft.openai_chat_completion(
-        _draft.SYSTEM_PROMPT,
-        user_msg,
+        read_prior_fn=lambda: _draft.read_prior_deliverables_for_04(
+            out, int(s.get("prior_caps_per_file", 42_000))
+        ),
         timeout=int(s.get("timeout_seconds", 300)),
-        draft_output_dir=out,
-        draft_target=target,
-        draft_chunk_bundle=chunk_bundle,
+        max_turns=int(max_turns) if max_turns is not None else None,
     )
+    completion_mode = str(draft_meta.get("mode") or "tools_clean")
+    gather_note = (
+        f"Tool-calling mode ({completion_mode}); "
+        f"turns={draft_meta.get('tool_turns')}/{draft_meta.get('max_tool_turns')}; "
+        f"tools={len(draft_meta.get('tools_called') or [])} call(s)"
+    )
+    if draft_meta.get("tools_exhausted"):
+        gather_note += " — WARN: synthesis recovery after max turns"
     return {
         "markdown": markdown.strip(),
         "filename": fn,
-        "chunks_used": used_paths,
+        "chunks_used": [],
         "gather_note": gather_note,
         "context_included": context_meta,
         "model": _draft.draft_config_public().get("model"),
-        "vision": vision_meta,
+        "draft_meta": draft_meta,
         "usage": usage_record,
-        "mode": "completion",
+        "mode": completion_mode,
     }
-
-
-def _read_prior_deliverables_for_04(out: Path, cap_each: int) -> str:
-    parts: list[str] = []
-    for tid in ("01", "02", "03"):
-        name = _TARGET_TO_FILE[tid]
-        p = out / name
-        if not p.is_file():
-            continue
-        try:
-            text = p.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        if len(text) > cap_each:
-            text = text[:cap_each] + "\n\n[TRUNCATED]\n"
-        parts.append(f"### `{name}`\n\n{text}")
-    return "\n\n".join(parts)
 
 
 _PIPELINE_LOCK = threading.Lock()
@@ -1780,11 +2066,13 @@ def _local_now_iso() -> str:
 
 
 def _pipeline_log(job_id: str, message: str) -> None:
-    line = f"{_local_now_iso()} {message}"
+    ts = _local_now_iso()
+    line = f"{ts} {message}"
     with _PIPELINE_LOCK:
         job = _PIPELINE_JOBS.get(job_id)
         if job is not None:
             job["logs"].append(line)
+    _pipeline_log_file.append(job_id, message, ts=ts)
 
 
 class PipelineStartBody(ExtractionDirBody):
@@ -1797,12 +2085,6 @@ class PipelineStartBody(ExtractionDirBody):
     """When true, delete and overwrite all target deliverable files even if they already exist on disk."""
     force_reextract_targets: list[Literal["01", "02", "03", "04"]] | None = None
     """Subset of targets to force-overwrite. When None and force_reextract is true, all targets are forced."""
-    chunk_paths: list[str] = Field(default_factory=list, max_length=48)
-    index_driven_chunks: bool = True
-    chunk_tree_03: Literal["primary", "waterfall", "both"] = "both"
-    max_bytes_per_chunk: int = Field(default=100_000, ge=4096, le=500_000)
-    max_total_chunk_chars: int = Field(default=160_000, ge=8000, le=500_000)
-    max_total_chunk_chars_04: int = Field(default=80_000, ge=4000, le=300_000)
     include_full_extraction_templates: bool = False
     full_templates_max_chars: int = Field(default=100_000, ge=5000, le=250_000)
     include_skill_md: bool = True
@@ -1813,9 +2095,13 @@ class PipelineStartBody(ExtractionDirBody):
     extra_instructions: str = ""
     timeout_seconds_per_step: int = Field(default=300, ge=60, le=600)
     run_map_fees: bool = True
-    """When true and **03** is in targets, run map_valuation_fees.py after drafting."""
+    """When true and **03** is in targets, run classify_waterfall_fees.py then map_valuation_fees.py after drafting."""
+    run_llm_fee_classify: bool = True
+    """When true (and run_map_fees is true), run LLM step 5b after classify_waterfall_fees.py
+    to resolve uncertain/catch-all rows the regex could not confidently map.
+    Default on: regex covers ~90% of rows; LLM only sees the residual uncertain rows
+    so the incremental cost is small (~$0.001/deal on average)."""
     run_validate: bool = True
-    use_tools: bool | None = None
     max_tool_turns: int | None = Field(default=None, ge=3, le=30)
 
 
@@ -1853,189 +2139,43 @@ def _pipeline_worker(job_id: str, body: PipelineStartBody) -> None:
         job["status"] = "running"
         job["started_at"] = _local_now_iso()
 
-    result: dict[str, Any] = {
-        "steps": [],
-        "fee_mapping": None,
-        "validation": None,
-        "source_dir": None,
-        "output_dir": None,
-        "llm_dir": None,
-    }
-    pipeline_usage_records: list[dict[str, Any]] = []
+    pipe_cfg = _llm_pipeline.LlmPipelineConfig(
+        targets=body.targets,
+        use_llm_folder=body.use_llm_folder,
+        force_reextract=body.force_reextract,
+        force_reextract_targets=body.force_reextract_targets,
+        include_full_extraction_templates=body.include_full_extraction_templates,
+        full_templates_max_chars=body.full_templates_max_chars,
+        include_skill_md=body.include_skill_md,
+        skill_max_chars=body.skill_max_chars,
+        include_agent_md=body.include_agent_md,
+        agent_max_chars=body.agent_max_chars,
+        prior_caps_per_file=body.prior_caps_per_file,
+        extra_instructions=body.extra_instructions,
+        timeout_seconds_per_step=body.timeout_seconds_per_step,
+        run_map_fees=body.run_map_fees,
+        run_llm_fee_classify=body.run_llm_fee_classify,
+        run_validate=body.run_validate,
+        max_tool_turns=body.max_tool_turns,
+        write_cost_manifest=True,
+    )
+
     try:
-        cfg = _draft.draft_config_public()
-        if not cfg.get("configured"):
-            raise RuntimeError(f"LLM not configured. {_DRAFT_KEY_HINT}")
-        active = _allowed_output_dir(body.output_dir)
-        deal_dir = _llm_deal_dir_from_active(active)
-        if not (deal_dir / "_chunks").is_dir():
-            raise RuntimeError(
-                f"Missing _chunks/ under {deal_dir}. Segment the PDF into the deal folder first."
-            )
-        result["source_dir"] = str(active)
-        if body.use_llm_folder:
-            _pipeline_log(job_id, f"Preparing LLM folder {deal_dir.name}_llm …")
-            out = _prepare_sibling_folder(deal_dir, "_llm", force=True)
-            result["llm_dir"] = str(out)
-            _pipeline_log(job_id, f"LLM output folder: {out}")
-        else:
-            out = deal_dir
-            if active != deal_dir:
-                _pipeline_log(
-                    job_id,
-                    f"Active folder is {active.name}; LLM writes to {deal_dir.name} (not *_sdk).",
-                )
-        result["output_dir"] = str(out)
-
-        order = ("01", "02", "03", "04")
-        want = set(body.targets) if body.targets else set(order)
-        targets = [t for t in order if t in want]
-        if not targets:
-            raise RuntimeError("No valid targets")
-
-        use_tools = _resolve_use_tools(body.use_tools)
-
-        base_settings = {
-            "chunk_paths": list(body.chunk_paths),
-            "index_driven_chunks": body.index_driven_chunks,
-            "max_bytes_per_chunk": body.max_bytes_per_chunk,
-            "max_total_chunk_chars": body.max_total_chunk_chars,
-            "include_current_draft": False,
-            "current_draft": "",
-            "extra_instructions": body.extra_instructions,
-            "timeout_seconds": body.timeout_seconds_per_step,
-            "include_full_extraction_templates": body.include_full_extraction_templates,
-            "full_templates_max_chars": body.full_templates_max_chars,
-            "include_skill_md": body.include_skill_md,
-            "skill_max_chars": body.skill_max_chars,
-            "include_agent_md": body.include_agent_md,
-            "agent_max_chars": body.agent_max_chars,
-        }
-
-        # Determine which targets should be force-overwritten when the file exists.
-        forced_set: set[str] = set()
-        if body.force_reextract:
-            if body.force_reextract_targets:
-                forced_set = {t for t in body.force_reextract_targets if t in set(targets)}
-            else:
-                forced_set = set(targets)
-        if forced_set:
-            _pipeline_log(
-                job_id,
-                f"Force re-extraction requested for: {', '.join(sorted(forced_set))} — "
-                "existing deliverables will be overwritten.",
-            )
-
-        for target in targets:
-            chunk_tree: Literal["primary", "waterfall", "both"] = (
-                body.chunk_tree_03 if target == "03" else "primary"
-            )
-            max_total = (
-                body.max_total_chunk_chars_04 if target == "04" else body.max_total_chunk_chars
-            )
-            step_s = {
-                **base_settings,
-                "chunk_tree": chunk_tree,
-                "max_total_chunk_chars": max_total,
-                "use_tools": use_tools,
-                "max_tool_turns": body.max_tool_turns,
-                "prior_caps_per_file": body.prior_caps_per_file,
-            }
-
-            # Delete existing file when force requested for this target.
-            if target in forced_set:
-                existing = out / _TARGET_TO_FILE[target]
-                if existing.is_file():
-                    existing.unlink()
-                    _pipeline_log(job_id, f"  Deleted existing {existing.name} (force re-extract).")
-
-            prior = ""
-            if target == "04":
-                prior = _read_prior_deliverables_for_04(out, body.prior_caps_per_file)
-                if not prior.strip():
-                    _pipeline_log(
-                        job_id,
-                        "WARN: 04 has no prior 01–03 files on disk yet; model will draft from chunks only.",
-                    )
-
-            _pipeline_log(
-                job_id,
-                f"LLM draft {target} (mode={'tools' if use_tools else 'bundle'}, "
-                f"chunk_tree={chunk_tree}, index_chunks={body.index_driven_chunks}, max_chars={max_total})…",
-            )
-            core = _draft_deliverable_core(out, target, step_s, prior_deliverables=prior)
-            fn = str(core["filename"])
-            path = out / fn
-            path.write_text(str(core["markdown"]), encoding="utf-8", newline="\n")
-            _pipeline_log(job_id, f"Wrote {fn} ({len(core['markdown'])} chars).")
-            urec = core.get("usage")
-            if isinstance(urec, dict):
-                pipeline_usage_records.append(urec)
-            result["steps"].append(
-                {
-                    "target": target,
-                    "filename": fn,
-                    "chunks_used": core["chunks_used"],
-                    "gather_note": core.get("gather_note"),
-                    "vision": core.get("vision"),
-                    "usage": urec,
-                }
-            )
-
-        if body.run_map_fees and "03" in targets:
-            _pipeline_log(job_id, "Running map_valuation_fees.py…")
-            result["fee_mapping"] = _maybe_run_map_valuation_fees(out, targets)
-            fm = result["fee_mapping"]
-            if isinstance(fm, dict):
-                _pipeline_log(
-                    job_id,
-                    f"map_valuation_fees mapped {fm.get('mapped_count', '?')} fee row(s); "
-                    f"exit {fm.get('returncode')}",
-                )
-
-        if body.run_validate:
-            _pipeline_log(job_id, "Running validate_noteval.py…")
-            result["validation"] = _run_validate_noteval(out)
-            v = result["validation"]
-            rc = v.get("returncode") if isinstance(v, dict) else None
-            rp = v.get("report_path") if isinstance(v, dict) else ""
-            _pipeline_log(job_id, f"validate_noteval exit {rc}; report at {rp}")
-
-        result["pipeline_usage_summary"] = _draft.summarize_draft_usage_records(
-            pipeline_usage_records
+        result = _llm_pipeline.run_llm_pipeline(
+            body.output_dir,
+            run_id=job_id,
+            config=pipe_cfg,
+            log=lambda msg: _pipeline_log(job_id, msg),
         )
-        pus = result["pipeline_usage_summary"]
-        _pipeline_log(
-            job_id,
-            "API usage (this pipeline only): "
-            f"requests={pus.get('requests', 0)} "
-            f"total_tokens≈{pus.get('total_tokens')} "
-            f"cost_usd_sum={pus.get('cost_usd_sum')}",
-        )
-        result["draft_usage"] = _draft.draft_usage_log_read_tail(
-            max_lines=max(48, len(targets) * 8)
-        )
-        du_sum = (result["draft_usage"].get("summary") or {}) if isinstance(
-            result["draft_usage"], dict
-        ) else {}
-        _pipeline_log(
-            job_id,
-            "API usage (log file tail — may include prior runs; see draft_usage.note): "
-            f"requests={du_sum.get('requests', 0)} "
-            f"total_tokens≈{du_sum.get('total_tokens')} "
-            f"cost_usd_sum={du_sum.get('cost_usd_sum')} "
-            f"— file {result['draft_usage'].get('path')}",
-        )
-
         with _PIPELINE_LOCK:
             job = _PIPELINE_JOBS.get(job_id)
             if job is not None:
                 job["status"] = "done"
                 job["result"] = result
                 job["finished_at"] = _local_now_iso()
-        _pipeline_log(job_id, "Pipeline finished OK.")
+                if result.get("pipeline_log_path"):
+                    job["log_path"] = result["pipeline_log_path"]
     except Exception as e:
-        _pipeline_log(job_id, f"ERROR: {e!s}")
         with _PIPELINE_LOCK:
             job = _PIPELINE_JOBS.get(job_id)
             if job is not None:
@@ -2063,6 +2203,12 @@ def extraction_draft_config():
     if not cfg.get("configured"):
         cfg["hint"] = _DRAFT_KEY_HINT
     cfg["cursor_sdk"] = sdk_config_public()
+    plog_dir = _pipeline_log_file.pipeline_log_dir()
+    cfg["pipeline_log"] = {
+        "enabled": _pipeline_log_file.pipeline_log_enabled(),
+        "dir": str(plog_dir) if _pipeline_log_file.pipeline_log_enabled() else None,
+        "deal_mirror": "pipeline_run.log",
+    }
     ap = _noteval_agent_md_path()
     cfg["repo_context_files"] = {
         "extraction_templates_md": _EXTRACTION_TEMPLATES_MD.is_file(),
@@ -2070,15 +2216,13 @@ def extraction_draft_config():
         "agent_md": bool(ap),
         "agent_resolved_path": str(ap) if ap else None,
     }
-    cfg["index_driven_chunks_default"] = _chunk_select.index_driven_enabled()
     return cfg
 
 
 @app.post("/api/extraction/draft")
 def extraction_draft(body: ExtractionDraftBody):
     """
-    Call an OpenAI-compatible chat completion to draft one deliverable from
-    template excerpt + chunk text.
+    Draft one deliverable via the tool-calling LLM loop (read index/chunks via tools).
     """
     cfg = _draft.draft_config_public()
     if not cfg.get("configured"):
@@ -2087,7 +2231,7 @@ def extraction_draft(body: ExtractionDraftBody):
     s = body.model_dump(exclude={"output_dir", "target"})
     prior = ""
     if body.target == "04":
-        prior = _read_prior_deliverables_for_04(out, 42_000)
+        prior = _draft.read_prior_deliverables_for_04(out, 42_000)
     try:
         core = _draft_deliverable_core(
             out,
@@ -2236,7 +2380,11 @@ class SdkStartBody(ExtractionDirBody):
     )
     run_map_fees: bool = Field(
         default=True,
-        description="When true, run map_valuation_fees.py after the agent when 03 is in targets.",
+        description="When true, run run_fee_pipeline.py (classify → map 05) after the agent when 03 is in targets.",
+    )
+    run_llm_fee_classify: bool = Field(
+        default=True,
+        description="When true (and run_map_fees), run Step 5b LLM on uncertain fee rows via run_fee_pipeline.",
     )
     run_validate: bool = Field(
         default=False,
@@ -2413,23 +2561,96 @@ def _sdk_worker(job_id: str, body: SdkStartBody) -> None:
                     except (TypeError, ValueError, OSError):
                         pass
 
-        if body.run_map_fees:
-            _sdk_log(job_id, "Running map_valuation_fees.py on deal folder…")
-            result["fee_mapping"] = _maybe_run_map_valuation_fees(deal_dir, sdk_targets)
-            fm = result["fee_mapping"]
-            if isinstance(fm, dict):
+        pdd = _maybe_run_apply_pdfplumber_pdd(deal_dir, sdk_targets)
+        if pdd is not None:
+            result["pdd_mapping"] = pdd
+            if pdd.get("skipped"):
+                _sdk_log(job_id, f"apply_pdfplumber_pdd skipped: {pdd.get('reason', '')}")
+            else:
                 _sdk_log(
                     job_id,
-                    f"map_valuation_fees mapped {fm.get('mapped_count', '?')} fee row(s); "
-                    f"exit {fm.get('returncode')}",
+                    f"apply_pdfplumber_pdd: {len(pdd.get('changes') or [])} column patch(es); "
+                    f"{pdd.get('cusip_rows', '?')} CUSIP / {pdd.get('class_rows', '?')} class rows",
                 )
-            elif "03" not in sdk_targets:
-                _sdk_log(job_id, "map_valuation_fees skipped (03 not in targets).")
+        elif "02" in sdk_targets:
+            _sdk_log(job_id, "apply_pdfplumber_pdd skipped (no pdd_idd_pdfplumber.md).")
+
+        idd = _maybe_run_apply_pdfplumber_idd(deal_dir, sdk_targets)
+        if idd is not None:
+            result["idd_mapping"] = idd
+            if idd.get("skipped"):
+                _sdk_log(job_id, f"apply_pdfplumber_idd skipped: {idd.get('reason', '')}")
+            else:
+                _sdk_log(
+                    job_id,
+                    f"apply_pdfplumber_idd: {len(idd.get('changes') or [])} column patch(es); "
+                    f"{idd.get('cusip_rows', '?')} CUSIP / {idd.get('class_rows', '?')} class rows",
+                )
+        elif "02" in sdk_targets:
+            _sdk_log(job_id, "apply_pdfplumber_idd skipped (no pdd_idd_pdfplumber.md).")
+
+        if body.run_map_fees:
+            _sdk_log(job_id, "Running run_fee_pipeline.py (waterfall cols → classify → LLM → map 05)…")
+            fee_pipeline = _run_fee_pipeline(
+                deal_dir,
+                targets=sdk_targets,
+                run_llm=body.run_llm_fee_classify,
+                log_fn=lambda msg, _jid=job_id: _sdk_log(_jid, msg),
+            )
+            if fee_pipeline is None:
+                if "03" not in sdk_targets:
+                    _sdk_log(job_id, "run_fee_pipeline skipped (03 not in targets).")
+            else:
+                _apply_fee_pipeline_to_result(result, fee_pipeline)
+                fc = fee_pipeline.get("classify") or {}
+                if isinstance(fc, dict):
+                    if fc.get("skipped"):
+                        _sdk_log(
+                            job_id,
+                            f"classify_waterfall_fees skipped: {fc.get('reason', '')}",
+                        )
+                    else:
+                        _sdk_log(
+                            job_id,
+                            f"classify_waterfall_fees: {fc.get('confident_count', '?')} confident, "
+                            f"{fc.get('uncertain_count', '?')} uncertain fee row(s)",
+                        )
+                llm_fc = fee_pipeline.get("llm_classify") or {}
+                if isinstance(llm_fc, dict) and body.run_llm_fee_classify:
+                    if llm_fc.get("skipped"):
+                        _sdk_log(
+                            job_id,
+                            f"LLM fee classify skipped: {llm_fc.get('reason', '')}",
+                        )
+                    elif llm_fc.get("error"):
+                        _sdk_log(job_id, f"LLM fee classify error: {llm_fc.get('error')}")
+                    elif not llm_fc.get("skipped"):
+                        u = llm_fc.get("usage") or {}
+                        _sdk_log(
+                            job_id,
+                            f"LLM fee classify: patched {llm_fc.get('patched_count', 0)} row(s) "
+                            f"(tokens≈{u.get('total_tokens')} cost≈${u.get('cost_usd') or 0:.4f})",
+                        )
+                fm = fee_pipeline.get("map_fees") or {}
+                if isinstance(fm, dict):
+                    _sdk_log(
+                        job_id,
+                        f"map_valuation_fees mapped {fm.get('mapped_count', '?')} fee row(s); "
+                        f"exit {fm.get('returncode')}",
+                    )
 
         if body.run_validate:
-            _sdk_log(job_id, "Running validate_noteval.py on deal folder…")
+            _sdk_log(
+                job_id,
+                "Layer 1: apply_distribution_usd/summary → fix_02 → validate_noteval.py…",
+            )
             result["validation"] = _run_validate_noteval(deal_dir)
             v = result["validation"]
+            if isinstance(v, dict):
+                _log_distribution_apply(
+                    lambda msg: _sdk_log(job_id, msg),
+                    v.get("distribution_apply"),
+                )
             _sdk_log(
                 job_id,
                 f"validate_noteval exit {v.get('returncode')}; report at {v.get('report_path')}",
@@ -2487,7 +2708,7 @@ def extraction_sdk_prepare(body: ExtractionDirBody):
 @app.post("/api/extraction/sdk/start")
 def extraction_sdk_start(body: SdkStartBody):
     """
-    Background job: run ``cursor_sdk_compare/run-extract.mjs`` (extraction + map_valuation_fees when 03).
+    Background job: run ``cursor_sdk_compare/run-extract.mjs`` (extraction + classify/map fees when 03).
     Set ``run_validate=true`` to run validate_noteval.py after the agent.
     """
     cfg = sdk_config_public()
@@ -2554,6 +2775,7 @@ def extraction_validate(body: ExtractionValidateBody):
         "report": report_text,
         "log": log,
         "report_path": str(report_path),
+        "manual_review_flags": _manual_review_flags_for_dir(out),
     }
 
 
